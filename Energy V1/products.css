@@ -1,0 +1,36 @@
+    /* Card Pop In Animation */
+    @keyframes popIn {
+      0% {opacity:0; transform:scale(0.9) translateY(20px);}
+      100% {opacity:1; transform:scale(1) translateY(0);}
+    }
+    .animate-popIn {
+      animation: popIn .6s cubic-bezier(.22,.9,.32,1) both;
+    }
+
+    /* Modal Bounce Animation */
+    @keyframes modalBounce {
+      0% {opacity:0; transform:scale(0.9) translateY(-20px);}
+      100% {opacity:1; transform:scale(1) translateY(0);}
+    }
+    .modal-in {
+      animation: modalBounce .35s ease-out both;
+    }
+    .modal-out {
+      animation: modalBounce .25s ease-in reverse both;
+    }
+
+    /* Drawer Slide */
+    .drawer-closed {transform: translateX(100%); transition: transform .35s ease;}
+    .drawer-open {transform: translateX(0); transition: transform .35s ease;}
+
+    /* Button Pulse */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .pulse {
+      animation: pulse .2s ease;
+    }
+
+    :root {--accent:#f97316;}

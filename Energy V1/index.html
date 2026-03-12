@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roam Energy - Powering the Future with Solar</title>
+  <meta name="description" content="Roam Energy provides high-quality, reliable solar solutions for African homes, businesses, and communities. Sustainable energy for a brighter future.">
+  <link rel="preload" as="image" href="https://images.unsplash.com/photo-1509391366360-2e959784a276?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80">
+  <link rel="icon" href="Roam Energy page/Roam_Logo.png" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+  <!-- Tailwind & Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+
+  <!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/> 
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="font-sans antialiased text-gray-800">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center">
+        <img src="ROAM_LOGO.png" alt="Roam Energy Company Logo" class="h-12 mr-4">
+        <span class="text-2xl font-bold text-orange-600">Roam Energy</span>
+      </div>
+      <div class="hidden md:flex space-x-8">
+        <a href="products.html" class="hover:text-orange-600 transition">Products</a>
+        <a href="#projects" class="hover:text-orange-600 transition">Projects</a>
+        <a href="#about" class="hover:text-orange-600 transition">About</a>
+        <a href="#contact" class="hover:text-orange-600 transition">Contact</a>
+      </div>
+      <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
+    </div>
+    <!-- Mobile Navigation -->
+    <div id="mobile-nav" class="md:hidden bg-white">
+      <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+        <a href="products.html" class="py-2 hover:text-orange-600 transition">Products</a>
+        <a href="#projects" class="py-2 hover:text-orange-600 transition">Projects</a>
+        <a href="#about" class="py-2 hover:text-orange-600 transition">About</a>
+        <a href="#contact" class="py-2 hover:text-orange-600 transition">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+   <!-- Hero Section -->
+  <section class="hero-image relative">
+    <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+    <div class="hero-content relative z-10 container mx-auto px-4 py-32 text-white">
+      <div class="max-w-2xl" data-aos="fade-right">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">Powering the Future with Solar</h1>
+        <p class="text-xl mb-8">High-quality, reliable, and scalable solar solutions designed for African homes, businesses, and communities.</p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="#products" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-medium text-center transition">Explore Products</a>
+          <a href="products.html" class="bg-white hover:bg-gray-100 text-orange-600 px-6 py-3 rounded-lg font-medium text-center transition">Get a Quote</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!-- About Section -->
+<section id="about" class="gradient-bg py-16">
+  <div class="container mx-auto px-4">
+    <div class="text-center mb-12" data-aos="fade-up">
+      <h2 class="text-3xl font-bold mb-4">Sustainable Energy Solutions</h2>
+      <div class="w-20 h-1 bg-orange-600 mx-auto mb-6"></div>
+      <p class="max-w-3xl mx-auto text-lg">Energy and mobility go hand in hand. Roam Energy delivers integrated, scalable energy solutions that work seamlessly with our mobility ecosystem. From charging your Roam Air at home to powering businesses and communities, we're here to make clean energy accessible for all.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="bg-white p-6 rounded-lg shadow-md text-center" data-aos="fade-up" data-aos-delay="100">
+        <div class="text-orange-600 text-4xl mb-4">
+          <i class="fas fa-solar-panel"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-2">Cutting-Edge Technology</h3>
+        <p>Our solar solutions incorporate the latest innovations for maximum efficiency and reliability.</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md text-center" data-aos="fade-up" data-aos-delay="200">
+        <div class="text-orange-600 text-4xl mb-4">
+          <i class="fas fa-leaf"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-2">Sustainable Future</h3>
+        <p>Designed to be affordable, sustainable, and future-ready for African homes and businesses.</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md text-center" data-aos="fade-up" data-aos-delay="300">
+        <div class="text-orange-600 text-4xl mb-4">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-2">Seamless Integration</h3>
+        <p>Works perfectly with our electric mobility solutions for complete energy independence.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Products Section -->
+<section id="products" class="py-16 bg-white">
+  <div class="container mx-auto px-4">
+    <div class="text-center mb-12" data-aos="fade-up">
+      <h2 class="text-3xl font-bold mb-4">Our Premium Products</h2>
+      <div class="w-20 h-1 bg-orange-600 mx-auto mb-6"></div>
+      <p class="max-w-3xl mx-auto text-lg">High-quality components that form the backbone of reliable solar energy systems</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- Solar Panel Card -->
+      <div class="product-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300" data-aos="fade-up" data-aos-delay="100">
+        <div class="p-6 bg-white flex items-center justify-center">
+          <img src="https://jinkosolarcdn.shwebspace.com/themes/basicen/skin/images/tige2.png" 
+               alt="Jinko Bifacial Solar Panels" 
+               class="w-full h-auto object-contain">
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2">Jinko Bifacial Solar Panels</h3>
+          <p class="text-gray-600 mb-4">585W / 620W</p>
+          <p class="mb-4">Tier 1 panels with dual-sided power generation and advanced N-Type TOPCon cell technology for maximum efficiency.</p>
+          <ul class="mb-4 space-y-2">
+            <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i>30-year linear performance warranty</li>
+            <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i>Higher energy yield from same sunlight</li>
+            <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i>Built to last a lifetime</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Battery Card -->
+      <div class="product-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300" data-aos="fade-up" data-aos-delay="200">
+        <div class="p-6 bg-white flex items-center justify-center">
+          <img src="Dyness A.jpg" 
+               alt="Dyness Lithium Battery" 
+               class="w-full h-auto object-contain">
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2">Dyness Lithium Battery</h3>
+          <p class="text-gray-600 mb-4">5.12kWh</p>
+          <p class="mb-4">The LiFePO4 Dyness Battery brings reliable power with over 6,000 cycles at 90% DoD, scalable up to 50 units in parallel.</p>
+          <ul class="mb-4 space-y-2">
+            <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i>Modular design for flexible installation</li>
+            <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i>Wall or floor mounting options</li>
+            <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i>Combines power with sleek design</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Inverter Card -->
+      <div class="product-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300" data-aos="fade-up" data-aos-delay="300">
+        <div class="p-6 bg-white flex items-center justify-center">
+          <img src="Deye A.jpg" 
+               alt="Deye Hybrid Inverters" 
+               class="w-full h-auto object-contain">
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2">Deye Hybrid Inverters</h3>
+          <p class="text-gray-600 mb-4">Single & Three Phase</p>
+          <p class="mb-4">All-in-one hybrid inverter supporting both on-grid and off-grid modes with built-in MPPT charge controller.</p>
+          <ul class="mb-4 space-y-2">
+            <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i>Parallel operation for bigger systems</li>
+            <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i>Ensures uninterrupted energy flow</li>
+            <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i>Ideal for homes and businesses</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+  
+  <!-- Request Quote -->
+<div class="my-8 flex justify-center">
+  <a
+    href="products.html"
+    target="_blank"
+    rel="noopener"
+    class="inline-block bg-orange-600 hover:bg-orange-700 text-white py-2 px-6 rounded-lg transition shadow-md"
+  >
+    Request Quote
+  </a>
+</div>
+
+
+<!-- Floating WhatsApp Button -->
+<a id="whatsapp-btn"
+   href="https://wa.me/254704612435?text=Hi%20Roy,%20I%20would%20like%20to%20know%20more%20about%20your%20products"
+   target="_blank"
+   style="display:none;">
+   <div style="
+     position: fixed;
+     width: 60px;
+     height: 60px;
+     bottom: 20px;
+     right: 20px;
+     background-color: #25D366;
+     color: white;
+     border-radius: 50%;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     font-size: 28px;
+     box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+     z-index: 1000;
+     transition: transform 0.2s ease-in-out, background 0.2s;">
+     <i class="fab fa-whatsapp"></i>
+   </div>
+</a>
+<!-- Projects Section -->
+<section id="projects" class="py-16 gradient-bg">
+  <div class="container mx-auto px-4">
+    <div class="text-center mb-12" data-aos="fade-up">
+      <h2 class="text-3xl font-bold mb-4">Reference Projects</h2>
+      <div class="w-20 h-1 bg-orange-600 mx-auto mb-6"></div>
+      <p class="max-w-3xl mx-auto text-lg">See how we're powering businesses and communities across Africa</p>
+    </div>
+    
+    <!-- ✅ Grid wrapper stays open until after last project -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+      <!-- Project 1 -->
+      <div class="project-card bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up" data-aos-delay="200">
+        <div class="h-48 bg-gray-200">
+          <img src="Roam Park.png" alt="Roam Park" class="h-full w-full object-cover">
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2">Roam Park</h3>
+          <p class="text-gray-600 mb-4">Nairobi, Kenya</p>
+          <p class="mb-4">At Roam Park, Roam Energy installed a 55.78kWp grid-tied solar PV system, featuring Jinko 575W solar panels and SMA Sunny Tripower Core inverters.</p>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-500">Completed: August 2021</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 2 -->
+      <div class="project-card bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up" data-aos-delay="300">
+        <div class="h-48 bg-gray-200">
+          <img src="Emboo River.jpg" alt="Emboo River 2" class="h-full w-full object-cover">
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2">Emboo River 2</h3>
+          <p class="text-gray-600 mb-4">Maasai Mara, Kenya</p>
+          <p class="mb-4">In the heart of the Maasai Mara National Park, Narok County, Roam Energy implemented a 64.31kWp off-grid solar PV system with 153.6kWh lithium-ion battery storage.</p>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-500">Completed: January 2023</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 3 -->
+      <div class="project-card bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up" data-aos-delay="100">
+        <div class="h-48 bg-gray-200">
+          <img src="Sekanani Camp1.png" alt="Sekanani Camp" class="h-full w-full object-cover">
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-2">Sekanani Camp</h3>
+          <p class="text-gray-600 mb-4">Maasai Mara, Kenya</p>
+          <p class="mb-4">Roam Energy installed a 10.34 kWp off-grid solar PV system with 25.6 kWh battery storage at Sekanani Camp in the Maasai Mara National Park, Narok County.</p>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-500">Completed: November 2022</span>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- ✅ closes here -->
+
+    <!-- Button under grid -->
+    <div class="text-center mt-12">
+      <a href="projects.html"
+         class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-medium transition inline-block">
+        View All Projects
+      </a>
+    </div>
+  </div>
+</section>
+
+
+ <!-- FAQ Section -->
+<div class="py-16 bg-white">
+  <div class="container mx-auto px-4">
+    <div class="text-center mb-12" data-aos="fade-up">
+      <h2 class="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
+      <!-- ✅ Changed to orange -->
+      <div class="w-20 h-1 bg-orange-600 mx-auto mb-6"></div>
+      <p class="max-w-3xl mx-auto text-lg">Get answers to common questions about solar energy solutions</p>
+    </div>
+
+    <div class="max-w-3xl mx-auto space-y-4">
+      <div class="border border-gray-200 rounded-lg overflow-hidden" data-aos="fade-up" data-aos-delay="100">
+        <button class="faq-toggle w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition">
+          <h3 class="text-lg font-medium text-left">How much does a solar system cost?</h3>
+          <i class="fas fa-chevron-down transition-transform duration-300"></i>
+        </button>
+        <div class="faq-content hidden p-4">
+          <p>The cost of a solar system depends on several factors including your energy needs, the size of the system, and whether you need battery storage. Residential systems typically start from $2,000 for a basic setup, while commercial systems can range from $10,000 to $100,000+. Contact us for a free customized quote based on your specific requirements.</p>
+        </div>
+      </div>
+
+      <div class="border border-gray-200 rounded-lg overflow-hidden" data-aos="fade-up" data-aos-delay="200">
+        <button class="faq-toggle w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition">
+          <h3 class="text-lg font-medium text-left">What warranties do you offer?</h3>
+          <i class="fas fa-chevron-down transition-transform duration-300"></i>
+        </button>
+        <div class="faq-content hidden p-4">
+          <p>We offer comprehensive warranties on all our products and installations:</p>
+          <ul class="list-disc pl-5 mt-2 space-y-1">
+            <li>Solar panels: 25-30 years performance warranty</li>
+            <li>Batteries: 10 years warranty</li>
+            <li>Inverters: 5 years warranty</li>
+            <li>Installation workmanship: 1 year warranty</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="border border-gray-200 rounded-lg overflow-hidden" data-aos="fade-up" data-aos-delay="300">
+        <button class="faq-toggle w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition">
+          <h3 class="text-lg font-medium text-left">How long does installation take?</h3>
+          <i class="fas fa-chevron-down transition-transform duration-300"></i>
+        </button>
+        <div class="faq-content hidden p-4">
+          <p>Installation time varies depending on the system size and complexity:</p>
+          <ul class="list-disc pl-5 mt-2 space-y-1">
+            <li>Residential systems: 1-3 days</li>
+            <li>Commercial systems: 1-6 weeks</li>
+            <li>Large-scale projects: 4-12 weeks</li>
+          </ul>
+          <p class="mt-2">After your initial consultation and system design approval, we'll provide a detailed timeline for your specific project.</p>
+        </div>
+      </div>
+
+      <div class="border border-gray-200 rounded-lg overflow-hidden" data-aos="fade-up" data-aos-delay="400">
+        <button class="faq-toggle w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition">
+          <h3 class="text-lg font-medium text-left">Do solar panels require maintenance?</h3>
+          <i class="fas fa-chevron-down transition-transform duration-300"></i>
+        </button>
+        <div class="faq-content hidden p-4">
+          <p>Solar systems require minimal maintenance. We recommend:</p>
+          <ul class="list-disc pl-5 mt-2 space-y-1">
+            <li>Visual inspection every 6 months</li>
+            <li>Cleaning panels 2-4 times per year (more in dusty areas)</li>
+            <li>Professional system check every 2-3 years</li>
+          </ul>
+          <p class="mt-2">We offer affordable maintenance packages to keep your system performing at its best.</p>
+        </div>
+      </div>
+
+      <div class="border border-gray-200 rounded-lg overflow-hidden" data-aos="fade-up" data-aos-delay="500">
+        <button class="faq-toggle w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition">
+          <h3 class="text-lg font-medium text-left">Can I go completely off-grid?</h3>
+          <i class="fas fa-chevron-down transition-transform duration-300"></i>
+        </button>
+        <div class="faq-content hidden p-4">
+          <p>Yes, with the right system design and battery storage capacity, you can achieve complete energy independence. However, going completely off-grid requires:</p>
+          <ul class="list-disc pl-5 mt-2 space-y-1">
+            <li>Accurate assessment of your energy needs</li>
+            <li>Sufficient battery storage for night-time and cloudy days</li>
+            <li>Possible backup generator for extended bad weather</li>
+            <li>Energy-efficient appliances to minimize consumption</li>
+          </ul>
+          <p class="mt-2">Our experts can help design an off-grid solution tailored to your specific requirements.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-16 bg-gray-50">
+  <div class="container mx-auto px-4">
+    <div class="text-center mb-12" data-aos="fade-up">
+      <h2 class="text-3xl font-bold mb-4">What Our Clients Say</h2>
+      <!-- ✅ Changed to orange -->
+      <div class="w-20 h-1 bg-orange-600 mx-auto mb-6"></div>
+    </div>
+    <div class="relative">
+      <div class="testimonial-carousel flex overflow-x-auto snap-x md:overflow-hidden md:grid md:grid-cols-3 gap-8 pb-6 md:pb-0">
+        
+        <!-- Testimonial 1 -->
+        <div class="testimonial-slide bg-white p-6 rounded-lg shadow-sm flex-shrink-0">
+          <div class="flex items-center mb-4">
+            <!-- ✅ Kept stars yellow (consistent with reviews) -->
+            <div class="text-yellow-400 text-xl mr-2">
+              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+          </div>
+          <p class="mb-4 italic">"Roam Energy transformed our manufacturing facility with their solar solution. Our energy bills dropped by 60% and we've had zero downtime since installation."</p>
+          <div class="flex items-center">
+            <div>
+              <h4 class="font-bold">James Mwangi</h4>
+              <p class="text-sm text-gray-600">CEO, Carton Manufacturers</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="testimonial-slide bg-white p-6 rounded-lg shadow-sm flex-shrink-0">
+          <div class="flex items-center mb-4">
+            <div class="text-yellow-400 text-xl mr-2">
+              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+          </div>
+          <p class="mb-4 italic">"The solar installation at our camp has been flawless. No more generator noise, just clean reliable power that impresses our guests and protects the environment."</p>
+          <div class="flex items-center">
+            <div>
+              <h4 class="font-bold">Loic Amado</h4>
+              <p class="text-sm text-gray-600">Manager, Emboo Camp</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="testimonial-slide bg-white p-6 rounded-lg shadow-sm flex-shrink-0">
+          <div class="flex items-center mb-4">
+            <div class="text-yellow-400 text-xl mr-2">
+              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+            </div>
+          </div>
+          <p class="mb-4 italic">"Our health clinic can now operate 24/7 thanks to Roam Energy's reliable solar solution. Critical equipment never loses power, and we've seen improved patient outcomes."</p>
+          <div class="flex items-center">
+            <div>
+              <h4 class="font-bold">Dr. Peter Omondi</h4>
+              <p class="text-sm text-gray-600">Medical Director, Rural Health Clinic</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+<!-- Navigation arrows for mobile -->
+<button class="testimonial-prev absolute left-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md md:hidden">
+    <i class="fas fa-chevron-left text-orange-600"></i>
+</button>
+<button class="testimonial-next absolute right-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md md:hidden">
+    <i class="fas fa-chevron-right text-orange-600"></i>
+</button>
+</div>
+
+<!-- Dots for mobile -->
+<div class="flex justify-center mt-8 space-x-2 md:hidden">
+    <button class="testimonial-dot w-3 h-3 rounded-full bg-gray-300"></button>
+    <button class="testimonial-dot w-3 h-3 rounded-full bg-gray-300"></button>
+    <button class="testimonial-dot w-3 h-3 rounded-full bg-orange-600"></button>
+</div>
+
+   <!-- Map Section -->
+    <section id="map" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-6">Our Location</h2>
+            <div class="w-full h-96 rounded-lg overflow-hidden shadow-lg">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3609.5949736023463!2d36.8646023!3d-1.3368799999999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f13c8ea1f1751%3A0x5d8597495ebed52!2sRoam%20Park!5e0!3m2!1sen!2ske!4v1757955508948!5m2!1sen!2ske"
+                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </section>
+
+<!-- CTA Section -->
+<section class="py-16 bg-orange-600 text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-6" data-aos="fade-up">Ready to Power Your World Sustainably?</h2>
+        <p class="text-xl mb-8 max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+            Discover how Roam Energy can provide reliable, affordable solar solutions for your home, business, or community.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="200">
+            <a href="#contact" class="bg-white hover:bg-gray-100 text-orange-600 px-6 py-3 rounded-lg font-medium transition">
+                Get a Free Consultation
+            </a>
+            <a href="tel:+254704612435" class="border-2 border-white hover:bg-white hover:text-orange-600 px-6 py-3 rounded-lg font-medium transition" rel="noopener noreferrer">
+                <i class="fas fa-phone mr-2"></i> Call Us Now
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <!-- Contact Info -->
+            <div data-aos="fade-right">
+                <h2 class="text-3xl font-bold mb-6">Get In Touch</h2>
+                <p class="mb-8 text-lg">
+                    Have questions about our solar solutions? Our team is ready to help you find the perfect energy solution for your needs.
+                </p>
+                <div class="space-y-6">
+                    <div class="flex items-start">
+                        <div class="text-orange-600 text-xl mt-1 mr-4"><i class="fas fa-map-marker-alt"></i></div>
+                        <div>
+                            <h4 class="font-bold mb-1">Our Office</h4>
+                            <p>National Park East Gate Rd, Nairobi</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="text-orange-600 text-xl mt-1 mr-4"><i class="fas fa-envelope"></i></div>
+                        <div>
+                            <h4 class="font-bold mb-1">Email Us</h4>
+                            <p>energy@roam-electric.com</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="text-orange-600 text-xl mt-1 mr-4"><i class="fas fa-phone"></i></div>
+                        <div>
+                            <h4 class="font-bold mb-1">Call Us</h4>
+                            <p>+254 704 612 435</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="bg-gray-50 p-8 rounded-lg shadow-sm" data-aos="fade-left">
+                <h3 class="text-xl font-bold mb-6">Send Us a Message</h3>
+                <form action="https://formsubmit.co/roy.otieno@roam-electric.com" method="POST" class="space-y-4 max-w-lg mx-auto">
+                    <input type="text" name="name" placeholder="Your Name" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600">
+                    <input type="email" name="email" placeholder="Your Email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600">
+                    <textarea name="message" rows="5" placeholder="Your Message" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-600"></textarea>
+                    <input type="hidden" name="_captcha" value="false">
+                    <input type="hidden" name="_next" value="https://yourwebsite.com/thank-you.html">
+                    <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg transition">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer & Newsletter -->
+<footer class="bg-gray-900 text-white">
+    <div class="container mx-auto px-4 py-12">
+        <div class="grid md:grid-cols-4 gap-8 mb-8">
+            <!-- Logo & Socials -->
+            <div>
+                <img src="ROAM_LOGO.png" alt="Roam Energy Logo" class="h-10 mb-4">
+                <p class="mb-4">Powering the future with sustainable solar solutions for African homes, businesses, and communities.</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white transition" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <h4 class="text-lg font-bold mb-4">Quick Links</h4>
+                <ul class="space-y-2">
+                    <li><a href="#products" class="text-gray-400 hover:text-white transition">Products</a></li>
+                    <li><a href="#projects" class="text-gray-400 hover:text-white transition">Projects</a></li>
+                    <li><a href="#about" class="text-gray-400 hover:text-white transition">About Us</a></li>
+                    <li><a href="#contact" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                </ul>
+            </div>
+
+            <!-- Products -->
+            <div>
+                <h4 class="text-lg font-bold mb-4">Products</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-gray-400 hover:text-white transition">Solar Panels</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition">Batteries</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition">Inverters</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition">Complete Systems</a></li>
+                </ul>
+            </div>
+
+            <!-- Newsletter -->
+            <section id="newsletter" class="py-16 bg-orange-600 text-white col-span-1 md:col-span-1">
+                <div class="container mx-auto px-4 text-center">
+                    <h2 class="text-3xl font-bold mb-4">Newsletter</h2>
+                    <p class="mb-6">Subscribe to get updates on our latest products and projects.</p>
+                    <form action="https://formsubmit.co/roy.otieno@roam-electric.com" method="POST" class="max-w-md mx-auto flex">
+                        <input type="email" name="email" placeholder="Enter your email" required class="w-full px-4 py-3 rounded-l-lg text-gray-800 focus:outline-none">
+                        <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-r-lg font-semibold transition">Subscribe</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p class="text-gray-400 mb-4 md:mb-0">© 2025 Roam Energy. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="#" class="text-gray-400 hover:text-white transition">Privacy Policy</a>
+                <a href="#" class="text-gray-400 hover:text-white transition">Terms of Service</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Projects</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+   <!-- Custom CSS -->
+  <link rel="stylesheet" href="projects.css">
+  </head>
+<body class="bg-gray-50 text-gray-900">  
+<!-- Navbar -->
+<nav class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-3 bg-white/90 backdrop-blur shadow-sm">
+  <div class="text-xl font-bold text-orange-500">Roam Energy</div>
+  <a href="index.html" class="text-gray-700 hover:text-orange-500 font-medium transition">Home</a>
+</nav>
+
+<section class="pt-28 pb-16 px-6 md:px-12 lg:px-20">
+  <h2 class="text-4xl font-bold text-center mb-12">Our Projects</h2>
+  <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+</section>
+
+<!-- Modal -->
+<div id="project-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+  <div class="bg-white rounded-2xl shadow-lg p-6 max-w-2xl w-full relative transform transition-transform duration-300">
+    <button onclick="closeProjectModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+    <h3 id="modal-title" class="text-2xl font-bold mb-4">Project Title</h3>
+
+    <!-- Carousel -->
+    <div class="relative mb-4">
+      <img id="modal-image" src="" alt="Project image" class="w-full h-64 object-cover rounded">
+      <button id="prevImage" class="hidden absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black">&lt;</button>
+      <button id="nextImage" class="hidden absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black">&gt;</button>
+      </div>
+
+    <div id="modal-content" class="space-y-4"></div>
+  </div>
+</div>
+
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-gray-300 py-6 mt-12">
+  <div class="container mx-auto px-4 text-center">
+    <p>&copy; 2025 Roam Energy. All rights reserved.</p>
+  </div>
+</footer>
+
+  <!-- Custom JS -->
+  <script src="projects.js"></script>
+</body>
+</html>
