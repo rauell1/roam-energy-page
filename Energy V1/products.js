@@ -84,15 +84,18 @@ function parsePrice(val) {
   return 0;
 }
 
+// Simple plural normalisation used when searching product names.
+// Removes a trailing "s" to handle basic plural/singular matching
+// (e.g. "inverters" matches "inverter"). Does not cover irregular plurals.
+function normalize(text) {
+  return text.toLowerCase().replace(/s$/,'');
+}
+
 // --- Render Products ---
 function renderProducts() {
   const search = searchInput.value.trim().toLowerCase();
   const brand = brandFilter.value;
   const sort = sortSelect.value;
-
-function normalize(text) {
-  return text.toLowerCase().replace(/s$/,''); // simple plural handling
-}
 
 let filtered = PRODUCTS.filter(p => {
   if (brand !== 'All' && p.brand !== brand) return false;
@@ -348,10 +351,8 @@ checkoutBtn.onclick = () => {
 
   msg += `\nTotal: KES ${total.toLocaleString()}`;
   const encodedMsg = encodeURIComponent(msg);
-  //const waLink = `https://api.whatsapp.com/send?phone=254704612435&text=${encodedMsg}`;
-  // const waLink = `https://wa.me/254704612435?text=${encodedMsg}`;
-let waLink = `https://api.whatsapp.com/send?phone=254704612435&text=${encodedMsg}`;
-window.open(waLink, '_blank');
+  const waLink = `https://api.whatsapp.com/send?phone=254704612435&text=${encodedMsg}`;
+
   // Create toast
   const toast = document.createElement("div");
   toast.textContent = "Redirecting to WhatsApp...";
@@ -361,12 +362,11 @@ window.open(waLink, '_blank');
   // Fade in
   setTimeout(() => toast.style.opacity = 1, 10);
 
-  // Fade out and redirect
+  // Fade out then open WhatsApp once
   setTimeout(() => {
     toast.style.opacity = 0;
     setTimeout(() => {
       toast.remove();
-      // Open WhatsApp in a new tab instead of leaving the page
       window.open(waLink, '_blank');
     }, 500);
   }, 1800); // keep visible for 1.8s
