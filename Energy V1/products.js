@@ -226,16 +226,17 @@ async function loadLogoDataUrl() {
 function drawInvoiceHeader(pdf, currentDate, totalPagesPlaceholder) {
   const leftMargin = 20;
   const rightContentEnd = 195;
+  const headerRightEdge = pdf.internal.pageSize.getWidth() - 10;
 
   pdf.setTextColor(0, 0, 0);
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(18);
-  pdf.text('Pro Forma-Invoice', rightContentEnd, 25, { align: 'right' });
+  pdf.text('Pro Forma-Invoice', headerRightEdge, 25, { align: 'right' });
 
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(9);
-  pdf.text(currentDate, rightContentEnd, 31, { align: 'right' });
-  pdf.text(`Page ${pdf.getNumberOfPages()} / ${totalPagesPlaceholder}`, rightContentEnd, 36, { align: 'right' });
+  pdf.text(currentDate, headerRightEdge, 31, { align: 'right' });
+  pdf.text(`Page ${pdf.getNumberOfPages()}/${totalPagesPlaceholder}`, headerRightEdge, 36, { align: 'right' });
 
   const startY = 42;
   const leftAddressLines = [
@@ -251,11 +252,11 @@ function drawInvoiceHeader(pdf, currentDate, totalPagesPlaceholder) {
     pdf.text(line, leftMargin, startY + (index * 5));
   });
 
-  pdf.text(COMPANY_NAME, rightContentEnd, startY, { align: 'right' });
+  pdf.text(COMPANY_NAME, headerRightEdge, startY, { align: 'right' });
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(9);
   COMPANY_ADDRESS.forEach((line, index) => {
-    pdf.text(line, rightContentEnd, startY + 5 + (index * 4.5), { align: 'right' });
+    pdf.text(line, headerRightEdge, startY + 5 + (index * 4.5), { align: 'right' });
   });
 }
 
@@ -301,7 +302,12 @@ function drawTableHeader(pdf, y) {
   let x = leftMargin;
   headers.forEach((header, index) => {
     pdf.line(x, y + 6, x + columns[index], y + 6);
-    const textX = aligns[index] === 'left' ? x : x + columns[index];
+    let textX = x;
+    if (aligns[index] === 'center') {
+      textX = x + (columns[index] / 2);
+    } else if (aligns[index] === 'right') {
+      textX = x + columns[index];
+    }
     pdf.text(header, textX, y + 4.5, { align: aligns[index] });
     x += columns[index];
   });
@@ -341,10 +347,10 @@ async function generateInvoicePdf(cartEntries, orderReference) {
 
   cartEntries.forEach(item => {
     const lineTotal = item.qty * item.price;
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
     const itemTitleLines = pdf.splitTextToSize(item.title, columns.item);
-    const itemDesc = `${item.brand} - ${item.category}. ${item.description}`;
-    const itemDescLines = pdf.splitTextToSize(itemDesc, columns.item);
-    const rowHeight = (itemTitleLines.length * 5) + (itemDescLines.length * 4) + 2;
+    const rowHeight = (itemTitleLines.length * 5.2) + 3;
 
     if (currentY + rowHeight > 260) {
       pdf.addPage();
@@ -370,9 +376,6 @@ async function generateInvoicePdf(cartEntries, orderReference) {
 
     pdf.setFont('helvetica', 'bold');
     pdf.text(itemTitleLines, leftMargin, currentY + 4);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(8);
-    pdf.text(itemDescLines, leftMargin, currentY + (itemTitleLines.length * 5) + 2);
 
     currentY += rowHeight;
     grandTotal += lineTotal;
@@ -496,17 +499,23 @@ async function fallbackToWhatsApp(pdfBlob, filename, cartEntries, orderReference
     return;
   }
 
+  downloadBlob(pdfBlob, filename);
   openWhatsAppFallback(cartEntries, orderReference, total, filename);
   showToast(`Email failed. WhatsApp was opened for ${CONTACT_PHONE_DISPLAY}; attach the downloaded PDF if your browser didn't share it automatically.`, 'info');
 }
 
 async function sendInvoiceEmail(pdfBlob, filename, cartEntries, orderReference, total) {
+  if (window.location.protocol === 'file:') {
+    throw new Error('Email handoff requires the site to be served over http or https.');
+  }
+
   const formData = new FormData();
   formData.append('name', 'Roam Energy Website Checkout');
   formData.append('email', ORDER_EMAIL);
   formData.append('_subject', `New Roam Energy order ${orderReference}`);
   formData.append('_captcha', 'false');
   formData.append('_template', 'table');
+  formData.append('_url', window.location.href);
   formData.append('order_reference', orderReference);
   formData.append('order_total', formatMoney(total));
   formData.append('message', buildOrderEmailMessage(cartEntries, orderReference, total));
@@ -799,12 +808,14 @@ async function handleCheckout() {
   try {
     const orderReference = buildOrderReference(new Date());
     const invoice = await generateInvoicePdf(cartEntries, orderReference);
-    downloadBlob(invoice.blob, invoice.filename);
     try {
       await sendInvoiceEmail(invoice.blob, invoice.filename, cartEntries, orderReference, invoice.total);
-      showToast(`Invoice exported and emailed to ${ORDER_EMAIL}.`);
+      showToast(`Invoice emailed to ${ORDER_EMAIL}.`);
     } catch (emailError) {
       console.error('Email handoff failed:', emailError);
+      if (emailError && typeof emailError.message === 'string' && emailError.message.includes('http or https')) {
+        showToast('Email sending needs the site to run through Live Server or another http/https host. Switching to WhatsApp fallback.', 'info');
+      }
       await fallbackToWhatsApp(invoice.blob, invoice.filename, cartEntries, orderReference, invoice.total);
     }
   } catch (error) {
