@@ -52,6 +52,25 @@ const cartItemsEl = document.getElementById('cartItems');
 const cartTotalEl = document.getElementById('cartTotal');
 const floatingCount = document.getElementById('floatingCount');
 const checkoutBtn = document.getElementById('checkoutBtn');
+const ORDER_EMAIL = 'roy.otieno@roam-electric.com';
+const CONTACT_PHONE_DISPLAY = '+254704612435';
+const WHATSAPP_PHONE = '254704612435';
+const ORDER_CURRENCY = 'KES';
+const COMPANY_NAME = 'Roam Electric Limited';
+const COMPANY_ADDRESS = ['National Park East Gate Rd.', 'P.O. Box nr 18284', 'Nairobi, 00500', 'Kenya'];
+const COMPANY_BANK_DETAILS = [
+  ['Email', 'info@roam-electric.com'],
+  ['Home Page', 'www.roam-electric.com'],
+  ['Phone No.', CONTACT_PHONE_DISPLAY],
+  ['VAT Registration No.', 'P05170428D'],
+  ['Mpesa Till No.', '9572270'],
+  ['Bank', 'Standard Chartered'],
+  ['Account No.', '0102487879100 (KES)'],
+  ['Account No.', '8702487879100 (USD)'],
+  ['Branch', 'Industrial Area 053'],
+  ['SWIFT Code', 'SCBLKENXXXX']
+];
+let logoDataUrlPromise;
 
 const searchInput = document.getElementById('searchInput');
 const brandFilter = document.getElementById('brandFilter');
@@ -89,6 +108,428 @@ function parsePrice(val) {
 // (e.g. "inverters" matches "inverter"). Does not cover irregular plurals.
 function normalize(text) {
   return text.toLowerCase().replace(/s$/,'');
+}
+
+function getCartEntries() {
+  return Object.values(cart);
+}
+
+function getCartTotal() {
+  return getCartEntries().reduce((sum, item) => sum + (item.qty * item.price), 0);
+}
+
+function formatMoney(amount) {
+  return `${ORDER_CURRENCY} ${amount.toLocaleString('en-KE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+}
+
+function formatNumber(amount) {
+  return amount.toLocaleString('en-KE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function formatInvoiceDate(date) {
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  }).toUpperCase();
+}
+
+function buildOrderReference(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const time = [
+    String(date.getHours()).padStart(2, '0'),
+    String(date.getMinutes()).padStart(2, '0'),
+    String(date.getSeconds()).padStart(2, '0')
+  ].join('');
+  return `RE-${year}${month}${day}-${time}`;
+}
+
+function buildInvoiceFilename(orderReference) {
+  return `Roam-Pro-Forma-Invoice-${orderReference}.pdf`;
+}
+
+function showToast(message, tone = 'success') {
+  const palette = {
+    success: 'bg-green-600',
+    error: 'bg-red-600',
+    info: 'bg-gray-900'
+  };
+  const toast = document.createElement('div');
+  toast.textContent = message;
+  toast.className = `fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded px-4 py-3 text-sm text-white shadow-lg opacity-0 transition-opacity duration-300 ${palette[tone] || palette.info}`;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.style.opacity = 1;
+  });
+
+  setTimeout(() => {
+    toast.style.opacity = 0;
+    setTimeout(() => toast.remove(), 300);
+  }, 2600);
+}
+
+function setCheckoutBusy(isBusy) {
+  const hasItems = getCartEntries().length > 0;
+  checkoutBtn.disabled = isBusy || !hasItems;
+  checkoutBtn.classList.toggle('opacity-70', isBusy);
+  checkoutBtn.classList.toggle('cursor-wait', isBusy);
+  checkoutBtn.classList.toggle('opacity-50', !isBusy && !hasItems);
+  checkoutBtn.classList.toggle('cursor-not-allowed', !isBusy && !hasItems);
+  checkoutBtn.textContent = isBusy ? 'Preparing Invoice...' : 'Export PDF and Email Order';
+}
+
+function downloadBlob(blob, filename) {
+  const downloadUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function loadLogoDataUrl() {
+  if (!logoDataUrlPromise) {
+    logoDataUrlPromise = fetch('Roam_Logo.png')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Logo file unavailable');
+        }
+        return response.blob();
+      })
+      .then(blobToDataUrl)
+      .catch(() => null);
+  }
+
+  return logoDataUrlPromise;
+}
+
+function drawInvoiceHeader(pdf, currentDate, totalPagesPlaceholder) {
+  const leftMargin = 20;
+  const rightContentEnd = 195;
+
+  pdf.setTextColor(0, 0, 0);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(18);
+  pdf.text('Pro Forma-Invoice', rightContentEnd, 25, { align: 'right' });
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  pdf.text(currentDate, rightContentEnd, 31, { align: 'right' });
+  pdf.text(`Page ${pdf.getNumberOfPages()} / ${totalPagesPlaceholder}`, rightContentEnd, 36, { align: 'right' });
+
+  const startY = 42;
+  const leftAddressLines = [
+    'WEBSITE CART ORDER',
+    'Product Selection',
+    'Generated from',
+    'Roam Energy Store'
+  ];
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
+  leftAddressLines.forEach((line, index) => {
+    pdf.text(line, leftMargin, startY + (index * 5));
+  });
+
+  pdf.text(COMPANY_NAME, rightContentEnd, startY, { align: 'right' });
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  COMPANY_ADDRESS.forEach((line, index) => {
+    pdf.text(line, rightContentEnd, startY + 5 + (index * 4.5), { align: 'right' });
+  });
+}
+
+function drawInvoiceMetadata(pdf, currentDate, orderReference) {
+  const leftMargin = 20;
+  const rightContentEnd = 195;
+  const yStart = 75;
+  const leftSide = [
+    ['Document No', orderReference],
+    ['VAT Registration No.', ''],
+    ['Document Date', currentDate],
+    ['Currency', ORDER_CURRENCY],
+    ['Project Location', 'Nairobi, Kenya'],
+    ['Salesperson', 'Website Checkout']
+  ];
+
+  leftSide.forEach(([label, value], index) => {
+    const y = yStart + (index * 5);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.text(label, leftMargin, y);
+    pdf.text(value, leftMargin + 45, y);
+  });
+
+  const valueX = rightContentEnd;
+  COMPANY_BANK_DETAILS.forEach(([label, value], index) => {
+    const y = yStart + (index * 5);
+    pdf.text(label, 105, y);
+    pdf.text(value, valueX, y, { align: 'right' });
+  });
+}
+
+function drawTableHeader(pdf, y) {
+  const leftMargin = 20;
+  const columns = [60, 15, 25, 15, 12, 23, 25];
+  const headers = ['Item', 'Quantity', 'Unit Price', 'HS Code', 'VAT%', 'VAT Amount', 'Amount'];
+  const aligns = ['left', 'center', 'right', 'center', 'center', 'right', 'right'];
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(9);
+  pdf.setDrawColor(0, 0, 0);
+
+  let x = leftMargin;
+  headers.forEach((header, index) => {
+    pdf.line(x, y + 6, x + columns[index], y + 6);
+    const textX = aligns[index] === 'left' ? x : x + columns[index];
+    pdf.text(header, textX, y + 4.5, { align: aligns[index] });
+    x += columns[index];
+  });
+}
+
+async function generateInvoicePdf(cartEntries, orderReference) {
+  const { jsPDF } = window.jspdf || {};
+  if (!jsPDF) {
+    throw new Error('PDF library failed to load.');
+  }
+
+  const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+  const totalPagesPlaceholder = '{total_pages_count_string}';
+  const currentDate = formatInvoiceDate(new Date());
+  const leftMargin = 20;
+  const rightContentEnd = 195;
+  const columns = { item: 60, qty: 15, price: 25, hs: 15, vatPercent: 12, vatAmount: 23, amount: 25 };
+  const logoDataUrl = await loadLogoDataUrl();
+
+  if (logoDataUrl) {
+    pdf.addImage(logoDataUrl, 'PNG', leftMargin, 10, 35, 0);
+  } else {
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(18);
+    pdf.setTextColor(244, 121, 32);
+    pdf.text('ROAM', leftMargin, 23);
+    pdf.setTextColor(0, 0, 0);
+  }
+
+  drawInvoiceHeader(pdf, currentDate, totalPagesPlaceholder);
+  drawInvoiceMetadata(pdf, currentDate, orderReference);
+  drawTableHeader(pdf, 135);
+
+  let currentY = 143;
+  let grandTotal = 0;
+  const totalVat = 0;
+
+  cartEntries.forEach(item => {
+    const lineTotal = item.qty * item.price;
+    const itemTitleLines = pdf.splitTextToSize(item.title, columns.item);
+    const itemDesc = `${item.brand} - ${item.category}. ${item.description}`;
+    const itemDescLines = pdf.splitTextToSize(itemDesc, columns.item);
+    const rowHeight = (itemTitleLines.length * 5) + (itemDescLines.length * 4) + 2;
+
+    if (currentY + rowHeight > 260) {
+      pdf.addPage();
+      currentY = 20;
+      drawTableHeader(pdf, currentY);
+      currentY += 8;
+    }
+
+    let x = leftMargin + columns.item;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.text(String(item.qty), x + (columns.qty / 2), currentY + 4, { align: 'center' });
+    x += columns.qty;
+    pdf.text(formatNumber(item.price), x + columns.price, currentY + 4, { align: 'right' });
+    x += columns.price;
+    pdf.text('', x + (columns.hs / 2), currentY + 4, { align: 'center' });
+    x += columns.hs;
+    pdf.text('0', x + (columns.vatPercent / 2), currentY + 4, { align: 'center' });
+    x += columns.vatPercent;
+    pdf.text(formatNumber(0), x + columns.vatAmount, currentY + 4, { align: 'right' });
+    x += columns.vatAmount;
+    pdf.text(formatNumber(lineTotal), x + columns.amount, currentY + 4, { align: 'right' });
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(itemTitleLines, leftMargin, currentY + 4);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    pdf.text(itemDescLines, leftMargin, currentY + (itemTitleLines.length * 5) + 2);
+
+    currentY += rowHeight;
+    grandTotal += lineTotal;
+  });
+
+  currentY += 5;
+  const labelX = rightContentEnd - 60;
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(9);
+  pdf.text('Total Amount', labelX, currentY);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(formatNumber(grandTotal), rightContentEnd, currentY, { align: 'right' });
+
+  currentY += 6;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('VAT Amount', labelX, currentY);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(formatNumber(totalVat), rightContentEnd, currentY, { align: 'right' });
+  pdf.line(labelX, currentY + 1.5, rightContentEnd, currentY + 1.5);
+
+  currentY += 8;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Total Incl. VAT', labelX, currentY);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(formatNumber(grandTotal + totalVat), rightContentEnd, currentY, { align: 'right' });
+
+  currentY += 12;
+  pdf.setFont('helvetica', 'italic');
+  pdf.setFontSize(8);
+  pdf.text('This invoice was generated automatically from the Roam Energy website cart.', leftMargin, currentY);
+
+  if (typeof pdf.putTotalPages === 'function') {
+    pdf.putTotalPages(totalPagesPlaceholder);
+  }
+
+  return {
+    blob: pdf.output('blob'),
+    filename: buildInvoiceFilename(orderReference),
+    total: grandTotal
+  };
+}
+
+function buildOrderEmailMessage(cartEntries, orderReference, total) {
+  const lines = [
+    `A new Roam Energy website order has been generated.`,
+    '',
+    `Order Reference: ${orderReference}`,
+    `Recipient Inbox: ${ORDER_EMAIL}`,
+    '',
+    'Cart Summary:'
+  ];
+
+  cartEntries.forEach(item => {
+    lines.push(`- ${item.title} x ${item.qty} = ${formatMoney(item.qty * item.price)}`);
+  });
+
+  lines.push('');
+  lines.push(`Total: ${formatMoney(total)}`);
+  lines.push('Attached: Pro forma invoice PDF');
+
+  return lines.join('\n');
+}
+
+function buildWhatsAppMessage(cartEntries, orderReference, total, filename) {
+  const lines = [
+    'Hello Roam, the website checkout email handoff failed.',
+    '',
+    `Order Reference: ${orderReference}`,
+    `Invoice File: ${filename}`,
+    '',
+    'Cart Summary:'
+  ];
+
+  cartEntries.forEach(item => {
+    lines.push(`- ${item.title} x ${item.qty} = ${formatMoney(item.qty * item.price)}`);
+  });
+
+  lines.push('');
+  lines.push(`Total: ${formatMoney(total)}`);
+  lines.push('Please see the generated invoice PDF.');
+
+  return lines.join('\n');
+}
+
+function openWhatsAppFallback(cartEntries, orderReference, total, filename) {
+  const text = encodeURIComponent(buildWhatsAppMessage(cartEntries, orderReference, total, filename));
+  const waLink = `https://wa.me/${WHATSAPP_PHONE}?text=${text}`;
+  window.open(waLink, '_blank', 'noopener');
+}
+
+async function shareInvoiceFile(pdfBlob, filename, cartEntries, orderReference, total) {
+  if (!window.isSecureContext || typeof navigator.share !== 'function' || typeof navigator.canShare !== 'function') {
+    return false;
+  }
+
+  const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
+  if (!navigator.canShare({ files: [pdfFile] })) {
+    return false;
+  }
+
+  try {
+    await navigator.share({
+      title: `Roam Energy Order ${orderReference}`,
+      text: buildWhatsAppMessage(cartEntries, orderReference, total, filename),
+      files: [pdfFile]
+    });
+    return true;
+  } catch (error) {
+    if (error && error.name === 'AbortError') {
+      return false;
+    }
+    throw error;
+  }
+}
+
+async function fallbackToWhatsApp(pdfBlob, filename, cartEntries, orderReference, total) {
+  const shared = await shareInvoiceFile(pdfBlob, filename, cartEntries, orderReference, total);
+  if (shared) {
+    showToast(`Email failed. The invoice PDF was shared from your device; choose WhatsApp and send it to ${CONTACT_PHONE_DISPLAY}.`, 'info');
+    return;
+  }
+
+  openWhatsAppFallback(cartEntries, orderReference, total, filename);
+  showToast(`Email failed. WhatsApp was opened for ${CONTACT_PHONE_DISPLAY}; attach the downloaded PDF if your browser didn't share it automatically.`, 'info');
+}
+
+async function sendInvoiceEmail(pdfBlob, filename, cartEntries, orderReference, total) {
+  const formData = new FormData();
+  formData.append('name', 'Roam Energy Website Checkout');
+  formData.append('email', ORDER_EMAIL);
+  formData.append('_subject', `New Roam Energy order ${orderReference}`);
+  formData.append('_captcha', 'false');
+  formData.append('_template', 'table');
+  formData.append('order_reference', orderReference);
+  formData.append('order_total', formatMoney(total));
+  formData.append('message', buildOrderEmailMessage(cartEntries, orderReference, total));
+  formData.append('attachment', pdfBlob, filename);
+
+  const response = await fetch(`https://formsubmit.co/ajax/${ORDER_EMAIL}`, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      Accept: 'application/json'
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Email handoff failed with status ${response.status}`);
+  }
+
+  const data = await response.json().catch(() => null);
+  if (data && data.success === false) {
+    throw new Error(data.message || 'Email handoff failed.');
+  }
+
+  return data;
 }
 
 // --- Render Products ---
@@ -202,6 +643,9 @@ function updateCartUI(){
   }
   cartTotalEl.textContent=`KES ${total.toLocaleString()}`;
   floatingCount.textContent=keys.reduce((a,k)=>a+cart[k].qty,0);
+  checkoutBtn.disabled = keys.length === 0;
+  checkoutBtn.classList.toggle('opacity-50', keys.length === 0);
+  checkoutBtn.classList.toggle('cursor-not-allowed', keys.length === 0);
 
   // update product grid quantities
   Object.keys(cart).forEach(id=>{
@@ -256,8 +700,13 @@ document.addEventListener("input", function(e) {
     // Save updated cart to localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
 
+    const hasItems = Object.keys(cart).length > 0;
+    checkoutBtn.disabled = !hasItems;
+    checkoutBtn.classList.toggle('opacity-50', !hasItems);
+    checkoutBtn.classList.toggle('cursor-not-allowed', !hasItems);
+
     // Show "cart empty" message if no items left
-    if (Object.keys(cart).length === 0) {
+    if (!hasItems) {
       cartItemsEl.innerHTML = '<p class="text-gray-500">Your cart is empty.</p>';
     }
   }
@@ -335,42 +784,36 @@ closeModalBtn.onclick=closeProductModal;
 productModalOverlay.onclick=closeProductModal;
 
 checkoutBtn.onclick = () => {
-  if (Object.keys(cart).length === 0) {
-    alert("Your cart is empty!");
+  handleCheckout();
+};
+
+async function handleCheckout() {
+  const cartEntries = getCartEntries();
+  if (cartEntries.length === 0) {
+    showToast('Your cart is empty.', 'error');
     return;
   }
 
-  let msg = "Hello Roam! I would like to order the following products:\n\n";
-  let total = 0;
+  setCheckoutBusy(true);
 
-  Object.values(cart).forEach(it => {
-    const unitLabel = it.qty === 1 ? "Pc" : "Pcs";
-    msg += `- ${it.title} x ${it.qty} ${unitLabel} = KES ${(it.price * it.qty).toLocaleString()}\n`;
-    total += it.price * it.qty;
-  });
-
-  msg += `\nTotal: KES ${total.toLocaleString()}`;
-  const encodedMsg = encodeURIComponent(msg);
-  const waLink = `https://api.whatsapp.com/send?phone=254704612435&text=${encodedMsg}`;
-
-  // Create toast
-  const toast = document.createElement("div");
-  toast.textContent = "Redirecting to WhatsApp...";
-  toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50 opacity-0 transition-opacity duration-500";
-  document.body.appendChild(toast);
-
-  // Fade in
-  setTimeout(() => toast.style.opacity = 1, 10);
-
-  // Fade out then open WhatsApp once
-  setTimeout(() => {
-    toast.style.opacity = 0;
-    setTimeout(() => {
-      toast.remove();
-      window.open(waLink, '_blank');
-    }, 500);
-  }, 1800); // keep visible for 1.8s
-};
+  try {
+    const orderReference = buildOrderReference(new Date());
+    const invoice = await generateInvoicePdf(cartEntries, orderReference);
+    downloadBlob(invoice.blob, invoice.filename);
+    try {
+      await sendInvoiceEmail(invoice.blob, invoice.filename, cartEntries, orderReference, invoice.total);
+      showToast(`Invoice exported and emailed to ${ORDER_EMAIL}.`);
+    } catch (emailError) {
+      console.error('Email handoff failed:', emailError);
+      await fallbackToWhatsApp(invoice.blob, invoice.filename, cartEntries, orderReference, invoice.total);
+    }
+  } catch (error) {
+    console.error('Checkout failed:', error);
+    showToast('Could not export the order PDF. Please try again.', 'error');
+  } finally {
+    setCheckoutBusy(false);
+  }
+}
 // --- PERSIST SEARCH/FILTER/SORT SETTINGS ---
 searchInput.oninput = () => {
   localStorage.setItem('searchTerm', searchInput.value);

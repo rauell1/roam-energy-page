@@ -75,7 +75,8 @@
         <span class="font-medium">Subtotal</span>
         <span id="cartTotal" class="font-bold">KES 0</span>
       </div>
-      <button id="checkoutBtn" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg shadow">Checkout via WhatsApp</button>
+      <button id="checkoutBtn" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg shadow transition-colors">Export PDF and Email Order</button>
+      <p class="mt-2 text-xs text-gray-500">Checkout creates a pro forma invoice from your live cart, emails it to Roam, and falls back to WhatsApp if the email handoff fails.</p>
     </div>
   </div>
 </div>
@@ -99,6 +100,7 @@
 </footer>
 <!-- Scripts -->
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="products.js"></script>
 </body>
 </html>
