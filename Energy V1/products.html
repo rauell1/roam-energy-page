@@ -71,12 +71,26 @@
     </div>
     <div id="cartItems" class="space-y-3 overflow-auto flex-1"></div>
     <div class="mt-4 border-t pt-4">
+      <div class="space-y-3 mb-4">
+        <div>
+          <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
+          <input id="customerName" type="text" placeholder="Enter full name" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200" />
+        </div>
+        <div>
+          <label for="customerEmail" class="block text-sm font-medium text-gray-700 mb-1">Customer Email</label>
+          <input id="customerEmail" type="email" placeholder="Enter email address" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200" />
+        </div>
+        <div>
+          <label for="customerPhone" class="block text-sm font-medium text-gray-700 mb-1">Customer Phone</label>
+          <input id="customerPhone" type="tel" placeholder="Enter phone number" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200" />
+        </div>
+      </div>
       <div class="flex justify-between items-center mb-2">
         <span class="font-medium">Subtotal</span>
         <span id="cartTotal" class="font-bold">KES 0</span>
       </div>
       <button id="checkoutBtn" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg shadow transition-colors">Export PDF and Email Order</button>
-      <p class="mt-2 text-xs text-gray-500">Checkout creates a pro forma invoice from your live cart, emails it to Roam, and falls back to WhatsApp if the email handoff fails.</p>
+      <p class="mt-2 text-xs text-gray-500">Add the customer details here so the invoice and order email include the right follow-up contact, with WhatsApp fallback if email handoff fails.</p>
     </div>
   </div>
 </div>

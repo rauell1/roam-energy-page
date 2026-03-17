@@ -52,10 +52,14 @@ const cartItemsEl = document.getElementById('cartItems');
 const cartTotalEl = document.getElementById('cartTotal');
 const floatingCount = document.getElementById('floatingCount');
 const checkoutBtn = document.getElementById('checkoutBtn');
+const customerNameInput = document.getElementById('customerName');
+const customerEmailInput = document.getElementById('customerEmail');
+const customerPhoneInput = document.getElementById('customerPhone');
 const ORDER_EMAIL = 'roy.otieno@roam-electric.com';
 const CONTACT_PHONE_DISPLAY = '+254704612435';
 const WHATSAPP_PHONE = '254704612435';
 const ORDER_CURRENCY = 'KES';
+const CUSTOMER_DETAILS_STORAGE_KEY = 'checkoutCustomerDetails';
 const COMPANY_NAME = 'Roam Electric Limited';
 const COMPANY_ADDRESS = ['National Park East Gate Rd.', 'P.O. Box nr 18284', 'Nairobi, 00500', 'Kenya'];
 const COMPANY_BANK_DETAILS = [
@@ -93,6 +97,8 @@ if (savedCart) {
   }
 }
 
+loadSavedCustomerDetails();
+
 // --- Helper to parse price safely ---
 function parsePrice(val) {
   if (typeof val === 'number') return val;
@@ -117,6 +123,64 @@ function getCartEntries() {
 function getCartTotal() {
   return getCartEntries().reduce((sum, item) => sum + (item.qty * item.price), 0);
 }
+
+function loadSavedCustomerDetails() {
+  const savedDetails = localStorage.getItem(CUSTOMER_DETAILS_STORAGE_KEY);
+  if (!savedDetails) {
+    return;
+  }
+
+  try {
+    const details = JSON.parse(savedDetails);
+    customerNameInput.value = details.name || '';
+    customerEmailInput.value = details.email || '';
+    customerPhoneInput.value = details.phone || '';
+  } catch (error) {
+    console.error('Error parsing saved customer details:', error);
+  }
+}
+
+function getCustomerDetails() {
+  return {
+    name: customerNameInput.value.trim(),
+    email: customerEmailInput.value.trim(),
+    phone: customerPhoneInput.value.trim()
+  };
+}
+
+function persistCustomerDetails() {
+  localStorage.setItem(CUSTOMER_DETAILS_STORAGE_KEY, JSON.stringify(getCustomerDetails()));
+}
+
+function validateCustomerDetails(customerDetails) {
+  if (!customerDetails.name) {
+    return {
+      message: 'Please enter the customer name before checkout.',
+      field: customerNameInput
+    };
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerDetails.email)) {
+    return {
+      message: 'Please enter a valid customer email address.',
+      field: customerEmailInput
+    };
+  }
+
+  const digitsOnly = customerDetails.phone.replace(/\D/g, '');
+  if (digitsOnly.length < 10) {
+    return {
+      message: 'Please enter a valid customer phone number.',
+      field: customerPhoneInput
+    };
+  }
+
+  return null;
+}
+
+[customerNameInput, customerEmailInput, customerPhoneInput].forEach(input => {
+  input.addEventListener('input', persistCustomerDetails);
+});
 
 function formatMoney(amount) {
   return `${ORDER_CURRENCY} ${amount.toLocaleString('en-KE', {
@@ -260,7 +324,7 @@ function drawInvoiceHeader(pdf, currentDate, totalPagesPlaceholder) {
   });
 }
 
-function drawInvoiceMetadata(pdf, currentDate, orderReference) {
+function drawInvoiceMetadata(pdf, currentDate, orderReference, customerDetails) {
   const leftMargin = 20;
   const rightContentEnd = 195;
   const yStart = 75;
@@ -287,6 +351,27 @@ function drawInvoiceMetadata(pdf, currentDate, orderReference) {
     pdf.text(label, 105, y);
     pdf.text(value, valueX, y, { align: 'right' });
   });
+
+  const customerStartY = 126;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Customer Details', leftMargin, customerStartY);
+
+  const customerLines = [
+    ['Name', customerDetails.name],
+    ['Email', customerDetails.email],
+    ['Phone', customerDetails.phone]
+  ];
+
+  let customerY = customerStartY + 5;
+  customerLines.forEach(([label, value], index) => {
+    const wrappedValue = pdf.splitTextToSize(value, 55);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(label, leftMargin, customerY);
+    pdf.text(wrappedValue, leftMargin + 20, customerY);
+    customerY += Math.max(5, wrappedValue.length * 4.5);
+  });
+
+  return customerY + 3;
 }
 
 function drawTableHeader(pdf, y) {
@@ -313,7 +398,7 @@ function drawTableHeader(pdf, y) {
   });
 }
 
-async function generateInvoicePdf(cartEntries, orderReference) {
+async function generateInvoicePdf(cartEntries, orderReference, customerDetails) {
   const { jsPDF } = window.jspdf || {};
   if (!jsPDF) {
     throw new Error('PDF library failed to load.');
@@ -338,10 +423,10 @@ async function generateInvoicePdf(cartEntries, orderReference) {
   }
 
   drawInvoiceHeader(pdf, currentDate, totalPagesPlaceholder);
-  drawInvoiceMetadata(pdf, currentDate, orderReference);
-  drawTableHeader(pdf, 135);
+  const tableHeaderY = drawInvoiceMetadata(pdf, currentDate, orderReference, customerDetails);
+  drawTableHeader(pdf, tableHeaderY);
 
-  let currentY = 143;
+  let currentY = tableHeaderY + 8;
   let grandTotal = 0;
   const totalVat = 0;
 
@@ -419,12 +504,17 @@ async function generateInvoicePdf(cartEntries, orderReference) {
   };
 }
 
-function buildOrderEmailMessage(cartEntries, orderReference, total) {
+function buildOrderEmailMessage(cartEntries, orderReference, total, customerDetails) {
   const lines = [
     `A new Roam Energy website order has been generated.`,
     '',
     `Order Reference: ${orderReference}`,
     `Recipient Inbox: ${ORDER_EMAIL}`,
+    '',
+    'Customer Details:',
+    `- Name: ${customerDetails.name}`,
+    `- Email: ${customerDetails.email}`,
+    `- Phone: ${customerDetails.phone}`,
     '',
     'Cart Summary:'
   ];
@@ -440,12 +530,17 @@ function buildOrderEmailMessage(cartEntries, orderReference, total) {
   return lines.join('\n');
 }
 
-function buildWhatsAppMessage(cartEntries, orderReference, total, filename) {
+function buildWhatsAppMessage(cartEntries, orderReference, total, filename, customerDetails) {
   const lines = [
     'Hello Roam, the website checkout email handoff failed.',
     '',
     `Order Reference: ${orderReference}`,
     `Invoice File: ${filename}`,
+    '',
+    'Customer Details:',
+    `- Name: ${customerDetails.name}`,
+    `- Email: ${customerDetails.email}`,
+    `- Phone: ${customerDetails.phone}`,
     '',
     'Cart Summary:'
   ];
@@ -461,13 +556,13 @@ function buildWhatsAppMessage(cartEntries, orderReference, total, filename) {
   return lines.join('\n');
 }
 
-function openWhatsAppFallback(cartEntries, orderReference, total, filename) {
-  const text = encodeURIComponent(buildWhatsAppMessage(cartEntries, orderReference, total, filename));
+function openWhatsAppFallback(cartEntries, orderReference, total, filename, customerDetails) {
+  const text = encodeURIComponent(buildWhatsAppMessage(cartEntries, orderReference, total, filename, customerDetails));
   const waLink = `https://wa.me/${WHATSAPP_PHONE}?text=${text}`;
   window.open(waLink, '_blank', 'noopener');
 }
 
-async function shareInvoiceFile(pdfBlob, filename, cartEntries, orderReference, total) {
+async function shareInvoiceFile(pdfBlob, filename, cartEntries, orderReference, total, customerDetails) {
   if (!window.isSecureContext || typeof navigator.share !== 'function' || typeof navigator.canShare !== 'function') {
     return false;
   }
@@ -480,7 +575,7 @@ async function shareInvoiceFile(pdfBlob, filename, cartEntries, orderReference, 
   try {
     await navigator.share({
       title: `Roam Energy Order ${orderReference}`,
-      text: buildWhatsAppMessage(cartEntries, orderReference, total, filename),
+      text: buildWhatsAppMessage(cartEntries, orderReference, total, filename, customerDetails),
       files: [pdfFile]
     });
     return true;
@@ -492,33 +587,37 @@ async function shareInvoiceFile(pdfBlob, filename, cartEntries, orderReference, 
   }
 }
 
-async function fallbackToWhatsApp(pdfBlob, filename, cartEntries, orderReference, total) {
-  const shared = await shareInvoiceFile(pdfBlob, filename, cartEntries, orderReference, total);
+async function fallbackToWhatsApp(pdfBlob, filename, cartEntries, orderReference, total, customerDetails) {
+  const shared = await shareInvoiceFile(pdfBlob, filename, cartEntries, orderReference, total, customerDetails);
   if (shared) {
     showToast(`Email failed. The invoice PDF was shared from your device; choose WhatsApp and send it to ${CONTACT_PHONE_DISPLAY}.`, 'info');
     return;
   }
 
   downloadBlob(pdfBlob, filename);
-  openWhatsAppFallback(cartEntries, orderReference, total, filename);
+  openWhatsAppFallback(cartEntries, orderReference, total, filename, customerDetails);
   showToast(`Email failed. WhatsApp was opened for ${CONTACT_PHONE_DISPLAY}; attach the downloaded PDF if your browser didn't share it automatically.`, 'info');
 }
 
-async function sendInvoiceEmail(pdfBlob, filename, cartEntries, orderReference, total) {
+async function sendInvoiceEmail(pdfBlob, filename, cartEntries, orderReference, total, customerDetails) {
   if (window.location.protocol === 'file:') {
     throw new Error('Email handoff requires the site to be served over http or https.');
   }
 
   const formData = new FormData();
-  formData.append('name', 'Roam Energy Website Checkout');
-  formData.append('email', ORDER_EMAIL);
+  formData.append('name', customerDetails.name);
+  formData.append('email', customerDetails.email);
+  formData.append('phone', customerDetails.phone);
   formData.append('_subject', `New Roam Energy order ${orderReference}`);
   formData.append('_captcha', 'false');
   formData.append('_template', 'table');
   formData.append('_url', window.location.href);
+  formData.append('customer_name', customerDetails.name);
+  formData.append('customer_email', customerDetails.email);
+  formData.append('customer_phone', customerDetails.phone);
   formData.append('order_reference', orderReference);
   formData.append('order_total', formatMoney(total));
-  formData.append('message', buildOrderEmailMessage(cartEntries, orderReference, total));
+  formData.append('message', buildOrderEmailMessage(cartEntries, orderReference, total, customerDetails));
   formData.append('attachment', pdfBlob, filename);
 
   const response = await fetch(`https://formsubmit.co/ajax/${ORDER_EMAIL}`, {
@@ -803,20 +902,30 @@ async function handleCheckout() {
     return;
   }
 
+  const customerDetails = getCustomerDetails();
+  const validationError = validateCustomerDetails(customerDetails);
+  if (validationError) {
+    showToast(validationError.message, 'error');
+    validationError.field.focus();
+    return;
+  }
+
+  persistCustomerDetails();
+
   setCheckoutBusy(true);
 
   try {
     const orderReference = buildOrderReference(new Date());
-    const invoice = await generateInvoicePdf(cartEntries, orderReference);
+    const invoice = await generateInvoicePdf(cartEntries, orderReference, customerDetails);
     try {
-      await sendInvoiceEmail(invoice.blob, invoice.filename, cartEntries, orderReference, invoice.total);
+      await sendInvoiceEmail(invoice.blob, invoice.filename, cartEntries, orderReference, invoice.total, customerDetails);
       showToast(`Invoice emailed to ${ORDER_EMAIL}.`);
     } catch (emailError) {
       console.error('Email handoff failed:', emailError);
       if (emailError && typeof emailError.message === 'string' && emailError.message.includes('http or https')) {
         showToast('Email sending needs the site to run through Live Server or another http/https host. Switching to WhatsApp fallback.', 'info');
       }
-      await fallbackToWhatsApp(invoice.blob, invoice.filename, cartEntries, orderReference, invoice.total);
+      await fallbackToWhatsApp(invoice.blob, invoice.filename, cartEntries, orderReference, invoice.total, customerDetails);
     }
   } catch (error) {
     console.error('Checkout failed:', error);
