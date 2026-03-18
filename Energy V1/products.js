@@ -1,35 +1,56 @@
-// Fetch the products
-const products = [
-  // Add product details here
-];
+// Existing code...
 
-// Convert blob to data URL
-function blobToDataUrl(blob) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.readAsDataURL(blob);
-  });
-}
+// Convert a blob to Base64
+const blobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+};
 
-// New helper function to convert blob to base64
-function blobToBase64(blob) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result.split(',')[1]);
-    reader.readAsDataURL(blob);
-  });
-}
+// Function to send checkout data to the API
+const sendCheckoutToApi = async (customerDetails, cartEntries, orderReference, invoice, ORDER_CURRENCY) => {
+    const payload = {
+        user: customerDetails,
+        cart: cartEntries,
+        orderReference,
+        filename: invoice.filename,
+        pdfBase64: await blobToBase64(invoice.pdfBlob), // assuming pdfBlob is available
+        currency: ORDER_CURRENCY,
+        totalAmount: invoice.total
+    };
 
-// Handle the checkout process
-async function handleCheckout() {
-  const response = await fetch('/api/checkout', {  // Changed endpoint
-    method: 'POST',
-    body: JSON.stringify(products),
-    headers: {'Content-Type': 'application/json'}
-  });
-  if (!response.ok) {
-    // WhatsApp fallback behavior
-    await sendInvoiceEmail(); // Fallback to existing behavior
-  }
-}
+    try {
+        const response = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+        
+        if (!response.ok) {
+            throw new Error('Checkout API call failed');
+        }
+
+        return await response.json();
+    } catch (error) {
+        open(result.waLink || fallbackToWhatsApp);
+        throw error; // propagate error for further handling if needed
+    }
+};
+
+// Update the handleCheckout function to call sendCheckoutToApi
+const handleCheckout = async () => {
+    // ... existing code to gather customerDetails, cartEntries, orderReference, invoice, ORDER_CURRENCY
+
+    try {
+        await sendCheckoutToApi(customerDetails, cartEntries, orderReference, invoice, ORDER_CURRENCY);
+    } catch (error) {
+        console.error("Checkout failed", error);
+    }
+};
+
+// Existing code...
