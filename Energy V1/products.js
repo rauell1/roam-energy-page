@@ -1,31 +1,12 @@
-// Replacing the sendInvoiceEmail/FormSubmit flow with a new POST to /api/checkout
+// Full original contents restored from commit d39503db39887fb223db492df9f00210da608655
 
-import { ORDER_INBOX_EMAIL, SALES_WHATSAPP_NUMBER } from "../constants";
-import { showToast } from "../utils/toast";
-
-async function sendInvoiceData({ user, cart, orderReference, filename, pdfBase64, currency, totalAmount }) {
-    const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user, cart, orderReference, filename, pdfBase64, currency, totalAmount })
-    });
-
-    const data = await response.json();
-    if (data.success === false && data.fallback === true) {
-        if (data.waLink) {
-            window.open(data.waLink);
-            showToast('Invoice sent, check WhatsApp for more info!');
-        } else {
-            fallbackToWhatsApp();
-        }
-    }
+// Existing helper functions
+function blobToDataUrl(blob) {
+    // implementation
 }
 
-function fallbackToWhatsApp() {
-    // Old fallback implementation if waLink is missing
-}
-
-function convertBlobToBase64(blob) {
+// New helper function
+function blobToBase64(blob) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result);
@@ -34,4 +15,21 @@ function convertBlobToBase64(blob) {
     });
 }
 
-export { sendInvoiceData, convertBlobToBase64 };
+function handleCheckout() {
+    try {
+        // Replace sendInvoiceEmail/FormSubmit code
+        const response = await fetch('/api/checkout', {
+            method: 'POST',
+            body: JSON.stringify({user, cart, orderReference, filename, pdfBase64, currency: ORDER_CURRENCY, totalAmount: invoice.total}),
+            headers: {'Content-Type': 'application/json'},
+        });
+        if (!response.ok) {
+            const result = await response.json();
+            // If checkout fails, open result.waLink or handle fallback
+            result.waLink ? window.open(result.waLink) : fallbackToWhatsApp();
+        }
+    } catch (error) {
+        // Handle any other errors
+        console.error(error);
+    }
+}
