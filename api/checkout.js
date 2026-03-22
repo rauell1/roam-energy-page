@@ -164,7 +164,7 @@ async function sendWhatsAppConfirmation(order) {
 }
 
 function isOriginAllowed(origin) {
-  if (!origin) return false;
+  if (!origin) return !appConfig.cors.allowedOrigins.length;
   if (!appConfig.cors.allowedOrigins.length) return true;
   return appConfig.cors.allowedOrigins.includes(origin);
 }
