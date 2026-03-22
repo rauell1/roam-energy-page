@@ -24,11 +24,15 @@ api/config.js     # Environment + runtime configuration
 
 1. Install Node 18+ and MongoDB (or use Atlas).
 2. Configure the environment variables below.
-3. Serve the static site:
+3. Install API dependencies:
+   ```bash
+   npm install
+   ```
+4. Serve the static site:
    ```bash
    npx serve "Energy V1"
    ```
-4. Deploy `api/` with Vercel (recommended) or run locally via `vercel dev` / `next dev` if using a Next.js wrapper.
+5. Deploy `api/` with Vercel (recommended) or run locally via `vercel dev` / `next dev` if using a Next.js wrapper.
 
 ## Environment variables
 
@@ -57,6 +61,7 @@ No automated tests or linters are defined in this repo. Add a pipeline (for exam
 2. Framework preset: Other / static.
 3. Root directory: `Energy V1` for the static site; API routes deploy from `api/`.
 4. Enable a custom domain and enforce HTTPS.
+5. The included `vercel.json` rewrites static assets from `Energy V1` and pins the API runtime to Node 18.
 
 ## Proposed feature-based structure (future)
 

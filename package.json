@@ -1,0 +1,30 @@
+{
+  "name": "roam-energy-page",
+  "version": "1.0.0",
+  "description": "Marketing site and checkout API for Roam Energy (solar solutions).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests specified\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rauell1/roam-energy-page.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/rauell1/roam-energy-page/issues"
+  },
+  "homepage": "https://github.com/rauell1/roam-energy-page#readme",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "mongodb": "^6.8.0",
+    "node-fetch": "^3.3.2",
+    "resend": "^6.9.4"
+  }
+}
