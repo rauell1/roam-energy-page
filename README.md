@@ -1,33 +1,100 @@
-# Roam Energy — Marketing Page
+# Roam Energy
 
-A static marketing site for Roam Energy (solar and sustainable energy solutions).
+Marketing site and checkout API for Roam Energy (solar solutions).
 
-**Live (Vercel):** https://roam-energy.vercel.app/
+- Live (Vercel): https://roam-energy.vercel.app/
+- Tech: Static HTML/CSS/vanilla JS (frontend), Vercel/Next API route (Node 18), MongoDB, Resend, WhatsApp Cloud API.
 
-## Pages / sections
+## Features
 
-- Home
-- Products
-- Projects
-- About
-- Contact
+- Product catalogue with PDF export and email handoff
+- Project showcase with modal gallery
+- Sticky WhatsApp CTA with scroll-aware visibility
+- Checkout API saves orders, emails confirmation, and sends WhatsApp follow-up
 
-## Tech stack
+## Repository layout
 
-- Static HTML
-- Tailwind CSS (CDN)
-- Vanilla JavaScript
+```
+Energy V1/        # Static site assets (HTML/CSS/JS/images)
+api/checkout.js   # Order processing API (Vercel/Next API route)
+api/config.js     # Environment + runtime configuration
+```
 
-## Run locally
+## Setup
 
-Serve the Energy V1/ folder with any static server.
+1. Install Node 18+ and MongoDB (or use Atlas).
+2. Configure the environment variables below.
+3. Serve the static site:
+   ```bash
+   npx serve "Energy V1"
+   ```
+4. Deploy `api/` with Vercel (recommended) or run locally via `vercel dev` / `next dev` if using a Next.js wrapper.
 
-## Deployment
+## Environment variables
 
-Vercel:
-- Framework preset:  Other / static
-- Root directory: Energy V1
+| Name | Description |
+| --- | --- |
+| MONGODB_URI | MongoDB connection string (with credentials). |
+| MONGODB_DB_NAME | Database name (default `roam-energy`). |
+| MONGODB_ORDERS_COLLECTION | Collection for orders (default `orders`). |
+| RESEND_API_KEY | Resend API key for transactional email. |
+| RESEND_FROM_EMAIL | Verified sender email for Resend. |
+| WHATSAPP_API_TOKEN | WhatsApp Cloud API token. |
+| WHATSAPP_PHONE_NUMBER_ID | WhatsApp sender phone number ID. |
+| WHATSAPP_API_VERSION | WhatsApp Graph API version (default `v18.0`). |
+| API_ACCESS_TOKEN | Shared secret required in `x-api-key` for order requests. |
+| ALLOWED_ORIGINS | Comma-separated origins allowed to call the API. |
+| RATE_LIMIT_WINDOW_MS | Rate limit window in ms (default `60000`). |
+| RATE_LIMIT_MAX_REQUESTS | Requests allowed per window (default `30`). |
 
-## License
+## Running tests / lint
 
-Use as specified for the Roam Energy project.
+No automated tests or linters are defined in this repo. Add a pipeline (for example, eslint + unit tests) before production rollout.
+
+## Deployment (Vercel)
+
+1. Set the environment variables above in the Vercel project.
+2. Framework preset: Other / static.
+3. Root directory: `Energy V1` for the static site; API routes deploy from `api/`.
+4. Enable a custom domain and enforce HTTPS.
+
+## Proposed feature-based structure (future)
+
+```
+app/
+  shared/
+    components/
+    hooks/
+    services/
+    utils/
+    types/
+  catalog/
+    components/
+    services/
+    hooks/
+  projects/
+    components/
+    services/
+  contact/
+    components/
+    hooks/
+api/
+  checkout/
+    handler.ts
+    validation.ts
+    service.ts
+    config.ts
+```
+
+## Security
+
+- API requires `x-api-key` and origin allow-listing.
+- Rate limiting is built in (configurable).
+- Inputs validated and sanitized before persistence.
+- Email/WhatsApp secrets loaded from environment variables only.
+
+## Maintenance notes
+
+- Pin CDN script versions.
+- Rotate API tokens and database credentials regularly.
+- Add monitoring/alerting for the checkout endpoint and database connectivity.
