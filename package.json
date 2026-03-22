@@ -23,7 +23,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "mongodb": "^7.1.0",
+    "mongodb": "^6.8.0",
     "node-fetch": "^3.3.2",
     "resend": "^6.9.4"
   }
