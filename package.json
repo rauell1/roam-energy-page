@@ -1,0 +1,15 @@
+{
+  "name": "roam-energy-page",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Marketing site and checkout API for Roam Energy (solar solutions)",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "mongodb": "^6.0.0",
+    "node-fetch": "^3.3.0",
+    "resend": "^3.0.0"
+  }
+}
