@@ -482,11 +482,6 @@ checkoutBtn.addEventListener('click', async () => {
   orderReference  = generateOrderReference();
   invoice         = await generateInvoice(customerDetails, orderReference);
 
-  const link = document.createElement('a');
-  link.href     = URL.createObjectURL(invoice.blob);
-  link.download = invoice.filename;
-  link.click();
-
   const origLabel = checkoutBtn.textContent;
   checkoutBtn.textContent = 'Sending…';
   checkoutBtn.disabled    = true;

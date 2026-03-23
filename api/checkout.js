@@ -138,17 +138,49 @@ async function sendOrderEmail(order) {
 }
 
 async function sendWhatsAppConfirmation(order) {
-  const url = `https://graph.facebook.com/${appConfig.whatsapp.apiVersion}/${appConfig.whatsapp.phoneNumberId}/messages`;
+  // Step 1: Upload the PDF to WhatsApp media endpoint
+  const pdfBuffer = Buffer.from(order.pdfBase64.replace('data:application/pdf;base64,', ''), 'base64');
+
+  const uploadUrl = `https://graph.facebook.com/${appConfig.whatsapp.apiVersion}/${appConfig.whatsapp.phoneNumberId}/media`;
+  const FormData = (await import('form-data')).default;
+  const formData = new FormData();
+  formData.append('messaging_product', 'whatsapp');
+  formData.append('file', pdfBuffer, {
+    filename: order.filename,
+    contentType: 'application/pdf',
+  });
+
+  const uploadResponse = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${appConfig.whatsapp.apiToken}`,
+      ...formData.getHeaders(),
+    },
+    body: formData,
+  });
+
+  if (!uploadResponse.ok) {
+    const text = await uploadResponse.text();
+    throw new Error(`WhatsApp media upload failed: ${uploadResponse.status} ${text}`);
+  }
+
+  const uploadResult = await uploadResponse.json();
+  const mediaId = uploadResult.id;
+
+  // Step 2: Send the document message with the uploaded media
+  const messageUrl = `https://graph.facebook.com/${appConfig.whatsapp.apiVersion}/${appConfig.whatsapp.phoneNumberId}/messages`;
   const payload = {
     messaging_product: 'whatsapp',
     to: order.customer.phone,
-    type: 'text',
-    text: {
-      body: `Thanks ${order.customer.name}, we received order ${order.orderReference}. Total: ${order.currency} ${order.totalAmount}.`,
+    type: 'document',
+    document: {
+      id: mediaId,
+      filename: order.filename,
+      caption: `Thanks ${order.customer.name}, we received order ${order.orderReference}. Total: ${order.currency} ${order.totalAmount}.`,
     },
   };
 
-  const response = await fetch(url, {
+  const response = await fetch(messageUrl, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${appConfig.whatsapp.apiToken}`,
