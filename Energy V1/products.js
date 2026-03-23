@@ -436,7 +436,7 @@ function fallbackToWhatsApp(blob, filename, entries, ref, total, customer) {
   const msg = encodeURIComponent(
     `Hi Roam Energy,\n\nOrder Ref: ${ref}\nCustomer: ${customer.name}\nPhone: ${customer.phone}\n\n${lines}\n\nTotal: ${ORDER_CURRENCY} ${total.toLocaleString('en-KE')}`
   );
-  window.open(`https://wa.me/254700000000?text=${msg}`, '_blank');
+  window.open(`https://wa.me/254704612435?text=${msg}`, '_blank');
 }
 
 // ─── Checkout state ────────────────────────────────────────────────────────
