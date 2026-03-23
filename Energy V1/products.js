@@ -143,6 +143,10 @@ const modalTitle    = document.getElementById('modalTitle');
 const modalBody     = document.getElementById('modalBody');
 const closeModalBtn = document.getElementById('closeModalBtn');
 
+const checkoutConfig = window.checkoutConfig || {};
+const API_ENDPOINT = checkoutConfig.endpoint || '/api/checkout';
+const API_ACCESS_TOKEN = checkoutConfig.apiKey || (document.querySelector('meta[name="roam-api-key"]')?.content || '');
+
 // ─── Helpers ───────────────────────────────────────────────────────────────
 function formatPrice(n) {
   return ORDER_CURRENCY + ' ' + n.toLocaleString('en-KE');
@@ -341,81 +345,177 @@ async function generateInvoice(customerDetails, orderReference) {
   const { jsPDF } = window.jspdf;
   const doc  = new jsPDF({ unit: 'pt', format: 'a4' });
   const pageW = doc.internal.pageSize.getWidth();
-  let y = 50;
+  const margin = 48;
+  const accent = [249, 115, 22];
+  const textDark = [41, 37, 36];
+  const textMuted = [90, 98, 104];
 
+  // Header band
+  doc.setFillColor(...accent);
+  doc.rect(0, 0, pageW, 86, 'F');
+  doc.setTextColor(255, 255, 255);
   doc.setFontSize(22);
-  doc.setTextColor(249, 115, 22);
-  doc.text('Roam Energy', 40, y);
-  doc.setFontSize(10);
-  doc.setTextColor(80);
-  doc.text('roamenergy.co.ke', 40, y + 18);
-
+  doc.setFont(undefined, 'bold');
+  doc.text('Roam Energy — Solar & Storage Solutions', margin, 36);
   doc.setFontSize(11);
-  doc.setTextColor(30);
-  doc.text(`Order: ${orderReference}`, pageW - 40, y, { align: 'right' });
-  doc.text(new Date().toLocaleDateString('en-KE', { dateStyle: 'long' }), pageW - 40, y + 16, { align: 'right' });
+  doc.setFont(undefined, 'normal');
+  doc.text('Premium solar, hybrid inverters, and storage built for Africa.', margin, 56);
+  doc.setFontSize(13);
+  doc.text(`Quote ${orderReference}`, pageW - margin, 32, { align: 'right' });
+  doc.text(new Date().toLocaleDateString('en-KE', { dateStyle: 'long' }), pageW - margin, 50, { align: 'right' });
 
-  y += 50;
+  let y = 110;
 
-  doc.setFontSize(11);
-  doc.setTextColor(80);
-  doc.text('Bill To:', 40, y);
+  // Customer + company blocks
+  doc.setTextColor(...textDark);
   doc.setFontSize(12);
-  doc.setTextColor(30);
-  doc.text(customerDetails.name,  40, y + 16);
-  doc.text(customerDetails.email, 40, y + 32);
-  doc.text(customerDetails.phone, 40, y + 48);
+  doc.setFont(undefined, 'bold');
+  doc.text('Prepared For', margin, y);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(...textMuted);
+  doc.setFontSize(11);
+  const customerLines = [
+    customerDetails.name,
+    customerDetails.email,
+    customerDetails.phone,
+  ]
+    .filter(Boolean)
+    .flatMap((line) => doc.splitTextToSize(line, (pageW / 2) - margin * 1.5));
+  let infoY = y + 18;
+  customerLines.forEach((line) => {
+    doc.text(line, margin, infoY);
+    infoY += 16;
+  });
 
-  y += 80;
+  doc.setTextColor(...textDark);
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  const rightX = pageW / 2 + 10;
+  doc.text('Prepared By', rightX, y);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(...textMuted);
+  doc.setFontSize(11);
+  ['Roam Energy', 'hello@roamenergy.co.ke', '+254 704 612 435', 'www.roamenergy.co.ke'].forEach((line, idx) => {
+    doc.text(line, rightX, y + 18 + idx * 16);
+  });
 
-  doc.setFillColor(249, 115, 22);
-  doc.rect(40, y, pageW - 80, 22, 'F');
-  doc.setFontSize(10);
-  doc.setTextColor(255);
-  doc.text('Product',    48,          y + 15);
-  doc.text('Qty',        pageW - 200, y + 15, { align: 'right' });
-  doc.text('Unit Price', pageW - 130, y + 15, { align: 'right' });
-  doc.text('Total',      pageW - 45,  y + 15, { align: 'right' });
+  y = Math.max(infoY, y + 18 + 4 * 16) + 16;
+  doc.setDrawColor(230);
+  doc.line(margin, y, pageW - margin, y);
+  y += 20;
 
-  y += 30;
+  // Summary text
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...textDark);
+  doc.setFontSize(13);
+  doc.text('Solution Summary', margin, y);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(...textMuted);
+  doc.setFontSize(11);
+  const summary = doc.splitTextToSize(
+    'Tailored solar solution with tier-one modules, hybrid inverters, and scalable lithium storage. Pricing shown is for equipment; installation is confirmed after site validation.',
+    pageW - margin * 2
+  );
+  doc.text(summary, margin, y + 16);
+  y += 16 + summary.length * 14 + 6;
+
+  // Table headers
+  const tableX = margin;
+  const tableW = pageW - margin * 2;
+  doc.setFillColor(246, 247, 249);
+  doc.rect(tableX, y, tableW, 30, 'F');
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...textDark);
+  doc.setFontSize(11);
+  doc.text('Item', tableX + 12, y + 20);
+  doc.text('Qty', tableX + tableW * 0.55, y + 20, { align: 'right' });
+  doc.text('Unit', tableX + tableW * 0.72, y + 20, { align: 'right' });
+  doc.text('Line Total', tableX + tableW - 12, y + 20, { align: 'right' });
+
+  y += 38;
 
   let total = 0;
-  Object.entries(cart).forEach(([id, qty], i) => {
-    const p = PRODUCTS.find(p => p.id === id);
+  Object.entries(cart).forEach(([id, qty], index) => {
+    const p = PRODUCTS.find((product) => product.id === id);
     if (!p) return;
     const lineTotal = p.price * qty;
     total += lineTotal;
-    if (i % 2 === 0) { doc.setFillColor(250, 250, 250); doc.rect(40, y - 5, pageW - 80, 20, 'F'); }
-    doc.setFontSize(10);
-    doc.setTextColor(30);
-    doc.text(p.name,                  48,          y + 9);
-    doc.text(String(qty),             pageW - 200, y + 9, { align: 'right' });
-    doc.text(formatPrice(p.price),    pageW - 130, y + 9, { align: 'right' });
-    doc.text(formatPrice(lineTotal),  pageW - 45,  y + 9, { align: 'right' });
-    y += 22;
+
+    if (index % 2 === 0) {
+      doc.setFillColor(252, 252, 252);
+      doc.rect(tableX, y - 16, tableW, 34, 'F');
+    }
+
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...textDark);
+    doc.setFontSize(11);
+    const nameLines = doc.splitTextToSize(p.name, tableW * 0.5);
+    doc.text(nameLines, tableX + 12, y);
+
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(...textMuted);
+    doc.text(String(qty), tableX + tableW * 0.55, y, { align: 'right' });
+    doc.text(formatPrice(p.price), tableX + tableW * 0.72, y, { align: 'right' });
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...textDark);
+    doc.text(formatPrice(lineTotal), tableX + tableW - 12, y, { align: 'right' });
+
+    y += Math.max(26, nameLines.length * 14 + 10);
   });
 
-  y += 10;
-  doc.setDrawColor(200);
-  doc.line(40, y, pageW - 40, y);
-  y += 16;
-  doc.setFontSize(13);
-  doc.setFont(undefined, 'bold');
-  doc.text('Total',             pageW - 200, y, { align: 'right' });
-  doc.text(formatPrice(total),  pageW - 45,  y, { align: 'right' });
+  // Totals box
+  const totalsTop = y + 6;
+  doc.setDrawColor(235);
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(tableX + tableW * 0.55, totalsTop, tableW * 0.45, 70, 6, 6, 'S');
   doc.setFont(undefined, 'normal');
+  doc.setTextColor(...textMuted);
+  doc.setFontSize(11);
+  doc.text('Subtotal', tableX + tableW * 0.55 + 14, totalsTop + 22);
+  doc.text('Due',      tableX + tableW * 0.55 + 14, totalsTop + 46);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...textDark);
+  doc.text(formatPrice(total), tableX + tableW - 16, totalsTop + 22, { align: 'right' });
+  doc.text(formatPrice(total), tableX + tableW - 16, totalsTop + 46, { align: 'right' });
+
+  y = totalsTop + 90;
+
+  // Notes
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...textDark);
+  doc.setFontSize(12);
+  doc.text('Notes', margin, y);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(...textMuted);
+  const notes = doc.splitTextToSize(
+    'This quotation is valid for 14 days from the date above. Equipment availability may vary; we will confirm installation timelines after a site visit. Need adjustments? Reply to this email or WhatsApp and we will refine the scope.',
+    pageW - margin * 2
+  );
+  doc.text(notes, margin, y + 16);
 
   const footerY = doc.internal.pageSize.getHeight() - 40;
   doc.setFontSize(9);
   doc.setTextColor(150);
-  doc.text('Thank you for your order. Roam Energy – Powering the Future.', pageW / 2, footerY, { align: 'center' });
+  doc.text('Roam Energy — Smarter solar and storage for homes and businesses.', pageW / 2, footerY, { align: 'center' });
 
-  const filename = `Roam-Energy-Order-${orderReference}.pdf`;
+  const filename = `Roam-Energy-Quote-${orderReference}.pdf`;
   const blob = doc.output('blob');
   return { blob, filename, total };
 }
 
 // ─── Utilities ─────────────────────────────────────────────────────────────
+function downloadInvoice(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 500);
+}
+
 function blobToDataUrl(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -443,30 +543,49 @@ function fallbackToWhatsApp(blob, filename, entries, ref, total, customer) {
 let customerDetails, cartEntries, orderReference, invoice;
 
 async function handleCheckout() {
-    const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            user: customerDetails,
-            cart: cartEntries,
-            orderReference,
-            filename: invoice.filename,
-            pdfBase64: await blobToDataUrl(invoice.blob),
-            currency: ORDER_CURRENCY,
-            totalAmount: invoice.total
-        })
-    });
+  if (!API_ACCESS_TOKEN) {
+    console.warn('Checkout API key is not set. The request may be rejected.');
+  }
 
-    if (!response.ok) {
-        const result = await response.json();
-        if (result.waLink) {
-            window.open(result.waLink);
-        } else {
-            fallbackToWhatsApp(invoice.blob, invoice.filename, cartEntries, orderReference, invoice.total, customerDetails);
-        }
+  const headers = { 'Content-Type': 'application/json' };
+  if (API_ACCESS_TOKEN) {
+    headers['x-api-key'] = API_ACCESS_TOKEN;
+  }
+
+  const pdfBase64 = invoice.base64 || await blobToDataUrl(invoice.blob);
+  invoice.base64 = pdfBase64;
+
+  const response = await fetch(API_ENDPOINT, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      user: customerDetails,
+      cart: cartEntries,
+      orderReference,
+      filename: invoice.filename,
+      pdfBase64,
+      currency: ORDER_CURRENCY,
+      totalAmount: invoice.total,
+    }),
+  });
+
+  let result = {};
+  try {
+    result = await response.json();
+  } catch (_) {
+    result = {};
+  }
+
+  if (!response.ok) {
+    if (result.waLink) {
+      window.open(result.waLink, '_blank');
     }
+    const error = new Error(result.message || 'Checkout failed');
+    error.detail = result.detail;
+    throw error;
+  }
+
+  return result;
 }
 
 checkoutBtn.addEventListener('click', async () => {
@@ -481,6 +600,8 @@ checkoutBtn.addEventListener('click', async () => {
   cartEntries     = Object.entries(cart).map(([id, qty]) => ({ id, qty, name: PRODUCTS.find(p => p.id === id)?.name }));
   orderReference  = generateOrderReference();
   invoice         = await generateInvoice(customerDetails, orderReference);
+  invoice.base64  = await blobToDataUrl(invoice.blob);
+  downloadInvoice(invoice.blob, invoice.filename);
 
   const origLabel = checkoutBtn.textContent;
   checkoutBtn.textContent = 'Sending…';
@@ -488,8 +609,11 @@ checkoutBtn.addEventListener('click', async () => {
 
   try {
     await handleCheckout();
+    alert('Quote sent via email and WhatsApp. A PDF copy has been downloaded locally.');
   } catch (e) {
     fallbackToWhatsApp(invoice.blob, invoice.filename, cartEntries, orderReference, invoice.total, customerDetails);
+    console.error('Checkout failed, opened WhatsApp fallback.', e);
+    alert('We could not send automatically. We opened WhatsApp with your order details and downloaded the PDF locally.');
   } finally {
     checkoutBtn.textContent = origLabel;
     checkoutBtn.disabled    = false;

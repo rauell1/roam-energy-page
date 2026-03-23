@@ -2,6 +2,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="roam-api-key" content="" />
   <title>Products | Roam Energy</title>
 
   <!-- Tailwind CDN -->
@@ -89,8 +90,8 @@
         <span class="font-medium">Subtotal</span>
         <span id="cartTotal" class="font-bold">KES 0</span>
       </div>
-      <button id="checkoutBtn" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg shadow transition-colors">Send Order via Email & WhatsApp</button>
-      <p class="mt-2 text-xs text-gray-500">Your order will be sent via email and WhatsApp automatically. No files will be stored on your device.</p>
+      <button id="checkoutBtn" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg shadow transition-colors">Send Quote (Email + WhatsApp) & Download PDF</button>
+      <p class="mt-2 text-xs text-gray-500">We will email and WhatsApp the PDF quote and download a copy locally for you.</p>
     </div>
   </div>
 </div>
@@ -115,6 +116,12 @@
 <!-- Scripts -->
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script>
+    window.checkoutConfig = window.checkoutConfig || {
+      endpoint: '/api/checkout',
+      apiKey: document.querySelector('meta[name="roam-api-key"]')?.content || ''
+    };
+  </script>
   <script src="products.js"></script>
 </body>
 </html>
