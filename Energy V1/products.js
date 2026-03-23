@@ -6,7 +6,7 @@ const PRODUCTS = [
     name: 'Jinko Bifacial Solar Panel 585W',
     category: 'Solar Panel',
     price: 32500,
-    image: null,
+    image: 'https://jinkosolarcdn.shwebspace.com/themes/basicen/skin/images/tige2.png',
     description: 'Tier 1 panel with dual-sided power generation and advanced N-Type TOPCon cell technology for maximum efficiency. Higher energy yield from same sunlight.',
     specs: {
       'Wattage': '585 W',
@@ -22,7 +22,7 @@ const PRODUCTS = [
     name: 'Jinko Bifacial Solar Panel 620W',
     category: 'Solar Panel',
     price: 38500,
-    image: null,
+    image: 'https://jinkosolarcdn.shwebspace.com/themes/basicen/skin/images/tige2.png',
     description: 'Premium Tier 1 bifacial panel with dual-sided power generation and advanced N-Type TOPCon cell technology. Built to last a lifetime with 30-year warranty.',
     specs: {
       'Wattage': '620 W',
