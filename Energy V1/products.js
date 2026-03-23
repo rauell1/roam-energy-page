@@ -343,164 +343,178 @@ modalOverlay.addEventListener('click', closeModal);
 // ─── PDF generation ────────────────────────────────────────────────────────
 async function generateInvoice(customerDetails, orderReference) {
   const { jsPDF } = window.jspdf;
-  const doc  = new jsPDF({ unit: 'pt', format: 'a4' });
-  const pageW = doc.internal.pageSize.getWidth();
-  const margin = 48;
-  const accent = [249, 115, 22];
-  const textDark = [41, 37, 36];
-  const textMuted = [90, 98, 104];
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
-  // Header band
-  doc.setFillColor(...accent);
-  doc.rect(0, 0, pageW, 86, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
+  // Layout constants (mm, A4 = 210 × 297)
+  const LEFT_MARGIN = 20;
+  const RIGHT_END   = 195;
+
+  // Date string matching Python strftime("%d %b %Y").upper()
+  const d = new Date();
+  const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const dateStr = `${String(d.getDate()).padStart(2,'0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+
+  // ── 1. HEADER ──────────────────────────────────────────────────────────────
+  // Logo (falls back to "ROAM" text if image cannot be loaded)
+  try {
+    const imgData = await loadImageAsDataUrl('Roam_Logo.png');
+    doc.addImage(imgData, 'PNG', LEFT_MARGIN, 10, 35, 14);
+  } catch (_) {
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(244, 121, 32);
+    doc.text('ROAM', LEFT_MARGIN, 22);
+  }
+
+  // "Pro Forma Invoice" title — right-aligned
+  doc.setFontSize(18);
   doc.setFont(undefined, 'bold');
-  doc.text('Roam Energy — Solar & Storage Solutions', margin, 36);
-  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+  doc.text('Pro Forma Invoice', RIGHT_END, 22, { align: 'right' });
+
+  // Date and page number — right-aligned
+  doc.setFontSize(9);
   doc.setFont(undefined, 'normal');
-  doc.text('Premium solar, hybrid inverters, and storage built for Africa.', margin, 56);
-  doc.setFontSize(13);
-  doc.text(`Quote ${orderReference}`, pageW - margin, 32, { align: 'right' });
-  doc.text(new Date().toLocaleDateString('en-KE', { dateStyle: 'long' }), pageW - margin, 50, { align: 'right' });
+  doc.text(dateStr, RIGHT_END, 30, { align: 'right' });
+  doc.text('Page 1 / 1', RIGHT_END, 35, { align: 'right' });
 
-  let y = 110;
-
-  // Customer + company blocks
-  doc.setTextColor(...textDark);
-  doc.setFontSize(12);
+  // ── 2. ENTITY NAMES & ADDRESS ──────────────────────────────────────────────
+  let y = 44;
+  doc.setFontSize(10);
   doc.setFont(undefined, 'bold');
-  doc.text('Prepared For', margin, y);
+  doc.setTextColor(0, 0, 0);
+  doc.text(customerDetails.name || 'Walk-in Client', LEFT_MARGIN, y);
+
+  // Roam Electric address — right-aligned
+  doc.text('Roam Electric Limited', RIGHT_END, y, { align: 'right' });
   doc.setFont(undefined, 'normal');
-  doc.setTextColor(...textMuted);
-  doc.setFontSize(11);
-  const customerLines = [
-    customerDetails.name,
-    customerDetails.email,
-    customerDetails.phone,
-  ]
-    .filter(Boolean)
-    .flatMap((line) => doc.splitTextToSize(line, (pageW / 2) - margin * 1.5));
-  let infoY = y + 18;
-  customerLines.forEach((line) => {
-    doc.text(line, margin, infoY);
-    infoY += 16;
+  doc.setFontSize(9);
+  ['National Park East Gate Rd.', 'P.O. Box nr 18284', 'Nairobi, 00500', 'Kenya'].forEach((line, i) => {
+    doc.text(line, RIGHT_END, y + 5 + i * 4.5, { align: 'right' });
   });
 
-  doc.setTextColor(...textDark);
-  doc.setFontSize(12);
-  doc.setFont(undefined, 'bold');
-  const rightX = pageW / 2 + 10;
-  doc.text('Prepared By', rightX, y);
+  // ── 3. METADATA SECTIONS ───────────────────────────────────────────────────
+  y = 75;
+  const leftMeta = [
+    ['Document No',        orderReference],
+    ['VAT Registration No.', ''],
+    ['Document Date',      dateStr],
+    ['Currency',           ORDER_CURRENCY],
+    ['Salesperson',        'Roy Otieno'],
+  ];
+  const rightMeta = [
+    ['Email',              'info@roam-electric.com'],
+    ['Home Page',          'www.roam-electric.com'],
+    ['Phone No.',          '+254740666555'],
+    ['VAT Registration No.', 'P05170428D'],
+    ['Mpesa Till No.',     '9572270'],
+    ['Bank',               'Standard Chartered'],
+    ['Account No.',        '0102487879100 (KES)'],
+  ];
+
   doc.setFont(undefined, 'normal');
-  doc.setTextColor(...textMuted);
-  doc.setFontSize(11);
-  ['Roam Energy', 'hello@roamenergy.co.ke', '+254 704 612 435', 'www.roamenergy.co.ke'].forEach((line, idx) => {
-    doc.text(line, rightX, y + 18 + idx * 16);
+  doc.setFontSize(9);
+  doc.setTextColor(0, 0, 0);
+  leftMeta.forEach(([label, val], i) => {
+    doc.text(label,       LEFT_MARGIN,      y + i * 5);
+    doc.text(String(val), LEFT_MARGIN + 45, y + i * 5);
+  });
+  rightMeta.forEach(([label, val], i) => {
+    doc.text(label, 105,       y + i * 5);
+    doc.text(val,   RIGHT_END, y + i * 5, { align: 'right' });
   });
 
-  y = Math.max(infoY, y + 18 + 4 * 16) + 16;
-  doc.setDrawColor(230);
-  doc.line(margin, y, pageW - margin, y);
-  y += 20;
+  // ── 4. ITEM TABLE ──────────────────────────────────────────────────────────
+  // Column widths (mm) — total = 60+15+25+15+12+23+25 = 175 (LEFT_MARGIN to RIGHT_END)
+  const COL = { Item: 60, Qty: 15, Price: 25, HS: 15, VATpct: 12, VATAmt: 23, Amt: 25 };
+  // Precompute right-edge x for each column
+  const colX = {
+    Item:   LEFT_MARGIN,
+    Qty:    LEFT_MARGIN + COL.Item,
+    Price:  LEFT_MARGIN + COL.Item + COL.Qty,
+    HS:     LEFT_MARGIN + COL.Item + COL.Qty + COL.Price,
+    VATpct: LEFT_MARGIN + COL.Item + COL.Qty + COL.Price + COL.HS,
+    VATAmt: LEFT_MARGIN + COL.Item + COL.Qty + COL.Price + COL.HS + COL.VATpct,
+    Amt:    RIGHT_END,
+  };
 
-  // Summary text
+  y = 135;
   doc.setFont(undefined, 'bold');
-  doc.setTextColor(...textDark);
-  doc.setFontSize(13);
-  doc.text('Solution Summary', margin, y);
-  doc.setFont(undefined, 'normal');
-  doc.setTextColor(...textMuted);
-  doc.setFontSize(11);
-  const summary = doc.splitTextToSize(
-    'Tailored solar solution with tier-one modules, hybrid inverters, and scalable lithium storage. Pricing shown is for equipment; installation is confirmed after site validation.',
-    pageW - margin * 2
-  );
-  doc.text(summary, margin, y + 16);
-  y += 16 + summary.length * 14 + 6;
+  doc.setFontSize(9);
+  doc.text('Item',       colX.Item,                     y);
+  doc.text('Quantity',   colX.Qty   + COL.Qty   / 2,    y, { align: 'center' });
+  doc.text('Unit Price', colX.Price + COL.Price,         y, { align: 'right' });
+  doc.text('HS Code',    colX.HS    + COL.HS    / 2,    y, { align: 'center' });
+  doc.text('VAT%',       colX.VATpct + COL.VATpct / 2,  y, { align: 'center' });
+  doc.text('VAT Amount', colX.VATAmt + COL.VATAmt,       y, { align: 'right' });
+  doc.text('Amount',     colX.Amt,                       y, { align: 'right' });
+  doc.setDrawColor(0);
+  doc.line(LEFT_MARGIN, y + 1, RIGHT_END, y + 1);
+  y += 8;
 
-  // Table headers
-  const tableX = margin;
-  const tableW = pageW - margin * 2;
-  doc.setFillColor(246, 247, 249);
-  doc.rect(tableX, y, tableW, 30, 'F');
-  doc.setFont(undefined, 'bold');
-  doc.setTextColor(...textDark);
-  doc.setFontSize(11);
-  doc.text('Item', tableX + 12, y + 20);
-  doc.text('Qty', tableX + tableW * 0.55, y + 20, { align: 'right' });
-  doc.text('Unit', tableX + tableW * 0.72, y + 20, { align: 'right' });
-  doc.text('Line Total', tableX + tableW - 12, y + 20, { align: 'right' });
-
-  y += 38;
-
-  let total = 0;
-  Object.entries(cart).forEach(([id, qty], index) => {
+  // ── 5. ITEM ROWS ───────────────────────────────────────────────────────────
+  let grandTotal = 0;
+  Object.entries(cart).forEach(([id, qty]) => {
     const p = PRODUCTS.find((product) => product.id === id);
     if (!p) return;
     const lineTotal = p.price * qty;
-    total += lineTotal;
+    grandTotal += lineTotal;
+    const startY = y;
 
-    if (index % 2 === 0) {
-      doc.setFillColor(252, 252, 252);
-      doc.rect(tableX, y - 16, tableW, 34, 'F');
+    // Numerical cells (right of the Item column)
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(9);
+    doc.text(String(qty),             colX.Qty    + COL.Qty    / 2,   startY, { align: 'center' });
+    doc.text(formatAmt(p.price),      colX.Price  + COL.Price,         startY, { align: 'right' });
+    doc.text('0',                     colX.VATpct + COL.VATpct / 2,   startY, { align: 'center' });
+    doc.text('0.00',                  colX.VATAmt + COL.VATAmt,        startY, { align: 'right' });
+    doc.text(formatAmt(lineTotal),    colX.Amt,                        startY, { align: 'right' });
+
+    // Item name (bold, wraps inside Item column)
+    doc.setFont(undefined, 'bold');
+    const nameLines = doc.splitTextToSize(p.name, COL.Item - 2);
+    doc.text(nameLines, LEFT_MARGIN, startY);
+    let itemY = startY + nameLines.length * 5;
+
+    // Description (smaller, below name)
+    if (p.description) {
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(8);
+      const descLines = doc.splitTextToSize(p.description, COL.Item - 2);
+      doc.text(descLines, LEFT_MARGIN, itemY);
+      itemY += descLines.length * 4;
     }
 
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...textDark);
-    doc.setFontSize(11);
-    const nameLines = doc.splitTextToSize(p.name, tableW * 0.5);
-    doc.text(nameLines, tableX + 12, y);
-
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(...textMuted);
-    doc.text(String(qty), tableX + tableW * 0.55, y, { align: 'right' });
-    doc.text(formatPrice(p.price), tableX + tableW * 0.72, y, { align: 'right' });
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(...textDark);
-    doc.text(formatPrice(lineTotal), tableX + tableW - 12, y, { align: 'right' });
-
-    y += Math.max(26, nameLines.length * 14 + 10);
+    y = itemY + 2;
   });
 
-  // Totals box
-  const totalsTop = y + 6;
-  doc.setDrawColor(235);
-  doc.setFillColor(255, 255, 255);
-  doc.roundedRect(tableX + tableW * 0.55, totalsTop, tableW * 0.45, 70, 6, 6, 'S');
-  doc.setFont(undefined, 'normal');
-  doc.setTextColor(...textMuted);
-  doc.setFontSize(11);
-  doc.text('Subtotal', tableX + tableW * 0.55 + 14, totalsTop + 22);
-  doc.text('Due',      tableX + tableW * 0.55 + 14, totalsTop + 46);
-  doc.setFont(undefined, 'bold');
-  doc.setTextColor(...textDark);
-  doc.text(formatPrice(total), tableX + tableW - 16, totalsTop + 22, { align: 'right' });
-  doc.text(formatPrice(total), tableX + tableW - 16, totalsTop + 46, { align: 'right' });
-
-  y = totalsTop + 90;
-
-  // Notes
-  doc.setFont(undefined, 'bold');
-  doc.setTextColor(...textDark);
-  doc.setFontSize(12);
-  doc.text('Notes', margin, y);
-  doc.setFont(undefined, 'normal');
-  doc.setTextColor(...textMuted);
-  const notes = doc.splitTextToSize(
-    'This quotation is valid for 14 days from the date above. Equipment availability may vary; we will confirm installation timelines after a site visit. Need adjustments? Reply to this email or WhatsApp and we will refine the scope.',
-    pageW - margin * 2
-  );
-  doc.text(notes, margin, y + 16);
-
-  const footerY = doc.internal.pageSize.getHeight() - 40;
+  // ── 6. TOTALS ──────────────────────────────────────────────────────────────
+  y += 5;
+  const L_COL_X = RIGHT_END - 60;
   doc.setFontSize(9);
-  doc.setTextColor(150);
-  doc.text('Roam Energy — Smarter solar and storage for homes and businesses.', pageW / 2, footerY, { align: 'center' });
+  doc.setTextColor(0, 0, 0);
 
-  const filename = `Roam-Energy-Quote-${orderReference}.pdf`;
+  doc.setFont(undefined, 'bold');
+  doc.text('Total Amount',   L_COL_X, y);
+  doc.setFont(undefined, 'normal');
+  doc.text(formatAmt(grandTotal), RIGHT_END, y, { align: 'right' });
+  y += 6;
+
+  doc.setFont(undefined, 'bold');
+  doc.text('VAT Amount',     L_COL_X, y);
+  doc.setFont(undefined, 'normal');
+  doc.text('0.00',           RIGHT_END, y, { align: 'right' });
+  doc.line(L_COL_X, y + 1, RIGHT_END, y + 1);
+  y += 8;
+
+  doc.setFont(undefined, 'bold');
+  doc.text('Total Incl. VAT', L_COL_X, y);
+  doc.setFont(undefined, 'normal');
+  doc.text(formatAmt(grandTotal), RIGHT_END, y, { align: 'right' });
+
+  const filename = `Roam-ProForma-Invoice-${orderReference}.pdf`;
   const blob = doc.output('blob');
-  return { blob, filename, total };
+  return { blob, filename, total: grandTotal };
 }
 
 // ─── Utilities ─────────────────────────────────────────────────────────────
@@ -523,6 +537,26 @@ function blobToDataUrl(blob) {
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
+}
+
+function loadImageAsDataUrl(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width  = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('Image load failed'));
+    img.src = url;
+  });
+}
+
+function formatAmt(n) {
+  return n.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function generateOrderReference() {
