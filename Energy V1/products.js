@@ -152,6 +152,14 @@ function formatPrice(n) {
   return ORDER_CURRENCY + ' ' + n.toLocaleString('en-KE');
 }
 
+function singleLineText(doc, text, maxWidth) {
+  if (!text) return '';
+  const normalized = text.replace(/\s+/g, ' ').trim();
+  if (!normalized) return '';
+  const lines = doc.splitTextToSize(normalized, maxWidth);
+  return Array.isArray(lines) && lines.length ? lines[0] : '';
+}
+
 function cartCount() {
   return Object.values(cart).reduce((s, q) => s + q, 0);
 }
@@ -348,6 +356,9 @@ async function generateInvoice(customerDetails, orderReference) {
   // Layout constants (mm, A4 = 210 × 297)
   const LEFT_MARGIN = 20;
   const RIGHT_END   = 195;
+  const safeName  = customerDetails.name  || 'Walk-in Client';
+  const safeEmail = customerDetails.email || 'N/A';
+  const safePhone = customerDetails.phone || 'N/A';
 
   // Date string matching Python strftime("%d %b %Y").upper()
   const d = new Date();
@@ -383,12 +394,14 @@ async function generateInvoice(customerDetails, orderReference) {
   doc.setFontSize(10);
   doc.setFont(undefined, 'bold');
   doc.setTextColor(0, 0, 0);
-  doc.text(customerDetails.name || 'Walk-in Client', LEFT_MARGIN, y);
+  doc.text(safeName, LEFT_MARGIN, y);
 
   // Roam Electric address — right-aligned
   doc.text('Roam Electric Limited', RIGHT_END, y, { align: 'right' });
   doc.setFont(undefined, 'normal');
   doc.setFontSize(9);
+  doc.text(`Phone: ${safePhone}`, LEFT_MARGIN, y + 5);
+  doc.text(`Email: ${safeEmail}`, LEFT_MARGIN, y + 9);
   ['National Park East Gate Rd.', 'P.O. Box nr 18284', 'Nairobi, 00500', 'Kenya'].forEach((line, i) => {
     doc.text(line, RIGHT_END, y + 5 + i * 4.5, { align: 'right' });
   });
@@ -397,7 +410,9 @@ async function generateInvoice(customerDetails, orderReference) {
   y = 75;
   const leftMeta = [
     ['Document No',        orderReference],
-    ['VAT Registration No.', ''],
+    ['Customer Name',      safeName],
+    ['Customer Phone',     safePhone],
+    ['Customer Email',     safeEmail],
     ['Document Date',      dateStr],
     ['Currency',           ORDER_CURRENCY],
     ['Salesperson',        'Roy Otieno'],
@@ -480,9 +495,11 @@ async function generateInvoice(customerDetails, orderReference) {
     if (p.description) {
       doc.setFont(undefined, 'normal');
       doc.setFontSize(8);
-      const descLines = doc.splitTextToSize(p.description, COL.Item - 2);
-      doc.text(descLines, LEFT_MARGIN, itemY);
-      itemY += descLines.length * 4;
+      const descLine = singleLineText(doc, p.description, COL.Item - 2);
+      if (descLine) {
+        doc.text(descLine, LEFT_MARGIN, itemY);
+        itemY += 4;
+      }
     }
 
     y = itemY + 2;
@@ -565,11 +582,42 @@ function generateOrderReference() {
   return `RE-${ts}-${rand}`;
 }
 
-function fallbackToWhatsApp(blob, filename, entries, ref, total, customer) {
+function persistOrderLocally({ customer, entries, orderReference, total }) {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    const payload = {
+      customer,
+      entries,
+      orderReference,
+      currency: ORDER_CURRENCY,
+      total,
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem('roamLastOrder', JSON.stringify(payload));
+  } catch (err) {
+    console.warn('Failed to cache order locally', err);
+  }
+}
+
+async function fallbackToWhatsApp(blob, filename, entries, ref, total, customer) {
   const lines = entries.map(e => `• ${e.name || e.id} × ${e.qty}`).join('\n');
-  const msg = encodeURIComponent(
-    `Hi Roam Energy,\n\nOrder Ref: ${ref}\nCustomer: ${customer.name}\nPhone: ${customer.phone}\n\n${lines}\n\nTotal: ${ORDER_CURRENCY} ${total.toLocaleString('en-KE')}`
-  );
+  const summary = `Hi Roam Energy,\n\nOrder Ref: ${ref}\nCustomer: ${customer.name}\nPhone: ${customer.phone}\nEmail: ${customer.email}\n\n${lines}\n\nTotal: ${ORDER_CURRENCY} ${total.toLocaleString('en-KE')}`;
+
+  const canShareFile = typeof navigator !== 'undefined' && typeof File !== 'undefined' && typeof navigator.canShare === 'function';
+  if (canShareFile) {
+    try {
+      const pdfFile = new File([blob], filename, { type: 'application/pdf' });
+      const shareData = { title: `Roam Energy Order ${ref}`, text: summary, files: [pdfFile] };
+      if (navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        return;
+      }
+    } catch (err) {
+      console.warn('Share API failed, falling back to WhatsApp link', err);
+    }
+  }
+
+  const msg = encodeURIComponent(summary);
   window.open(`https://wa.me/254704612435?text=${msg}`, '_blank');
 }
 
@@ -645,9 +693,15 @@ checkoutBtn.addEventListener('click', async () => {
     await handleCheckout();
     alert('Quote sent via email and WhatsApp. A PDF copy has been downloaded locally.');
   } catch (e) {
-    fallbackToWhatsApp(invoice.blob, invoice.filename, cartEntries, orderReference, invoice.total, customerDetails);
+    persistOrderLocally({
+      customer: customerDetails,
+      entries: cartEntries,
+      orderReference,
+      total: invoice.total,
+    });
+    await fallbackToWhatsApp(invoice.blob, invoice.filename, cartEntries, orderReference, invoice.total, customerDetails);
     console.error('Checkout failed, opened WhatsApp fallback.', e);
-    alert('We could not send automatically. We opened WhatsApp with your order details and downloaded the PDF locally.');
+    alert('We could not send automatically. We saved your details locally and opened WhatsApp with your order details (PDF downloaded).');
   } finally {
     checkoutBtn.textContent = origLabel;
     checkoutBtn.disabled    = false;
