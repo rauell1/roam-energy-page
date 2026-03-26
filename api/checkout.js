@@ -168,10 +168,15 @@ async function sendWhatsAppConfirmation(order) {
   const mediaId = uploadResult.id;
 
   // Step 2: Send the document message with the uploaded media
+  const recipient = appConfig.whatsapp.recipientNumber;
+  if (!recipient) {
+    throw new Error('WhatsApp recipient number is not configured.');
+  }
+
   const messageUrl = `https://graph.facebook.com/${appConfig.whatsapp.apiVersion}/${appConfig.whatsapp.phoneNumberId}/messages`;
   const payload = {
     messaging_product: 'whatsapp',
-    to: order.customer.phone,
+    to: recipient,
     type: 'document',
     document: {
       id: mediaId,

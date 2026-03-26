@@ -162,14 +162,6 @@ function formatPrice(n) {
   return ORDER_CURRENCY + ' ' + n.toLocaleString('en-KE');
 }
 
-function singleLineText(doc, text, maxWidth) {
-  if (!text) return '';
-  const normalized = text.replace(/\s+/g, ' ').trim();
-  if (!normalized) return '';
-  const lines = doc.splitTextToSize(normalized, maxWidth);
-  return Array.isArray(lines) && lines.length ? lines[0] : '';
-}
-
 function cartCount() {
   return Object.values(cart).reduce((s, q) => s + q, 0);
 }
@@ -499,18 +491,7 @@ async function generateInvoice(customerDetails, orderReference) {
     doc.setFont(undefined, 'bold');
     const nameLines = doc.splitTextToSize(p.name, COL.Item - 2);
     doc.text(nameLines, LEFT_MARGIN, startY);
-    let itemY = startY + nameLines.length * 5;
-
-    // Description (smaller, below name)
-    if (p.description) {
-      doc.setFont(undefined, 'normal');
-      doc.setFontSize(8);
-      const descLine = singleLineText(doc, p.description, COL.Item - 2);
-      if (descLine) {
-        doc.text(descLine, LEFT_MARGIN, itemY);
-        itemY += 4;
-      }
-    }
+    const itemY = startY + nameLines.length * 5;
 
     y = itemY + 2;
   });
