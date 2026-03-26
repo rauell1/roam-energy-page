@@ -618,7 +618,8 @@ async function fallbackToWhatsApp(blob, filename, entries, ref, total, customer)
   }
 
   const msg = encodeURIComponent(summary);
-  window.open(`https://wa.me/254704612435?text=${msg}`, '_blank');
+  const waUrl = `https://wa.me/254704612435?text=${msg}`;
+  window.location.assign(waUrl);
 }
 
 // ─── Checkout state ────────────────────────────────────────────────────────
@@ -660,7 +661,7 @@ async function handleCheckout() {
 
   if (!response.ok) {
     if (result.waLink) {
-      window.open(result.waLink, '_blank');
+      window.location.assign(result.waLink);
     }
     const error = new Error(result.message || 'Checkout failed');
     error.detail = result.detail;
