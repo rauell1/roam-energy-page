@@ -120,6 +120,16 @@ const PRODUCTS = [
 ];
 
 const ORDER_CURRENCY = 'KES';
+const WHATSAPP_NUMBER = (window.ROAM_WHATSAPP_NUMBER || '+254704612435').replace(/\D/g, '');
+const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+
+function buildWhatsAppLink(message) {
+  const params = new URLSearchParams({ app_absent: '0' });
+  if (message) params.set('text', message);
+  return `${WHATSAPP_BASE_URL}?${params.toString()}`;
+}
+
+window.ROAM_WHATSAPP_NUMBER = WHATSAPP_NUMBER;
 
 // ─── State ─────────────────────────────────────────────────────────────────
 const cart = {};
@@ -602,6 +612,7 @@ function persistOrderLocally({ customer, entries, orderReference, total }) {
 async function fallbackToWhatsApp(blob, filename, entries, ref, total, customer) {
   const lines = entries.map(e => `• ${e.name || e.id} × ${e.qty}`).join('\n');
   const summary = `Hi Roam Energy,\n\nOrder Ref: ${ref}\nCustomer: ${customer.name}\nPhone: ${customer.phone}\nEmail: ${customer.email}\n\n${lines}\n\nTotal: ${ORDER_CURRENCY} ${total.toLocaleString('en-KE')}`;
+  const waUrl = buildWhatsAppLink(summary);
 
   const canShareFile = typeof navigator !== 'undefined' && typeof File !== 'undefined' && typeof navigator.canShare === 'function';
   if (canShareFile) {
@@ -610,15 +621,12 @@ async function fallbackToWhatsApp(blob, filename, entries, ref, total, customer)
       const shareData = { title: `Roam Energy Order ${ref}`, text: summary, files: [pdfFile] };
       if (navigator.canShare(shareData)) {
         await navigator.share(shareData);
-        return;
       }
     } catch (err) {
       console.warn('Share API failed, falling back to WhatsApp link', err);
     }
   }
 
-  const msg = encodeURIComponent(summary);
-  const waUrl = `https://wa.me/254704612435?text=${msg}`;
   window.location.assign(waUrl);
 }
 
