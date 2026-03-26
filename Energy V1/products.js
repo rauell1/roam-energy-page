@@ -668,9 +668,6 @@ async function handleCheckout() {
   }
 
   if (!response.ok) {
-    if (result.waLink) {
-      window.location.assign(result.waLink);
-    }
     const error = new Error(result.message || 'Checkout failed');
     error.detail = result.detail;
     throw error;
