@@ -7,6 +7,8 @@ const required = {
   apiAccessToken: process.env.API_ACCESS_TOKEN,
 };
 
+const defaultWhatsappRecipient = (process.env.WHATSAPP_RECIPIENT || '+254704612435').replace(/\D/g, '');
+
 export function validateEnvironment() {
   const missing = Object.entries(required)
     .filter(([, value]) => !value)
@@ -41,6 +43,6 @@ export const appConfig = {
     apiToken: process.env.WHATSAPP_API_TOKEN,
     phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID,
     apiVersion: process.env.WHATSAPP_API_VERSION || 'v18.0',
+    recipientNumber: defaultWhatsappRecipient,
   },
 };
-
