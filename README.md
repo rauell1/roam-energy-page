@@ -46,6 +46,7 @@ api/config.js     # Environment + runtime configuration
 | WHATSAPP_API_TOKEN | WhatsApp Cloud API token. |
 | WHATSAPP_PHONE_NUMBER_ID | WhatsApp sender phone number ID. |
 | WHATSAPP_API_VERSION | WhatsApp Graph API version (default `v18.0`). |
+| WHATSAPP_RECIPIENT | WhatsApp number to receive order PDFs (digits only; defaults to `+254704612435`). |
 | API_ACCESS_TOKEN | Shared secret required in `x-api-key` for order requests. |
 | ALLOWED_ORIGINS | Comma-separated origins allowed to call the API. |
 | RATE_LIMIT_WINDOW_MS | Rate limit window in ms (default `60000`). |
