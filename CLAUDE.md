@@ -155,5 +155,14 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
-- 1ea1d15 fix: remove duplicate const WHATSAPP_NUMBER causing products.js parse crash
+- 47f27f3 fix: remove duplicate const WHATSAPP_NUMBER causing products.js parse crash
+- 429c6a4 feat: full site revamp + infrastructure docs
+- b91532d feat: add BM25 search engine for UI/UX style guides with design system generation and persistence options
+- db34e1f merge: vercel-checkout-backend into main
+- 591922e merge: claude/fix-deployment-error into main
+- fb53860 Merge pull request #19 from rauell1/codex/update-read-me
+- 99cdb03 docs: document WhatsApp recipient env var
+- 6fcd2a9 Merge pull request #18 from rauell1/codex/remove-description-from-pdf
+- d75ea8f feat: update pdf output and whatsapp target
+- 7b18b7d Merge pull request #17 from rauell1/claude/update-pdf-sharing-flow
 
