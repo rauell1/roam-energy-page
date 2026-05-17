@@ -86,7 +86,7 @@ const PRODUCTS = [
   {
     id: 'dyness-5kw',
     brand: 'Dyness',
-    name: 'Dyness LiFePO₄ Battery 5.12 kWh',
+    name: 'Dyness LiFePO₂ Battery 5.12 kWh',
     category: 'Battery',
     price: 120000,
     image: 'Dyness A.jpg',
@@ -399,7 +399,7 @@ closeModalBtn.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', closeModal);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeCart(); } });
 
-// ─── PDF generation (preserves original logic) ─────────────────────────────
+// ─── PDF generation ────────────────────────────────────────────────────────
 async function generateInvoice(customerDetails, orderReference) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -599,26 +599,11 @@ function generateOrderReference() {
 
 function persistOrderLocally({ customer, entries, orderReference, total }) {
   try {
-    localStorage.setItem('roamLastOrder', JSON.stringify({
+    sessionStorage.setItem('roamLastOrder', JSON.stringify({
       customer, entries, orderReference, currency: ORDER_CURRENCY, total,
       savedAt: new Date().toISOString(),
     }));
   } catch (_) {}
-}
-
-async function fallbackToWhatsApp(blob, filename, entries, ref, total, customer) {
-  const lines   = entries.map(e => `• ${e.name || e.id} × ${e.qty}`).join('\n');
-  const summary = `Hi Roam Energy,\n\nOrder Ref: ${ref}\nCustomer: ${customer.name}\nPhone: ${customer.phone}\nEmail: ${customer.email}\n\n${lines}\n\nTotal: ${ORDER_CURRENCY} ${total.toLocaleString('en-KE')}`;
-  const waUrl   = buildWhatsAppLink(summary);
-
-  if (typeof navigator !== 'undefined' && typeof navigator.canShare === 'function') {
-    try {
-      const pdfFile   = new File([blob], filename, { type: 'application/pdf' });
-      const shareData = { title: `Roam Energy Order ${ref}`, text: summary, files: [pdfFile] };
-      if (navigator.canShare(shareData)) { await navigator.share(shareData); return; }
-    } catch (_) {}
-  }
-  window.location.assign(waUrl);
 }
 
 // ─── Checkout ──────────────────────────────────────────────────────────────
@@ -668,13 +653,17 @@ checkoutBtn.addEventListener('click', async () => {
       }),
     });
 
-    if (!response.ok) throw new Error('API error');
-    showToast('Quote sent via email and WhatsApp!', 'success');
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.detail || data.message || 'API error');
+    }
+
+    persistOrderLocally({ customer: customerDetails, entries: cartEntries, orderReference, total: invoice.total });
+    showToast('Quote sent! Check your email for the invoice.', 'success');
 
   } catch (e) {
-    persistOrderLocally({ customer: customerDetails, entries: cartEntries, orderReference, total: invoice?.total || 0 });
-    await fallbackToWhatsApp(invoice?.blob, invoice?.filename, cartEntries, orderReference, invoice?.total || 0, customerDetails);
-    console.error('Checkout error, used WhatsApp fallback:', e);
+    console.error('Checkout error:', e);
+    showToast('Something went wrong. Please try again or contact us directly.', 'error');
   } finally {
     checkoutBtn.innerHTML = origHTML;
     checkoutBtn.disabled  = false;
