@@ -1,127 +1,225 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="roam-api-key" content="" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="roam-api-key" content="">
   <title>Products | Roam Energy</title>
+  <meta name="description" content="Browse Roam Energy's solar panels, hybrid inverters, and lithium batteries. Build your system and get a quote instantly.">
+  <link rel="icon" href="Roam_Logo.png" type="image/png">
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-  <!-- Custom CSS -->
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="products.css">
-  </head>
-  <body class="bg-gray-50 text-gray-900 antialiased">
+</head>
 
-<header class="bg-white shadow">
-  <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-    <h1 class="text-2xl font-bold text-orange-600">Roam Energy</h1>
-    <nav class="flex items-center gap-6">
-      <a href="index.html" class="text-gray-600 hover:text-orange-500">Home</a>
-      <a href="projects.html" class="text-gray-600 hover:text-orange-500">Projects</a>
-      <a href="#" class="text-orange-600 font-medium">Products</a>
-    </nav>
-  </div>
-</header>
+<body>
 
-<main class="container mx-auto px-4 py-12">
-  <h2 class="text-4xl font-bold text-center mb-10">Products</h2>
-
-  <!-- Filters/Search -->
-  <div class="mb-8 p-4 bg-white rounded-2xl shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
-    <div class="flex gap-3 w-full md:w-2/3">
-      <input id="searchInput" type="search" placeholder="Search products..." class="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-orange-400" />
-      <select id="brandFilter" class="p-2 border rounded-lg focus:ring-2 focus:ring-orange-400">
-        <option value="All">All Brands</option>
-        <option value="Jinko">Jinko Panels</option>
-        <option value="Deye">Deye Inverters</option>
-        <option value="Dyness">Dyness Batteries</option>
-      </select>
+  <!-- ═══ NAVIGATION ═══ -->
+  <nav class="site-nav" id="site-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="Roam_Logo.png" alt="Roam Energy">
+        <span>Roam Energy</span>
+      </a>
+      <div class="nav-links" id="nav-links">
+        <a href="index.html">Home</a>
+        <a href="products.html" class="nav-active">Products</a>
+        <a href="projects.html">Projects</a>
+        <a href="index.html#contact">Contact</a>
+      </div>
+      <div class="nav-actions">
+        <button id="openCartBtn" class="btn btn-primary btn-sm cart-nav-btn" aria-label="Open cart">
+          <i class="fas fa-shopping-cart"></i>
+          <span>Cart</span>
+          <span id="floatingCount" class="cart-badge">0</span>
+        </button>
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
     </div>
-
-    <div class="flex gap-3 items-center w-full md:w-auto">
-      <select id="sortSelect" class="p-2 border rounded-lg focus:ring-2 focus:ring-orange-400">
-        <option value="default">Sort by</option>
-        <option value="low">Price: Low → High</option>
-        <option value="high">Price: High → Low</option>
-      </select>
-      <div class="text-sm text-gray-500">Tip: click image or title to view details</div>
+    <div class="nav-mobile" id="nav-mobile">
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="projects.html">Projects</a>
+      <a href="index.html#contact">Contact</a>
     </div>
-  </div>
+  </nav>
 
-  <!-- Products Grid -->
-  <section id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></section>
-</main>
-
-<!-- Floating Cart Button -->
-<button id="openCartBtn" aria-label="Open cart"
-        class="fixed bottom-6 right-6 z-50 bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-full shadow-lg flex items-center gap-2">
-  <i class="fa-solid fa-cart-shopping"></i>
-  <span id="floatingCount" class="text-sm font-medium">0</span>
-</button>
-
-<!-- Cart Drawer -->
-<div id="cartDrawerOverlay" class="fixed inset-0 bg-black bg-opacity-40 z-40 hidden"></div>
-<div id="cartDrawer" class="fixed top-0 right-0 w-80 h-full bg-white shadow-lg z-50 drawer-closed">
-  <div class="p-6 h-full flex flex-col">
-    <div class="flex items-start justify-between mb-4">
-      <h3 class="text-2xl font-bold">Your Cart</h3>
-      <button id="closeCartBtn" class="text-gray-500 hover:text-gray-700"><i class="fa-solid fa-xmark text-2xl"></i></button>
+  <!-- ═══ HERO ═══ -->
+  <section class="page-hero">
+    <div class="page-hero-overlay"></div>
+    <div class="page-hero-content">
+      <p class="hero-eyebrow">Solar Components</p>
+      <h1>Premium Products</h1>
+      <p>Choose from our curated range of tier-1 solar panels, hybrid inverters, and lithium batteries — priced for the African market.</p>
     </div>
-    <div id="cartItems" class="space-y-3 overflow-auto flex-1"></div>
-    <div class="mt-4 border-t pt-4">
-      <div class="space-y-3 mb-4">
-        <div>
-          <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
-          <input id="customerName" type="text" placeholder="Enter full name" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200" />
+  </section>
+
+  <!-- ═══ FILTERS ═══ -->
+  <section class="filters-bar">
+    <div class="container">
+      <div class="filters-inner">
+        <div class="filters-left">
+          <div class="search-wrap">
+            <i class="fas fa-search search-icon"></i>
+            <input id="searchInput" type="search" placeholder="Search products…" autocomplete="off">
+          </div>
+          <div class="filter-chips" id="brandFilterChips">
+            <button class="chip chip-active" data-brand="All">All</button>
+            <button class="chip" data-brand="Jinko">
+              <i class="fas fa-solar-panel"></i> Solar Panels
+            </button>
+            <button class="chip" data-brand="Deye">
+              <i class="fas fa-bolt"></i> Inverters
+            </button>
+            <button class="chip" data-brand="Dyness">
+              <i class="fas fa-battery-full"></i> Batteries
+            </button>
+          </div>
         </div>
-        <div>
-          <label for="customerEmail" class="block text-sm font-medium text-gray-700 mb-1">Customer Email</label>
-          <input id="customerEmail" type="email" placeholder="Enter email address" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200" />
-        </div>
-        <div>
-          <label for="customerPhone" class="block text-sm font-medium text-gray-700 mb-1">Customer Phone</label>
-          <input id="customerPhone" type="tel" placeholder="Enter phone number" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200" />
+        <div class="filters-right">
+          <select id="sortSelect" class="sort-select">
+            <option value="default">Sort by</option>
+            <option value="low">Price: Low → High</option>
+            <option value="high">Price: High → Low</option>
+          </select>
+          <span id="resultsCount" class="results-count">7 products</span>
         </div>
       </div>
-      <div class="flex justify-between items-center mb-2">
-        <span class="font-medium">Subtotal</span>
-        <span id="cartTotal" class="font-bold">KES 0</span>
+    </div>
+  </section>
+
+  <!-- ═══ PRODUCTS GRID ═══ -->
+  <main class="products-page">
+    <div class="container">
+      <div id="productsGrid" class="products-grid"></div>
+    </div>
+  </main>
+
+  <!-- ═══ CART DRAWER ═══ -->
+  <div id="cartDrawerOverlay" class="drawer-overlay"></div>
+
+  <aside id="cartDrawer" class="cart-drawer drawer-closed">
+    <div class="cart-header">
+      <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
+      <button id="closeCartBtn" class="cart-close" aria-label="Close cart">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div id="cartItems" class="cart-items"></div>
+
+    <div class="cart-footer">
+      <div class="customer-fields">
+        <h4>Your Details</h4>
+        <div class="field-group">
+          <label for="customerName">Full Name</label>
+          <input id="customerName" type="text" placeholder="Enter your full name">
+        </div>
+        <div class="field-group">
+          <label for="customerEmail">Email Address</label>
+          <input id="customerEmail" type="email" placeholder="you@example.com">
+        </div>
+        <div class="field-group">
+          <label for="customerPhone">Phone Number</label>
+          <input id="customerPhone" type="tel" placeholder="+254 7XX XXX XXX">
+        </div>
       </div>
-      <button id="checkoutBtn" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg shadow transition-colors">Send Quote (Email + WhatsApp) & Download PDF</button>
-      <p class="mt-2 text-xs text-gray-500">We will email and WhatsApp the PDF quote and download a copy locally for you.</p>
+
+      <div class="cart-total">
+        <span>Subtotal</span>
+        <span id="cartTotal" class="cart-total-amount">KES 0</span>
+      </div>
+
+      <button id="checkoutBtn" class="btn btn-primary btn-full checkout-btn">
+        <i class="fas fa-paper-plane"></i> Send Quote &amp; Download PDF
+      </button>
+      <p class="checkout-hint">We'll email and WhatsApp your PDF quote, and download a local copy.</p>
+    </div>
+  </aside>
+
+  <!-- ═══ PRODUCT MODAL ═══ -->
+  <div id="productModalOverlay" class="modal-overlay"></div>
+  <div id="productModal" class="modal-wrap">
+    <div id="productModalBox" class="modal-box">
+      <button id="closeModalBtn" class="modal-close" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+      <div id="modalBody"></div>
     </div>
   </div>
-</div>
 
-<!-- Product Modal -->
-<div id="productModalOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
-<div id="productModal" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4">
-  <div id="productModalBox" class="bg-white rounded-xl p-6 w-full max-w-lg relative modal-in">
-    <div class="flex justify-between items-start mb-4">
-      <h3 id="modalTitle" class="text-2xl font-bold"></h3>
-      <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700"><i class="fa-solid fa-xmark text-2xl"></i></button>
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="Roam_Logo.png" alt="Roam Energy">
+          <p>Powering the future with sustainable solar solutions for African homes, businesses, and communities.</p>
+          <p class="footer-parent">Part of <a href="https://www.roam-electric.com/" target="_blank" rel="noopener noreferrer">Roam Electric</a></p>
+          <div class="footer-socials">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="projects.html">Projects</a></li>
+            <li><a href="index.html#contact">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Products</h4>
+          <ul>
+            <li><a href="products.html">Solar Panels</a></li>
+            <li><a href="products.html">Batteries</a></li>
+            <li><a href="products.html">Inverters</a></li>
+          </ul>
+        </div>
+        <div class="footer-newsletter">
+          <h4>Stay Updated</h4>
+          <p>Get updates on our latest products and projects.</p>
+          <form action="https://formsubmit.co/roy.otieno@roam-electric.com" method="POST" class="newsletter-form">
+            <input type="email" name="email" placeholder="Your email address" required>
+            <input type="hidden" name="_subject" value="Newsletter Signup — Roam Energy">
+            <button type="submit" class="btn btn-primary btn-sm">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 Roam Energy. All rights reserved.</p>
+        <div class="footer-legal">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
     </div>
-    <div id="modalBody" class="space-y-4"></div>
-  </div>
-</div>
+  </footer>
 
-<footer class="bg-gray-800 text-gray-300 py-6 mt-12">
-  <div class="container mx-auto px-4 text-center">
-    <p>&copy; 2025 Roam Energy. All rights reserved.</p>
-  </div>
-</footer>
-<!-- Scripts -->
-  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script>
-    window.checkoutConfig = window.checkoutConfig || {
+    window.checkoutConfig = {
       endpoint: '/api/checkout',
       apiKey: document.querySelector('meta[name="roam-api-key"]')?.content || ''
     };
   </script>
+  <script src="script.js"></script>
   <script src="products.js"></script>
 </body>
 </html>
