@@ -96,7 +96,7 @@ function validateOrderPayload(payload) {
 
 async function storeOrder(order) {
   const db = getSupabase();
-  const { error } = await db.from(appConfig.supabase.ordersTable).insert({
+  const { data, error } = await db.from(appConfig.supabase.ordersTable).insert({
     order_reference: order.orderReference,
     customer_name: order.customer.name,
     customer_email: order.customer.email,
@@ -105,8 +105,15 @@ async function storeOrder(order) {
     currency: order.currency,
     total_amount: order.totalAmount,
     filename: order.filename,
-  });
+    status: 'pending',
+  }).select('id').single();
   if (error) throw new Error(`Supabase insert failed: ${error.message}`);
+  return data.id;
+}
+
+async function markOrderDelivery(orderId, fields) {
+  const db = getSupabase();
+  await db.from(appConfig.supabase.ordersTable).update(fields).eq('id', orderId);
 }
 
 function buildEmailHtml(order) {
@@ -271,8 +278,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'Invalid order payload', errors });
   }
 
+  let orderId;
   try {
-    await storeOrder(order);
+    orderId = await storeOrder(order);
   } catch (error) {
     console.error('Supabase insert failed', error);
     return res.status(502).json({
@@ -283,9 +291,10 @@ export default async function handler(req, res) {
 
   try {
     await sendOrderEmail(order);
+    await markOrderDelivery(orderId, { email_sent: true, status: 'confirmed' });
   } catch (error) {
     console.error('Email send failed (order already saved)', error);
-    // Order is saved — don't fail the whole request over email
+    await markOrderDelivery(orderId, { status: 'delivery_failed' });
   }
 
   return res.status(200).json({ message: 'Order processed successfully' });
