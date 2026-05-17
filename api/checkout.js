@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import fetch from 'node-fetch';
 import { Resend } from 'resend';
 import { appConfig, validateEnvironment } from './config.js';
 
@@ -228,52 +227,6 @@ async function sendOrderEmail(order) {
   });
 }
 
-async function sendWhatsAppConfirmation(order) {
-  const pdfBuffer = Buffer.from(order.pdfBase64.replace('data:application/pdf;base64,', ''), 'base64');
-  const uploadUrl = `https://graph.facebook.com/${appConfig.whatsapp.apiVersion}/${appConfig.whatsapp.phoneNumberId}/media`;
-
-  const FormData = (await import('form-data')).default;
-  const formData = new FormData();
-  formData.append('messaging_product', 'whatsapp');
-  formData.append('file', pdfBuffer, { filename: order.filename, contentType: 'application/pdf' });
-
-  const uploadResponse = await fetch(uploadUrl, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${appConfig.whatsapp.apiToken}`, ...formData.getHeaders() },
-    body: formData,
-  });
-
-  if (!uploadResponse.ok) {
-    const text = await uploadResponse.text();
-    throw new Error(`WhatsApp media upload failed: ${uploadResponse.status} ${text}`);
-  }
-
-  const { id: mediaId } = await uploadResponse.json();
-  const recipient = appConfig.whatsapp.recipientNumber;
-  if (!recipient) throw new Error('WhatsApp recipient number is not configured.');
-
-  const messageUrl = `https://graph.facebook.com/${appConfig.whatsapp.apiVersion}/${appConfig.whatsapp.phoneNumberId}/messages`;
-  const response = await fetch(messageUrl, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${appConfig.whatsapp.apiToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      messaging_product: 'whatsapp',
-      to: recipient,
-      type: 'document',
-      document: {
-        id: mediaId,
-        filename: order.filename,
-        caption: `New order from ${order.customer.name} (${order.customer.phone})\nRef: ${order.orderReference}\nTotal: ${order.currency} ${order.totalAmount.toLocaleString()}`,
-      },
-    }),
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`WhatsApp delivery failed: ${response.status} ${text}`);
-  }
-}
-
 function isOriginAllowed(origin) {
   if (!origin) return !appConfig.cors.allowedOrigins.length;
   if (!appConfig.cors.allowedOrigins.length) return true;
@@ -320,14 +273,20 @@ export default async function handler(req, res) {
 
   try {
     await storeOrder(order);
-    await sendOrderEmail(order);
-    await sendWhatsAppConfirmation(order);
-    return res.status(200).json({ message: 'Order processed successfully' });
   } catch (error) {
-    console.error('checkout handler failed', error);
+    console.error('Supabase insert failed', error);
     return res.status(502).json({
-      message: 'Failed to process order. Please try again or contact support.',
+      message: 'Failed to save order. Please try again or contact support.',
       detail: error.message,
     });
   }
+
+  try {
+    await sendOrderEmail(order);
+  } catch (error) {
+    console.error('Email send failed (order already saved)', error);
+    // Order is saved — don't fail the whole request over email
+  }
+
+  return res.status(200).json({ message: 'Order processed successfully' });
 }
