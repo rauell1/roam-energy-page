@@ -120,13 +120,6 @@ const PRODUCTS = [
 ];
 
 const ORDER_CURRENCY = 'KES';
-const WHATSAPP_NUMBER = (window.ROAM_WHATSAPP_NUMBER || '254704612435').replace(/\D/g, '');
-
-function buildWhatsAppLink(message) {
-  const params = new URLSearchParams({ app_absent: '0' });
-  if (message) params.set('text', message);
-  return `https://wa.me/${WHATSAPP_NUMBER}?${params.toString()}`;
-}
 
 // ─── State ─────────────────────────────────────────────────────────────────
 const cart = {};
