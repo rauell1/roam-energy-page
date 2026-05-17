@@ -3,12 +3,8 @@ const required = {
   supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
   resendApiKey: process.env.RESEND_API_KEY,
   resendFromEmail: process.env.RESEND_FROM_EMAIL,
-  whatsappApiToken: process.env.WHATSAPP_API_TOKEN,
-  whatsappPhoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID,
   apiAccessToken: process.env.API_ACCESS_TOKEN,
 };
-
-const defaultWhatsappRecipient = (process.env.WHATSAPP_RECIPIENT || '+254704612435').replace(/\D/g, '');
 
 export function validateEnvironment() {
   const missing = Object.entries(required)
@@ -39,11 +35,5 @@ export const appConfig = {
   email: {
     apiKey: process.env.RESEND_API_KEY,
     fromAddress: process.env.RESEND_FROM_EMAIL,
-  },
-  whatsapp: {
-    apiToken: process.env.WHATSAPP_API_TOKEN,
-    phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID,
-    apiVersion: process.env.WHATSAPP_API_VERSION || 'v18.0',
-    recipientNumber: defaultWhatsappRecipient,
   },
 };
