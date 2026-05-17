@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-05-17 19:14 UTC
+> Last updated: 2026-05-17 19:29 UTC
 
 ---
 
@@ -57,7 +57,7 @@ roam-energy-page/
 | Icons | Font Awesome 6.4.0 |
 | PDF | jsPDF (client-side invoice generation) |
 | Backend | Node.js 18 (Vercel Serverless Functions) |
-| Database | MongoDB Atlas (`roam-energy` db, `orders` collection) |
+| Database | Supabase (Postgres, `orders` table) |
 | Email | Resend API (transactional, with PDF attachment) |
 | Notifications | WhatsApp Cloud API (Graph API v18.0) |
 | Hosting | Vercel |
@@ -112,9 +112,9 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 | Variable | Purpose | Required |
 |----------|---------|----------|
-| `MONGODB_URI` | Atlas connection string | ✅ |
-| `MONGODB_DB_NAME` | Database name | default: `roam-energy` |
-| `MONGODB_ORDERS_COLLECTION` | Collection | default: `orders` |
+| `SUPABASE_URL` | Supabase project URL | ✅ |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (server-only) | ✅ |
+| `SUPABASE_ORDERS_TABLE` | Table name | default: `orders` |
 | `RESEND_API_KEY` | Email API key | ✅ |
 | `RESEND_FROM_EMAIL` | Verified sender | ✅ |
 | `WHATSAPP_API_TOKEN` | Graph API token | ✅ |
@@ -155,5 +155,5 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
-- 86fd825 feat: full site revamp + infrastructure docs
+- 1ea1d15 fix: remove duplicate const WHATSAPP_NUMBER causing products.js parse crash
 
