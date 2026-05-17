@@ -149,7 +149,6 @@
 
       <div class="products-showcase">
 
-        <!-- Product 1 — Panels -->
         <div class="product-showcase-card" data-aos="fade-up" data-aos-delay="100">
           <div class="product-showcase-image">
             <img src="https://jinkosolarcdn.shwebspace.com/themes/basicen/skin/images/tige2.png"
@@ -169,7 +168,6 @@
           </div>
         </div>
 
-        <!-- Product 2 — Inverters -->
         <div class="product-showcase-card product-showcase-card--reverse" data-aos="fade-up" data-aos-delay="150">
           <div class="product-showcase-image">
             <img src="Deye A.jpg" alt="Deye Hybrid Inverters" loading="lazy">
@@ -188,7 +186,6 @@
           </div>
         </div>
 
-        <!-- Product 3 — Batteries -->
         <div class="product-showcase-card" data-aos="fade-up" data-aos-delay="200">
           <div class="product-showcase-image">
             <img src="Dyness A.jpg" alt="Dyness Lithium Battery Storage" loading="lazy">
@@ -413,6 +410,63 @@
     </div>
   </section>
 
+  <!-- ═══ SOLAR SAVINGS CALCULATOR ═══ -->
+  <section id="calculator" class="section section-light">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <p class="section-eyebrow">Solar ROI</p>
+        <h2>Calculate Your Solar Savings</h2>
+        <p class="section-sub">Estimate how much you could save with a Roam Energy solar installation.</p>
+      </div>
+
+      <div class="calculator-grid" data-aos="fade-up">
+        <div class="calculator-inputs">
+          <div class="calc-field">
+            <label>Monthly Electricity Bill
+              <span class="calc-val" id="billDisplay">KES 15,000</span>
+            </label>
+            <input type="range" id="monthlyBill" min="0" max="100000" step="500" value="15000" class="calc-slider">
+          </div>
+          <div class="calc-field">
+            <label>System Size
+              <span class="calc-val" id="sizeDisplay">5 kWp</span>
+            </label>
+            <input type="range" id="systemSize" min="1" max="50" step="1" value="5" class="calc-slider">
+          </div>
+          <div class="calc-field">
+            <label>Battery Storage
+              <span class="calc-val" id="batteryDisplay">10 kWh</span>
+            </label>
+            <input type="range" id="batteryStorage" min="0" max="100" step="5" value="10" class="calc-slider">
+          </div>
+          <a href="products.html" class="btn btn-primary btn-lg" style="margin-top:1rem;display:inline-block;">Get a Real Quote</a>
+        </div>
+
+        <div class="calculator-results">
+          <div class="calc-result-card">
+            <div class="calc-result-item">
+              <span class="calc-result-label">Monthly Savings</span>
+              <span class="calc-result-val" id="monthlySavings">KES 0</span>
+            </div>
+            <div class="calc-result-item">
+              <span class="calc-result-label">Annual Savings</span>
+              <span class="calc-result-val" id="annualSavings">KES 0</span>
+            </div>
+            <div class="calc-result-item">
+              <span class="calc-result-label">Payback Period</span>
+              <span class="calc-result-val" id="paybackPeriod">0 yrs</span>
+            </div>
+            <div class="calc-result-item">
+              <span class="calc-result-label">CO₂ Avoided / Year</span>
+              <span class="calc-result-val" id="co2Avoided">0 kg</span>
+            </div>
+          </div>
+          <p class="calc-disclaimer">Estimates only. Actual savings depend on your usage profile and site conditions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ═══ MAP ═══ -->
   <section id="map" class="section-map">
     <div class="container">
@@ -497,15 +551,14 @@
         </div>
 
         <div class="contact-form-wrapper" data-aos="fade-left">
-          <form action="https://formsubmit.co/roy.otieno@roam-electric.com" method="POST" class="contact-form">
+          <form id="contact-form" class="contact-form">
             <input type="text" name="name" placeholder="Your Name" required>
             <input type="email" name="email" placeholder="Your Email" required>
             <input type="tel" name="phone" placeholder="Phone Number">
             <textarea name="message" rows="5" placeholder="Tell us about your energy needs..." required></textarea>
-            <input type="hidden" name="_captcha" value="false">
-            <input type="hidden" name="_subject" value="Roam Energy Enquiry">
-            <button type="submit" class="btn btn-primary btn-lg btn-full">Send Message</button>
+            <button id="contact-submit" type="submit" class="btn btn-primary btn-lg btn-full">Send Message</button>
           </form>
+          <div id="contact-feedback" aria-live="polite"></div>
         </div>
 
       </div>
@@ -522,10 +575,10 @@
           <p>Powering the future with sustainable solar solutions for African homes, businesses, and communities.</p>
           <p class="footer-parent">Part of <a href="https://www.roam-electric.com/" target="_blank" rel="noopener noreferrer">Roam Electric</a></p>
           <div class="footer-socials">
-            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" aria-label="Twitter / X"><i class="fab fa-x-twitter"></i></a>
-            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.facebook.com/RoamElectric" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://twitter.com/RoamElectric" target="_blank" rel="noopener noreferrer" aria-label="Twitter / X"><i class="fab fa-x-twitter"></i></a>
+            <a href="https://www.linkedin.com/company/roam-electric" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://www.instagram.com/roam_electric" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
 
@@ -552,9 +605,8 @@
         <div class="footer-newsletter">
           <h4>Stay Updated</h4>
           <p>Get updates on our latest products, projects, and solar tips.</p>
-          <form action="https://formsubmit.co/roy.otieno@roam-electric.com" method="POST" class="newsletter-form">
+          <form class="newsletter-form">
             <input type="email" name="email" placeholder="Your email address" required>
-            <input type="hidden" name="_subject" value="Newsletter Signup — Roam Energy">
             <button type="submit" class="btn btn-primary btn-sm">Subscribe</button>
           </form>
         </div>
@@ -562,7 +614,7 @@
       </div>
 
       <div class="footer-bottom">
-        <p>© 2025 Roam Energy. All rights reserved.</p>
+        <p>© 2026 Roam Energy. All rights reserved.</p>
         <div class="footer-legal">
           <a href="#">Privacy Policy</a>
           <a href="#">Terms of Service</a>

@@ -32,7 +32,7 @@
       </a>
       <div class="nav-links" id="nav-links">
         <a href="index.html">Home</a>
-        <a href="products.html" class="nav-active">Products</a>
+        <a href="products.html">Products</a>
         <a href="projects.html">Projects</a>
         <a href="index.html#contact">Contact</a>
       </div>
@@ -125,14 +125,17 @@
         <div class="field-group">
           <label for="customerName">Full Name</label>
           <input id="customerName" type="text" placeholder="Enter your full name">
+          <p class="field-error-msg" id="nameError"></p>
         </div>
         <div class="field-group">
           <label for="customerEmail">Email Address</label>
           <input id="customerEmail" type="email" placeholder="you@example.com">
+          <p class="field-error-msg" id="emailError"></p>
         </div>
         <div class="field-group">
           <label for="customerPhone">Phone Number</label>
           <input id="customerPhone" type="tel" placeholder="+254 7XX XXX XXX">
+          <p class="field-error-msg" id="phoneError"></p>
         </div>
       </div>
 
@@ -168,10 +171,10 @@
           <p>Powering the future with sustainable solar solutions for African homes, businesses, and communities.</p>
           <p class="footer-parent">Part of <a href="https://www.roam-electric.com/" target="_blank" rel="noopener noreferrer">Roam Electric</a></p>
           <div class="footer-socials">
-            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
-            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.facebook.com/RoamElectric" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://twitter.com/RoamElectric" target="_blank" rel="noopener noreferrer" aria-label="Twitter / X"><i class="fab fa-x-twitter"></i></a>
+            <a href="https://www.linkedin.com/company/roam-electric" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://www.instagram.com/roam_electric" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
         <div class="footer-col">
@@ -194,15 +197,14 @@
         <div class="footer-newsletter">
           <h4>Stay Updated</h4>
           <p>Get updates on our latest products and projects.</p>
-          <form action="https://formsubmit.co/roy.otieno@roam-electric.com" method="POST" class="newsletter-form">
+          <form class="newsletter-form">
             <input type="email" name="email" placeholder="Your email address" required>
-            <input type="hidden" name="_subject" value="Newsletter Signup — Roam Energy">
             <button type="submit" class="btn btn-primary btn-sm">Subscribe</button>
           </form>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>© 2025 Roam Energy. All rights reserved.</p>
+        <p>© 2026 Roam Energy. All rights reserved.</p>
         <div class="footer-legal">
           <a href="#">Privacy Policy</a>
           <a href="#">Terms of Service</a>
