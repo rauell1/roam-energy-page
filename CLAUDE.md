@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-05-17 19:29 UTC
+> Last updated: 2026-05-17 21:27 UTC
 
 ---
 
@@ -155,14 +155,14 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- 9b832c1 feat: Supabase delivery status tracking (email_sent, status flags)
+- e877895 fix: Prompt 1 — copyright year, active nav link, real social URLs
+- 8247c58 fix: set roam-api-key meta tag so checkout requests are authenticated
+- 3ffb3a8 fix: remove WhatsApp from required env vars in config
+- 15e0795 fix: remove WhatsApp fallback and references from frontend checkout
+- 938b809 fix: remove WhatsApp, fix Supabase insert error swallowing
+- e479f49 chore: update CLAUDE.md
 - 9cf054d chore: update CLAUDE.md
 - 47f27f3 fix: remove duplicate const WHATSAPP_NUMBER causing products.js parse crash
 - 429c6a4 feat: full site revamp + infrastructure docs
-- b91532d feat: add BM25 search engine for UI/UX style guides with design system generation and persistence options
-- db34e1f merge: vercel-checkout-backend into main
-- 591922e merge: claude/fix-deployment-error into main
-- fb53860 Merge pull request #19 from rauell1/codex/update-read-me
-- 99cdb03 docs: document WhatsApp recipient env var
-- 6fcd2a9 Merge pull request #18 from rauell1/codex/remove-description-from-pdf
-- d75ea8f feat: update pdf output and whatsapp target
 
