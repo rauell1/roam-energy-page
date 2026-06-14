@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-14 08:54 UTC
+> Last updated: 2026-06-14 14:06 UTC
 
 ---
 
@@ -155,6 +155,8 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- 4cba096 feat: replace API key auth with Supabase email/password login for admin
+- e35ae8e chore: update CLAUDE.md
 - f9bd5ca feat: Supabase-backed products/projects + admin panel
 - 7afc49b chore: update CLAUDE.md
 - 6c581bc feat: page transitions, scroll progress, parallax, animated counters, solar calculator
@@ -163,6 +165,4 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 - 9c1408e chore: sync local changes with remote
 - 560440e chore: update CLAUDE.md
 - 9b832c1 feat: Supabase delivery status tracking (email_sent, status flags)
-- e877895 fix: Prompt 1 — copyright year, active nav link, real social URLs
-- 8247c58 fix: set roam-api-key meta tag so checkout requests are authenticated
 
