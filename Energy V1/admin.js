@@ -293,7 +293,7 @@ function renderProjectsTable() {
       <td style="font-weight:600;">${p.title}</td>
       <td class="hide-mobile" style="color:var(--adm-muted);font-size:0.85rem;">${p.location}</td>
       <td><span class="adm-badge ${TYPE_BADGE[p.type] || ''}">${TYPE_LABEL[p.type] || p.type}</span></td>
-      <td class="hide-mobile">${p.size_kwp ? p.size_kwp + ' kWp' : '—'}</td>
+      <td class="hide-mobile">${p.size_kwp ? p.size_kwp + ' kWp' : 'N/A'}</td>
       <td class="hide-mobile"><span class="adm-badge ${p.active ? 'adm-badge-active' : 'adm-badge-inactive'}">${p.active ? 'Active' : 'Inactive'}</span></td>
       <td>
         <div class="row-actions">

@@ -137,8 +137,8 @@
     <div class="rae-profile-header">
       <div class="rae-avatar" id="rae-avatar-initials">?</div>
       <div>
-        <p class="rae-profile-name" id="rae-profile-name">—</p>
-        <p class="rae-profile-email" id="rae-profile-email">—</p>
+        <p class="rae-profile-name" id="rae-profile-name"></p>
+        <p class="rae-profile-email" id="rae-profile-email"></p>
       </div>
     </div>
     <form id="rae-profile-form" class="rae-form" novalidate>

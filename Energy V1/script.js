@@ -88,8 +88,30 @@ function buildWhatsAppLink(message) {
 
 /* ── AOS ────────────────────────────────────────────────── */
 if (typeof AOS !== 'undefined') {
-  AOS.init({ duration: 700, once: true, offset: 80, easing: 'ease-out-cubic' });
+  AOS.init({
+    duration: 680,
+    once: true,
+    offset: 60,
+    easing: 'ease-out-quart',
+    mirror: false,
+    anchorPlacement: 'top-bottom',
+  });
 }
+
+/* ── Section reveal observer (for pages without AOS CDN) ── */
+(function () {
+  const revealEls = document.querySelectorAll('.reveal');
+  if (!revealEls.length) return;
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => obs.observe(el));
+})();
 
 /* ── Navigation ─────────────────────────────────────────── */
 const nav         = document.getElementById('site-nav');
@@ -228,7 +250,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         await fetch('https://formsubmit.co/ajax/roy.otieno@roam-electric.com', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ email, _subject: 'Newsletter Signup — Roam Energy' })
+          body: JSON.stringify({ email, _subject: 'Newsletter Signup: Roam Energy' })
         });
       } catch (_) { /* silent */ }
       form.innerHTML = '<p class="newsletter-success">Subscribed! \u2705 Thanks for joining.</p>';
@@ -258,12 +280,12 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     const monthlySavings = bill * coveragePct;
     const annualSavings  = monthlySavings * 12;
     const systemCost     = size * 115000 + battery * 14000;
-    const payback        = annualSavings > 0 ? (systemCost / annualSavings).toFixed(1) : '\u2014';
+    const payback        = annualSavings > 0 ? (systemCost / annualSavings).toFixed(1) : 'N/A';
     const co2kg          = Math.round(size * 1460 * 0.38);
 
     document.getElementById('monthlySavings').textContent = fmt(monthlySavings);
     document.getElementById('annualSavings').textContent  = fmt(annualSavings);
-    document.getElementById('paybackPeriod').textContent  = payback + (payback !== '\u2014' ? ' yrs' : '');
+    document.getElementById('paybackPeriod').textContent  = payback + (payback !== 'N/A' ? ' yrs' : '');
     document.getElementById('co2Avoided').textContent     = co2kg.toLocaleString() + ' kg';
   }
 

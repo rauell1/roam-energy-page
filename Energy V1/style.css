@@ -1244,6 +1244,8 @@ body.page-ready #page-overlay { opacity: 0; }
 /* ══════════════════════════════════════════════════════════════
    AUTH MODAL
 ══════════════════════════════════════════════════════════════ */
+.hidden { display: none !important; }
+
 .rae-backdrop {
   position: fixed; inset: 0;
   background: rgba(0,0,0,.65); backdrop-filter: blur(4px);
