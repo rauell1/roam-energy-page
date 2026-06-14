@@ -4,7 +4,7 @@
   --adm-surface:  #111111;
   --adm-card:     #1a1a1a;
   --adm-border:   #2a2a2a;
-  --adm-primary:  #146EF5;
+  --adm-primary:  #E87722;
   --adm-success:  #059669;
   --adm-danger:   #dc2626;
   --adm-warning:  #d97706;
@@ -43,7 +43,7 @@ input, textarea, select {
 }
 input:focus, textarea:focus, select:focus {
   border-color: var(--adm-primary);
-  box-shadow: 0 0 0 3px rgba(20,110,245,.15);
+  box-shadow: 0 0 0 3px rgba(232,119,34,.15);
 }
 textarea { resize: vertical; min-height: 100px; }
 select option { background: var(--adm-card); }
@@ -64,7 +64,7 @@ label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--adm-m
 .btn:active { transform: translateY(0); }
 
 .btn-primary { background: var(--adm-primary); color: #fff; }
-.btn-primary:hover { background: #0e58cc; }
+.btn-primary:hover { background: #C5601A; }
 .btn-danger  { background: var(--adm-danger);  color: #fff; }
 .btn-danger:hover  { background: #b91c1c; }
 .btn-ghost   { background: transparent; color: var(--adm-muted); border: 1.5px solid var(--adm-border); }
@@ -199,10 +199,10 @@ label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--adm-m
 }
 .adm-badge-active  { background: rgba(5,150,105,.2);  color: #6ee7b7; }
 .adm-badge-inactive{ background: rgba(107,114,128,.15);color: var(--adm-muted); }
-.adm-badge-panel   { background: rgba(20,110,245,.15); color: #93c5fd; }
+.adm-badge-panel   { background: rgba(232,119,34,.15); color: #93c5fd; }
 .adm-badge-inverter{ background: rgba(217,119,6,.15);  color: #fcd34d; }
 .adm-badge-battery { background: rgba(5,150,105,.15);  color: #6ee7b7; }
-.adm-badge-gridtied  { background: rgba(20,110,245,.12); color: #93c5fd; }
+.adm-badge-gridtied  { background: rgba(232,119,34,.12); color: #93c5fd; }
 .adm-badge-offgrid   { background: rgba(5,150,105,.12);  color: #6ee7b7; }
 .adm-badge-hybrid    { background: rgba(217,119,6,.12);   color: #fcd34d; }
 .adm-badge-commercial{ background: rgba(139,92,246,.12);  color: #c4b5fd; }
