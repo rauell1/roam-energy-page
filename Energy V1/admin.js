@@ -1,7 +1,11 @@
 /* ── Roam Energy Admin Panel ─────────────────────────────── */
 
-const API_BASE  = '/api/admin';
-let   API_KEY   = sessionStorage.getItem('roam_admin_key') || '';
+const API_BASE       = '/api/admin';
+const SUPABASE_URL   = 'https://bpdysxhbyprfkmpkkynm.supabase.co';
+const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwZHlzeGhieXByZmttcGtreW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTgzNDQsImV4cCI6MjA5NTQ3NDM0NH0.mBdTYEr3nrtTXjuyBHFl9AGG_rJn7kH7J5l-5E8uEQY';
+const ADMIN_EMAIL    = 'roy.otieno@roam-electric.com';
+
+let ACCESS_TOKEN = sessionStorage.getItem('roam_admin_token') || '';
 
 /* ── Toast ───────────────────────────────────────────────── */
 function toast(msg, type = '') {
@@ -14,7 +18,7 @@ function toast(msg, type = '') {
 /* ── API helpers ─────────────────────────────────────────── */
 async function apiGet(table) {
   const res = await fetch(`${API_BASE}?table=${table}`, {
-    headers: { 'x-api-key': API_KEY }
+    headers: { 'Authorization': `Bearer ${ACCESS_TOKEN}` }
   });
   if (res.status === 401) throw new Error('UNAUTHORIZED');
   if (!res.ok) throw new Error(await res.text());
@@ -24,7 +28,7 @@ async function apiGet(table) {
 async function apiPost(body) {
   const res = await fetch(API_BASE, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ACCESS_TOKEN}` },
     body: JSON.stringify(body)
   });
   if (res.status === 401) throw new Error('UNAUTHORIZED');
@@ -39,36 +43,62 @@ async function apiPost(body) {
 const loginScreen = document.getElementById('login-screen');
 const adminPanel  = document.getElementById('admin-panel');
 const loginError  = document.getElementById('login-error');
+const loginBtn    = document.getElementById('login-btn');
 
-async function attemptLogin(key) {
+async function attemptLogin(email, password) {
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'Signing in…';
+  loginError.classList.add('hidden');
+
   try {
-    await fetch(`${API_BASE}?table=products`, {
-      headers: { 'x-api-key': key }
-    }).then(r => {
-      if (r.status === 401) throw new Error('Wrong access key.');
-      if (!r.ok) throw new Error('Server error.');
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON,
+      },
+      body: JSON.stringify({ email, password }),
     });
-    API_KEY = key;
-    sessionStorage.setItem('roam_admin_key', key);
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      throw new Error(json.error_description || json.msg || 'Invalid credentials.');
+    }
+
+    if (json.user?.email !== ADMIN_EMAIL) {
+      throw new Error('Access denied. Unauthorised account.');
+    }
+
+    ACCESS_TOKEN = json.access_token;
+    sessionStorage.setItem('roam_admin_token', ACCESS_TOKEN);
     showPanel();
   } catch (e) {
     loginError.textContent = e.message;
     loginError.classList.remove('hidden');
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Sign In';
   }
 }
 
-document.getElementById('login-btn').addEventListener('click', () => {
-  const key = document.getElementById('password-input').value.trim();
-  if (!key) return;
-  attemptLogin(key);
+loginBtn.addEventListener('click', () => {
+  const email    = document.getElementById('email-input').value.trim();
+  const password = document.getElementById('password-input').value;
+  if (!email || !password) return;
+  attemptLogin(email, password);
+});
+
+document.getElementById('email-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('password-input').focus();
 });
 document.getElementById('password-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('login-btn').click();
+  if (e.key === 'Enter') loginBtn.click();
 });
 
 document.getElementById('logout-btn').addEventListener('click', () => {
-  API_KEY = '';
-  sessionStorage.removeItem('roam_admin_key');
+  ACCESS_TOKEN = '';
+  sessionStorage.removeItem('roam_admin_token');
   adminPanel.classList.add('hidden');
   loginScreen.classList.remove('hidden');
 });
@@ -80,7 +110,7 @@ function showPanel() {
   loadProjects();
 }
 
-if (API_KEY) showPanel();
+if (ACCESS_TOKEN) showPanel();
 
 /* ── Tabs ─────────────────────────────────────────────────── */
 document.querySelectorAll('.admin-tab').forEach(tab => {

@@ -2,33 +2,40 @@ import { createClient } from '@supabase/supabase-js';
 
 const ALLOWED_TABLES = ['products', 'projects'];
 
-function getSupabase() {
-  return createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
-}
+const ALLOWED_ADMIN_EMAIL = 'roy.otieno@roam-electric.com';
 
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 }
 
-function isAuthorized(req) {
-  const key = req.headers['x-api-key'];
-  return typeof key === 'string' && key === process.env.API_ACCESS_TOKEN;
+async function getAuthorizedUser(req) {
+  const authHeader = req.headers['authorization'] || '';
+  if (!authHeader.startsWith('Bearer ')) return null;
+  const token = authHeader.slice(7);
+
+  const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) return null;
+  if (user.email !== ALLOWED_ADMIN_EMAIL) return null;
+  return user;
 }
 
 export default async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
 
-  if (!isAuthorized(req)) {
+  const user = await getAuthorizedUser(req);
+  if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const db = getSupabase();
+  const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
   /* ── GET: list all rows (including inactive) ── */
   if (req.method === 'GET') {
