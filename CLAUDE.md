@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-14 08:30 UTC
+> Last updated: 2026-06-14 08:54 UTC
 
 ---
 
@@ -155,6 +155,8 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- f9bd5ca feat: Supabase-backed products/projects + admin panel
+- 7afc49b chore: update CLAUDE.md
 - 6c581bc feat: page transitions, scroll progress, parallax, animated counters, solar calculator
 - 2d3a40d chore: update CLAUDE.md
 - 52547b6 Revert "chore: sync local changes with remote"
@@ -163,6 +165,4 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 - 9b832c1 feat: Supabase delivery status tracking (email_sent, status flags)
 - e877895 fix: Prompt 1 — copyright year, active nav link, real social URLs
 - 8247c58 fix: set roam-api-key meta tag so checkout requests are authenticated
-- 3ffb3a8 fix: remove WhatsApp from required env vars in config
-- 15e0795 fix: remove WhatsApp fallback and references from frontend checkout
 
