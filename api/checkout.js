@@ -345,9 +345,30 @@ export default async function handler(req, res) {
   }
 
   let pdfUrl = null;
+  let uploadError = null;
   try {
-    pdfUrl = await uploadInvoicePdf(order.filename, order.pdfBase64);
+    const db = getSupabase();
+    const base64Data = order.pdfBase64.replace(/^data:application\/pdf;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    const { data, error } = await db.storage
+      .from('quotations')
+      .upload(order.filename, buffer, {
+        contentType: 'application/pdf',
+        upsert: true,
+      });
+
+    if (error) {
+      uploadError = error;
+      console.error('Storage upload failed:', error);
+    } else {
+      const { data: { publicUrl } } = db.storage
+        .from('quotations')
+        .getPublicUrl(order.filename);
+      pdfUrl = publicUrl;
+    }
   } catch (storageError) {
+    uploadError = storageError.message || storageError;
     console.error('Supabase storage upload failed:', storageError);
   }
 
@@ -373,5 +394,9 @@ export default async function handler(req, res) {
   // Trigger Google Sheets Webhook Fallback
   await triggerGoogleSheetsWebhook(order, pdfUrl);
 
-  return res.status(200).json({ message: 'Order processed successfully' });
+  return res.status(200).json({
+    message: 'Order processed successfully',
+    pdfUrl,
+    uploadError
+  });
 }
