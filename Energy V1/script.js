@@ -1,5 +1,82 @@
 /* ── Roam Energy — Shared JS ─────────────────────────────── */
 
+/* ── Page transition overlay ─────────────────────────────── */
+(function () {
+  const overlay = document.getElementById('page-overlay');
+  if (!overlay) return;
+
+  document.body.classList.add('page-ready');
+
+  document.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (!href || href.startsWith('#') || href.startsWith('http') ||
+        href.startsWith('mailto') || href.startsWith('tel') ||
+        href.startsWith('//') || a.target === '_blank') return;
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const dest = href;
+      document.body.classList.remove('page-ready');
+      setTimeout(() => { window.location.href = dest; }, 320);
+    });
+  });
+})();
+
+/* ── Scroll progress bar ──────────────────────────────────── */
+(function () {
+  const bar = document.getElementById('scroll-progress');
+  if (!bar) return;
+  window.addEventListener('scroll', () => {
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (total > 0 ? (window.scrollY / total) * 100 : 0) + '%';
+  }, { passive: true });
+})();
+
+/* ── Hero parallax ───────────────────────────────────────── */
+(function () {
+  const hero = document.querySelector('.hero');
+  if (!hero) return;
+  window.addEventListener('scroll', () => {
+    if (window.scrollY < window.innerHeight) {
+      hero.style.backgroundPositionY = `calc(40% + ${window.scrollY * 0.3}px)`;
+    }
+  }, { passive: true });
+})();
+
+/* ── Animated stat counters ──────────────────────────────── */
+(function () {
+  const statEls = document.querySelectorAll('.stat-number[data-count]');
+  if (!statEls.length) return;
+
+  function animateCount(el) {
+    const target = parseFloat(el.dataset.count);
+    const suffix = el.dataset.suffix || '';
+    const prefix = el.dataset.prefix || '';
+    const isDecimal = el.dataset.decimal === 'true';
+    const duration = 1600;
+    let start = null;
+    const step = ts => {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = eased * target;
+      el.textContent = prefix + (isDecimal ? current.toFixed(1) : Math.floor(current).toLocaleString()) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        animateCount(e.target);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  statEls.forEach(el => obs.observe(el));
+})();
+
 const WHATSAPP_NUMBER = (window.ROAM_WHATSAPP_NUMBER || '254704612435').replace(/\D/g, '');
 window.ROAM_WHATSAPP_NUMBER = WHATSAPP_NUMBER;
 
@@ -11,7 +88,7 @@ function buildWhatsAppLink(message) {
 
 /* ── AOS ────────────────────────────────────────────────── */
 if (typeof AOS !== 'undefined') {
-  AOS.init({ duration: 750, once: true, offset: 60 });
+  AOS.init({ duration: 700, once: true, offset: 80, easing: 'ease-out-cubic' });
 }
 
 /* ── Navigation ─────────────────────────────────────────── */
@@ -157,4 +234,39 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       form.innerHTML = '<p class="newsletter-success">Subscribed! \u2705 Thanks for joining.</p>';
     });
   });
+})();
+
+/* \u2500\u2500 Solar Savings Calculator \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+(function () {
+  const billSlider    = document.getElementById('monthlyBill');
+  const sizeSlider    = document.getElementById('systemSize');
+  const batterySlider = document.getElementById('batteryStorage');
+  if (!billSlider) return;
+
+  function fmt(n) { return 'KES ' + Math.round(n).toLocaleString(); }
+
+  function compute() {
+    const bill    = +billSlider.value;
+    const size    = +sizeSlider.value;
+    const battery = +batterySlider.value;
+
+    document.getElementById('billDisplay').textContent    = 'KES ' + bill.toLocaleString();
+    document.getElementById('sizeDisplay').textContent    = size + ' kWp';
+    document.getElementById('batteryDisplay').textContent = battery + ' kWh';
+
+    const coveragePct    = Math.min(0.88, 0.30 + (size * 0.012) + (battery > 0 ? 0.18 : 0));
+    const monthlySavings = bill * coveragePct;
+    const annualSavings  = monthlySavings * 12;
+    const systemCost     = size * 115000 + battery * 14000;
+    const payback        = annualSavings > 0 ? (systemCost / annualSavings).toFixed(1) : '\u2014';
+    const co2kg          = Math.round(size * 1460 * 0.38);
+
+    document.getElementById('monthlySavings').textContent = fmt(monthlySavings);
+    document.getElementById('annualSavings').textContent  = fmt(annualSavings);
+    document.getElementById('paybackPeriod').textContent  = payback + (payback !== '\u2014' ? ' yrs' : '');
+    document.getElementById('co2Avoided').textContent     = co2kg.toLocaleString() + ' kg';
+  }
+
+  [billSlider, sizeSlider, batterySlider].forEach(s => s.addEventListener('input', compute));
+  compute();
 })();
