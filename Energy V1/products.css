@@ -602,6 +602,33 @@
   color: var(--clr-body);
 }
 
+.currency-segmented {
+  display: flex;
+  background: var(--clr-bg-alt, #f3f4f6);
+  padding: 4px;
+  border-radius: 8px;
+  margin-top: 6px;
+  border: 1px solid var(--clr-border, #e5e7eb);
+}
+.currency-tab {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--clr-muted, #6b7280);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+.currency-tab.active {
+  background: var(--clr-white, #ffffff);
+  color: var(--clr-primary, #146ef5);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
 .checkout-btn {
   margin-bottom: 8px;
   font-size: 0.9rem;

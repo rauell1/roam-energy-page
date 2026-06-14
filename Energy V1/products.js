@@ -29,7 +29,8 @@ async function fetchProducts() {
   return rows.map(transformProduct);
 }
 
-const ORDER_CURRENCY = 'KES';
+let ORDER_CURRENCY = 'KES';
+const KES_USD_RATE = 130.0;
 
 // ─── State ─────────────────────────────────────────────────────────────────
 const cart = {};
@@ -59,7 +60,11 @@ const API_ACCESS_TOKEN = checkoutConfig.apiKey || (document.querySelector('meta[
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 function formatPrice(n) {
-  return ORDER_CURRENCY + ' ' + n.toLocaleString('en-KE');
+  if (ORDER_CURRENCY === 'USD') {
+    const usdVal = n / KES_USD_RATE;
+    return '$ ' + usdVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  return 'KES ' + n.toLocaleString('en-KE');
 }
 function cartCount() {
   return Object.values(cart).reduce((s, q) => s + q, 0);
@@ -347,6 +352,17 @@ document.getElementById('cart-edit-account-btn')?.addEventListener('click', () =
   window.raeAuth?.openModal();
 });
 
+// Currency segmented toggle control
+document.querySelectorAll('.currency-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.currency-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    ORDER_CURRENCY = tab.dataset.currency;
+    updateCartUI();
+    renderGrid();
+  });
+});
+
 // Update cart auth state when user signs in/out/updates profile
 document.addEventListener('rae:auth', e => {
   const { type } = e.detail;
@@ -381,19 +397,21 @@ async function generateInvoice(customerDetails, orderReference) {
   } catch (_) {
     doc.setFontSize(18);
     doc.setFont(undefined, 'bold');
-    doc.setTextColor(20, 110, 245);
-    doc.text('ROAM', LEFT_MARGIN, 22);
+    doc.setTextColor(244, 121, 32); // Exact orange color (244, 121, 32)
+    doc.text('ROAM', LEFT_MARGIN, 25);
   }
 
+  // 1. LOGO & TOP TITLE SECTION
   doc.setFontSize(18);
   doc.setFont(undefined, 'bold');
   doc.setTextColor(0, 0, 0);
-  doc.text('Pro Forma Invoice', RIGHT_END, 22, { align: 'right' });
+  doc.text('Pro Forma-Invoice', RIGHT_END, 22, { align: 'right' });
   doc.setFontSize(9);
   doc.setFont(undefined, 'normal');
   doc.text(dateStr, RIGHT_END, 30, { align: 'right' });
-  doc.text('Page 1 / 1', RIGHT_END, 35, { align: 'right' });
+  doc.text(`Page 1 / 1`, RIGHT_END, 35, { align: 'right' });
 
+  // 2. ENTITY NAMES & ADDRESS
   let y = 44;
   doc.setFontSize(10);
   doc.setFont(undefined, 'bold');
@@ -408,24 +426,26 @@ async function generateInvoice(customerDetails, orderReference) {
     doc.text(line, RIGHT_END, y + 5 + i * 4.5, { align: 'right' });
   });
 
+  // 4. METADATA SECTIONS
   y = 75;
   const leftMeta = [
-    ['Document No',    orderReference],
-    ['Customer Name',  safeName],
-    ['Customer Phone', safePhone],
-    ['Customer Email', safeEmail],
-    ['Document Date',  dateStr],
-    ['Currency',       ORDER_CURRENCY],
-    ['Salesperson',    'Roy Otieno'],
+    ['Document No',          orderReference],
+    ['VAT Registration No.', ''],
+    ['Document Date',        dateStr],
+    ['Currency',             ORDER_CURRENCY],
+    ['Salesperson',          'Roy Otieno'],
   ];
   const rightMeta = [
     ['Email',                 'info@roam-electric.com'],
     ['Home Page',             'www.roam-electric.com'],
     ['Phone No.',             '+254740666555'],
-    ['VAT Registration No.', 'P05170428D'],
+    ['VAT Registration No.',  'P05170428D'],
     ['Mpesa Till No.',        '9572270'],
     ['Bank',                  'Standard Chartered'],
     ['Account No.',           '0102487879100 (KES)'],
+    ['Account No.',           '8702487879100 (USD)'],
+    ['Branch',                'Industrial Area 053'],
+    ['SWIFT Code',            'SCBLKENXXXX'],
   ];
 
   doc.setFont(undefined, 'normal');
@@ -439,6 +459,7 @@ async function generateInvoice(customerDetails, orderReference) {
     doc.text(val,   RIGHT_END, y + i * 5, { align: 'right' });
   });
 
+  // 5. ITEM TABLE Columns: Item=60, Qty=15, Price=25, HS=15, VAT%=12, VATAmt=23, Amt=25
   const COL = { Item: 60, Qty: 15, Price: 25, HS: 15, VATpct: 12, VATAmt: 23, Amt: 25 };
   const colX = {
     Item:    LEFT_MARGIN,
@@ -464,18 +485,21 @@ async function generateInvoice(customerDetails, orderReference) {
   doc.line(LEFT_MARGIN, y + 1, RIGHT_END, y + 1);
   y += 8;
 
+  // 6. ITEM DATA
   let grandTotal = 0;
   Object.entries(cart).forEach(([id, qty]) => {
     const p = PRODUCTS.find(product => product.id === id);
     if (!p) return;
-    const lineTotal = p.price * qty;
+    const price = ORDER_CURRENCY === 'USD' ? Math.round((p.price / KES_USD_RATE) * 100) / 100 : p.price;
+    const lineTotal = price * qty;
     grandTotal += lineTotal;
     const startY = y;
 
     doc.setFont(undefined, 'normal');
     doc.setFontSize(9);
     doc.text(String(qty),             colX.Qty    + COL.Qty    / 2,  startY, { align: 'center' });
-    doc.text(formatAmt(p.price),      colX.Price  + COL.Price,        startY, { align: 'right' });
+    doc.text(formatAmt(price),        colX.Price  + COL.Price,        startY, { align: 'right' });
+    doc.text('',                      colX.HS     + COL.HS     / 2,  startY, { align: 'center' });
     doc.text('0',                     colX.VATpct + COL.VATpct / 2,  startY, { align: 'center' });
     doc.text('0.00',                  colX.VATAmt + COL.VATAmt,       startY, { align: 'right' });
     doc.text(formatAmt(lineTotal),    colX.Amt,                       startY, { align: 'right' });
@@ -485,6 +509,7 @@ async function generateInvoice(customerDetails, orderReference) {
     y = startY + nameLines.length * 5 + 2;
   });
 
+  // 7. TOTALS SECTION
   y += 5;
   const L_COL_X = RIGHT_END - 60;
   doc.setFontSize(9);

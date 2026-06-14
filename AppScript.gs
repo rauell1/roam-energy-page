@@ -27,10 +27,12 @@ function doPost(e) {
       data.orderReference || "N/A",
       data.customerName || "N/A",
       data.customerEmail || "N/A",
-      data.customerPhone || "N/A",
+      // Prepend ' to prevent Google Sheets from interpreting '+' as a formula or stripping it
+      data.customerPhone ? "'" + data.customerPhone : "N/A",
       data.totalAmount || 0,
       data.currency || "KES",
-      data.items || "N/A"
+      data.items || "N/A",
+      data.pdfUrl || "N/A"
     ];
     sheet.appendRow(rowData);
     
@@ -58,7 +60,8 @@ function sendNotificationEmail(data) {
              "- Email: " + (data.customerEmail || "N/A") + "\n" +
              "- Phone: " + (data.customerPhone || "N/A") + "\n" +
              "- Total Amount: " + (data.currency || "KES") + " " + (data.totalAmount ? data.totalAmount.toLocaleString() : "0") + "\n" +
-             "- Items: " + (data.items || "N/A") + "\n\n" +
+             "- Items: " + (data.items || "N/A") + "\n" +
+             "- PDF Invoice Link: " + (data.pdfUrl || "N/A") + "\n\n" +
              "This data has been auto-appended to your Google Sheet:\n" +
              "https://docs.google.com/spreadsheets/d/15NxEfUChcHFKuVmiLxYC9aPrj8bRSLW2pttRbvsREuU/edit\n\n" +
              "Best regards,\n" +

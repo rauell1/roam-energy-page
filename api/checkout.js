@@ -94,7 +94,7 @@ function validateOrderPayload(payload) {
   };
 }
 
-async function storeOrder(order) {
+async function storeOrder(order, pdfUrl) {
   const db = getSupabase();
   const { data, error } = await db.from(appConfig.supabase.ordersTable).insert({
     order_reference: order.orderReference,
@@ -106,9 +106,34 @@ async function storeOrder(order) {
     total_amount: order.totalAmount,
     filename: order.filename,
     status: 'pending',
+    pdf_url: pdfUrl,
   }).select('id').single();
   if (error) throw new Error(`Supabase insert failed: ${error.message}`);
   return data.id;
+}
+
+async function uploadInvoicePdf(filename, pdfBase64) {
+  const db = getSupabase();
+  const base64Data = pdfBase64.replace(/^data:application\/pdf;base64,/, '');
+  const buffer = Buffer.from(base64Data, 'base64');
+
+  const { data, error } = await db.storage
+    .from('quotations')
+    .upload(filename, buffer, {
+      contentType: 'application/pdf',
+      upsert: true,
+    });
+
+  if (error) {
+    console.error('Storage upload failed:', error);
+    return null;
+  }
+
+  const { data: { publicUrl } } = db.storage
+    .from('quotations')
+    .getPublicUrl(filename);
+
+  return publicUrl;
 }
 
 async function markOrderDelivery(orderId, fields) {
@@ -116,7 +141,7 @@ async function markOrderDelivery(orderId, fields) {
   await db.from(appConfig.supabase.ordersTable).update(fields).eq('id', orderId);
 }
 
-function buildEmailHtml(order) {
+function buildEmailHtml(order, pdfUrl) {
   const lineItems = order.cart
     .map(
       (item) => `
@@ -196,9 +221,14 @@ function buildEmailHtml(order) {
             <!-- CTA -->
             <table cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
               <tr>
-                <td style="background:#146EF5;border-radius:6px;">
-                  <a href="https://roam-energy.vercel.app/" style="display:inline-block;padding:14px 28px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;">Visit Roam Energy</a>
+                <td style="background:#146EF5;border-radius:6px;padding:14px 28px;">
+                  <a href="https://roam-energy.vercel.app/" style="display:inline-block;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;">Visit Roam Energy</a>
                 </td>
+                ${pdfUrl ? `
+                <td style="padding-left:16px;">
+                  <a href="${pdfUrl}" style="display:inline-block;padding:14px 28px;font-size:14px;font-weight:700;color:#146EF5;text-decoration:none;border:2px solid #146EF5;border-radius:6px;">View PDF Quotation</a>
+                </td>
+                ` : ''}
               </tr>
             </table>
           </td>
@@ -219,7 +249,7 @@ function buildEmailHtml(order) {
 </html>`;
 }
 
-async function sendOrderEmail(order) {
+async function sendOrderEmail(order, pdfUrl) {
   const attachmentContent = order.pdfBase64.replace('data:application/pdf;base64,', '');
 
   await resend.emails.send({
@@ -228,14 +258,14 @@ async function sendOrderEmail(order) {
     bcc: 'roy.otieno@roam-electric.com',
     replyTo: 'energy@roam-electric.com',
     subject: `Your Roam Energy quotation — ${order.orderReference}`,
-    html: buildEmailHtml(order),
+    html: buildEmailHtml(order, pdfUrl),
     attachments: [
       { content: attachmentContent, filename: order.filename, type: 'application/pdf' },
     ],
   });
 }
 
-async function triggerGoogleSheetsWebhook(order) {
+async function triggerGoogleSheetsWebhook(order, pdfUrl) {
   const webhookUrl = appConfig.webhooks.googleSheetsUrl;
   if (!webhookUrl) {
     console.warn('Google Sheets Webhook URL is not configured, skipping fallback sheet logging.');
@@ -250,6 +280,7 @@ async function triggerGoogleSheetsWebhook(order) {
     totalAmount: order.totalAmount,
     currency: order.currency,
     items: order.cart.map(item => `${item.name || item.id} (Qty: ${item.qty})`).join(', '),
+    pdfUrl: pdfUrl || '',
     timestamp: new Date().toISOString()
   };
 
@@ -313,9 +344,16 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'Invalid order payload', errors });
   }
 
+  let pdfUrl = null;
+  try {
+    pdfUrl = await uploadInvoicePdf(order.filename, order.pdfBase64);
+  } catch (storageError) {
+    console.error('Supabase storage upload failed:', storageError);
+  }
+
   let orderId;
   try {
-    orderId = await storeOrder(order);
+    orderId = await storeOrder(order, pdfUrl);
   } catch (error) {
     console.error('Supabase insert failed', error);
     return res.status(502).json({
@@ -325,7 +363,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    await sendOrderEmail(order);
+    await sendOrderEmail(order, pdfUrl);
     await markOrderDelivery(orderId, { email_sent: true, status: 'confirmed' });
   } catch (error) {
     console.error('Email send failed (order already saved)', error);
@@ -333,7 +371,7 @@ export default async function handler(req, res) {
   }
 
   // Trigger Google Sheets Webhook Fallback
-  await triggerGoogleSheetsWebhook(order);
+  await triggerGoogleSheetsWebhook(order, pdfUrl);
 
   return res.status(200).json({ message: 'Order processed successfully' });
 }
