@@ -15,7 +15,9 @@
 
 <!-- ═══ LOGIN ═══ -->
 <div id="login-screen">
-  <div class="login-card">
+
+  <!-- Sign-in card -->
+  <div class="login-card" id="signin-card">
     <img src="Roam_Logo.png" alt="Roam Energy">
     <h1>Admin Panel</h1>
     <p>Sign in with your Roam Energy admin account.</p>
@@ -23,7 +25,35 @@
     <input type="password" id="password-input" placeholder="Password" autocomplete="current-password">
     <button class="btn btn-primary btn-full" id="login-btn">Sign In</button>
     <p id="login-error" class="hidden"></p>
+    <p style="margin-top:16px;">
+      <button class="btn-link" id="forgot-link">Forgot password?</button>
+    </p>
   </div>
+
+  <!-- Forgot password card -->
+  <div class="login-card hidden" id="forgot-card">
+    <img src="Roam_Logo.png" alt="Roam Energy">
+    <h1>Reset Password</h1>
+    <p>Enter your admin email and we'll send you a reset link.</p>
+    <input type="email" id="forgot-email-input" placeholder="Email address" autocomplete="email">
+    <button class="btn btn-primary btn-full" id="forgot-btn">Send Reset Link</button>
+    <p id="forgot-msg" class="hidden" style="margin-top:12px;font-size:0.88rem;"></p>
+    <p style="margin-top:16px;">
+      <button class="btn-link" id="back-to-signin">Back to sign in</button>
+    </p>
+  </div>
+
+  <!-- Set new password card (shown after clicking reset link in email) -->
+  <div class="login-card hidden" id="reset-card">
+    <img src="Roam_Logo.png" alt="Roam Energy">
+    <h1>Set New Password</h1>
+    <p>Choose a strong new password for your admin account.</p>
+    <input type="password" id="new-password-input" placeholder="New password (min 8 characters)" autocomplete="new-password">
+    <input type="password" id="confirm-password-input" placeholder="Confirm new password" autocomplete="new-password">
+    <button class="btn btn-primary btn-full" id="reset-btn">Update Password</button>
+    <p id="reset-error" class="hidden" style="margin-top:12px;font-size:0.88rem;color:var(--adm-danger);"></p>
+  </div>
+
 </div>
 
 <!-- ═══ ADMIN PANEL ═══ -->

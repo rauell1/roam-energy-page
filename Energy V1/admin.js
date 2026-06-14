@@ -96,6 +96,101 @@ document.getElementById('password-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') loginBtn.click();
 });
 
+/* ── Forgot password ─────────────────────────────────────── */
+document.getElementById('forgot-link').addEventListener('click', () => {
+  document.getElementById('signin-card').classList.add('hidden');
+  document.getElementById('forgot-card').classList.remove('hidden');
+  document.getElementById('forgot-email-input').value = document.getElementById('email-input').value;
+});
+
+document.getElementById('back-to-signin').addEventListener('click', () => {
+  document.getElementById('forgot-card').classList.add('hidden');
+  document.getElementById('signin-card').classList.remove('hidden');
+});
+
+document.getElementById('forgot-btn').addEventListener('click', async () => {
+  const btn     = document.getElementById('forgot-btn');
+  const msgEl   = document.getElementById('forgot-msg');
+  const email   = document.getElementById('forgot-email-input').value.trim();
+  msgEl.className = 'hidden';
+
+  if (!email) { msgEl.textContent = 'Please enter your email.'; msgEl.className = 'forgot-error'; return; }
+
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    const redirectTo = window.location.origin + '/admin.html';
+    await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, redirect_to: redirectTo }),
+    });
+    msgEl.textContent = 'Reset link sent! Check your inbox (and spam folder).';
+    msgEl.className = 'forgot-success';
+  } catch {
+    msgEl.textContent = 'Something went wrong. Try again.';
+    msgEl.className = 'forgot-error';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send Reset Link';
+  }
+});
+
+/* ── Handle password reset redirect (URL hash from Supabase) ── */
+(function () {
+  const hash   = window.location.hash.slice(1);
+  const params = new URLSearchParams(hash);
+  if (params.get('type') !== 'recovery') return;
+
+  const token = params.get('access_token');
+  if (!token) return;
+
+  // Store token for the reset call, clean URL
+  sessionStorage.setItem('roam_reset_token', token);
+  history.replaceState(null, '', window.location.pathname);
+
+  document.getElementById('signin-card').classList.add('hidden');
+  document.getElementById('reset-card').classList.remove('hidden');
+})();
+
+document.getElementById('reset-btn').addEventListener('click', async () => {
+  const btn       = document.getElementById('reset-btn');
+  const errorEl   = document.getElementById('reset-error');
+  const pw        = document.getElementById('new-password-input').value;
+  const pw2       = document.getElementById('confirm-password-input').value;
+  const resetToken = sessionStorage.getItem('roam_reset_token');
+  errorEl.classList.add('hidden');
+
+  if (pw.length < 8)  { errorEl.textContent = 'Password must be at least 8 characters.'; errorEl.classList.remove('hidden'); return; }
+  if (pw !== pw2)     { errorEl.textContent = 'Passwords do not match.'; errorEl.classList.remove('hidden'); return; }
+  if (!resetToken)    { errorEl.textContent = 'Reset session expired. Request a new link.'; errorEl.classList.remove('hidden'); return; }
+
+  btn.disabled = true; btn.textContent = 'Updating…';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${resetToken}`,
+      },
+      body: JSON.stringify({ password: pw }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.msg || json.error_description || 'Update failed.');
+
+    sessionStorage.removeItem('roam_reset_token');
+    document.getElementById('reset-card').classList.add('hidden');
+    document.getElementById('signin-card').classList.remove('hidden');
+    loginError.textContent = '';
+    loginError.classList.add('hidden');
+    toast('Password updated. Please sign in with your new password.', 'success');
+  } catch (e) {
+    errorEl.textContent = e.message;
+    errorEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Update Password';
+  }
+});
+
 document.getElementById('logout-btn').addEventListener('click', () => {
   ACCESS_TOKEN = '';
   sessionStorage.removeItem('roam_admin_token');
