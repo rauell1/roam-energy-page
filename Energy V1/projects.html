@@ -3,49 +3,198 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Our Projects</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-   <!-- Custom CSS -->
+  <title>Projects | Roam Energy</title>
+  <meta name="description" content="Explore Roam Energy's solar installation projects across Kenya — off-grid camps, rooftop commercial systems, and residential installations.">
+  <link rel="icon" href="Roam_Logo.png" type="image/png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- AOS -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="projects.css">
-  </head>
-<body class="bg-gray-50 text-gray-900">  
-<!-- Navbar -->
-<nav class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-3 bg-white/90 backdrop-blur shadow-sm">
-  <div class="text-xl font-bold text-orange-500">Roam Energy</div>
-  <a href="index.html" class="text-gray-700 hover:text-orange-500 font-medium transition">Home</a>
-</nav>
+</head>
 
-<section class="pt-28 pb-16 px-6 md:px-12 lg:px-20">
-  <h2 class="text-4xl font-bold text-center mb-12">Our Projects</h2>
-  <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-</section>
+<body>
 
-<!-- Modal -->
-<div id="project-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
-  <div class="bg-white rounded-2xl shadow-lg p-6 max-w-2xl w-full relative transform transition-transform duration-300">
-    <button onclick="closeProjectModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-    <h3 id="modal-title" class="text-2xl font-bold mb-4">Project Title</h3>
+  <!-- ═══ NAVIGATION ═══ -->
+  <nav class="site-nav" id="site-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="Roam_Logo.png" alt="Roam Energy">
+        <span>Roam Energy</span>
+      </a>
+      <div class="nav-links" id="nav-links">
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="projects.html" class="nav-active">Projects</a>
+        <a href="index.html#contact">Contact</a>
+      </div>
+      <div class="nav-actions">
+        <a href="products.html" class="btn btn-primary btn-sm">Get a Quote</a>
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+    <div class="nav-mobile" id="nav-mobile">
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="projects.html">Projects</a>
+      <a href="index.html#contact">Contact</a>
+      <a href="products.html" class="btn btn-primary mt-4">Get a Quote</a>
+    </div>
+  </nav>
 
-    <!-- Carousel -->
-    <div class="relative mb-4">
-      <img id="modal-image" src="" alt="Project image" class="w-full h-64 object-cover rounded">
-      <button id="prevImage" class="hidden absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black">&lt;</button>
-      <button id="nextImage" class="hidden absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black">&gt;</button>
+  <!-- ═══ HERO ═══ -->
+  <section class="page-hero page-hero--projects">
+    <div class="page-hero-overlay"></div>
+    <div class="page-hero-content">
+      <p class="hero-eyebrow">Our Work</p>
+      <h1>Reference Projects</h1>
+      <p>From Nairobi rooftops to off-grid safari camps in the Maasai Mara — real installations, real impact.</p>
+    </div>
+  </section>
+
+  <!-- ═══ STATS ═══ -->
+  <div class="projects-stats-bar">
+    <div class="container">
+      <div class="projects-stats-inner">
+        <div class="pstat">
+          <span class="pstat-number">5</span>
+          <span class="pstat-label">Completed Projects</span>
+        </div>
+        <div class="pstat-div"></div>
+        <div class="pstat">
+          <span class="pstat-number">600+</span>
+          <span class="pstat-label">kWp Installed</span>
+        </div>
+        <div class="pstat-div"></div>
+        <div class="pstat">
+          <span class="pstat-number">330+</span>
+          <span class="pstat-label">kWh Storage</span>
+        </div>
+        <div class="pstat-div"></div>
+        <div class="pstat">
+          <span class="pstat-number">3</span>
+          <span class="pstat-label">Counties Served</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PROJECTS GRID ═══ -->
+  <section class="projects-section section section-light">
+    <div class="container">
+      <div id="projects-grid" class="proj-grid"></div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA ═══ -->
+  <section class="cta-strip">
+    <div class="container">
+      <div class="cta-strip-inner">
+        <div>
+          <h2>Ready to Start Your Project?</h2>
+          <p>Let's design the right solar solution for your site.</p>
+        </div>
+        <div class="cta-strip-buttons">
+          <a href="products.html" class="btn btn-white btn-lg">Browse Products</a>
+          <a href="index.html#contact" class="btn btn-outline-white btn-lg">Get in Touch</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PROJECT MODAL ═══ -->
+  <div id="project-modal-overlay" class="proj-modal-overlay"></div>
+  <div id="project-modal" class="proj-modal-wrap">
+    <div class="proj-modal-box">
+      <button id="closeProjectModal" class="proj-modal-close" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <!-- Image carousel -->
+      <div class="proj-modal-carousel">
+        <img id="modal-image" src="" alt="Project image" loading="lazy">
+        <button id="prevImage" class="carousel-btn carousel-btn--prev" aria-label="Previous image">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button id="nextImage" class="carousel-btn carousel-btn--next" aria-label="Next image">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <div id="carousel-dots" class="carousel-dots"></div>
       </div>
 
-    <div id="modal-content" class="space-y-4"></div>
+      <div class="proj-modal-body">
+        <div id="modal-content"></div>
+      </div>
+    </div>
   </div>
-</div>
 
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="Roam_Logo.png" alt="Roam Energy">
+          <p>Powering the future with sustainable solar solutions for African homes, businesses, and communities.</p>
+          <p class="footer-parent">Part of <a href="https://www.roam-electric.com/" target="_blank" rel="noopener noreferrer">Roam Electric</a></p>
+          <div class="footer-socials">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="projects.html">Projects</a></li>
+            <li><a href="index.html#contact">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Products</h4>
+          <ul>
+            <li><a href="products.html">Solar Panels</a></li>
+            <li><a href="products.html">Batteries</a></li>
+            <li><a href="products.html">Inverters</a></li>
+          </ul>
+        </div>
+        <div class="footer-newsletter">
+          <h4>Stay Updated</h4>
+          <p>Get updates on our latest products and projects.</p>
+          <form action="https://formsubmit.co/roy.otieno@roam-electric.com" method="POST" class="newsletter-form">
+            <input type="email" name="email" placeholder="Your email address" required>
+            <input type="hidden" name="_subject" value="Newsletter Signup — Roam Energy">
+            <button type="submit" class="btn btn-primary btn-sm">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 Roam Energy. All rights reserved.</p>
+        <div class="footer-legal">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
-<!-- Footer -->
-<footer class="bg-gray-800 text-gray-300 py-6 mt-12">
-  <div class="container mx-auto px-4 text-center">
-    <p>&copy; 2025 Roam Energy. All rights reserved.</p>
-  </div>
-</footer>
-
-  <!-- Custom JS -->
+  <!-- Scripts -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="script.js"></script>
   <script src="projects.js"></script>
 </body>
 </html>
