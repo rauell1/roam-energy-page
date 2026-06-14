@@ -376,7 +376,7 @@ async function generateInvoice(customerDetails, orderReference) {
   const dateStr = `${String(d.getDate()).padStart(2,'0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 
   try {
-    const imgData = await loadImageAsDataUrl('Roam_Logo.png');
+    const imgData = await loadImageAsDataUrl('roam-logo.png');
     doc.addImage(imgData, 'PNG', LEFT_MARGIN, 10, 35, 14);
   } catch (_) {
     doc.setFontSize(18);

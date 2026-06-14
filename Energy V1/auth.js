@@ -85,7 +85,7 @@
   <div id="rae-auth-view">
     <button class="rae-modal-close" id="rae-close-btn" aria-label="Close">&times;</button>
     <div class="rae-modal-logo">
-      <img src="Roam_Logo.png" alt="Roam Energy">
+      <img src="roam-logo.png" alt="Roam Energy">
     </div>
 
     <div class="rae-tabs" role="tablist">
