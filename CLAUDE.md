@@ -131,9 +131,10 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 |---------|-----|-------------|
 | Jinko Bifacial 585W | `jinko-585w` | 32,500 |
 | Jinko Bifacial 620W | `jinko-620w` | 38,500 |
-| Deye 5kW Hybrid | `deye-5kw-single` | 95,000 |
-| Deye 8kW Hybrid | `deye-8kw-single` | 140,000 |
-| Deye 10kW 3-phase | `deye-10kw-three` | 185,000 |
+| Solis Hybrid 6kW | `solis-6kw` | 114,920 |
+| Solis Hybrid 12kW | `solis-12kw` | 244,920 |
+| Solis Hybrid 18kW | `solis-18kw` | 289,900 |
+| Solis Hybrid 50kW | `solis-50kw` | 620,100 |
 | Dyness 5.12kWh | `dyness-5kwh` | 120,000 |
 | Dyness 10.24kWh | `dyness-10kwh` | 215,000 |
 
