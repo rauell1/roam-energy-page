@@ -187,11 +187,25 @@ function buildEmailHtml(order, pdfUrl) {
             </p>
 
             <!-- Order ref pill -->
-            <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+            <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
               <tr>
                 <td style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:10px 18px;">
                   <span style="font-size:12px;font-weight:700;color:#146EF5;letter-spacing:0.06em;text-transform:uppercase;">Reference</span>
                   <span style="display:block;font-size:16px;font-weight:700;color:#0a0a0a;margin-top:2px;">${order.orderReference}</span>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Customer Details for Follow Up -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;border:1px solid #e5e7eb;border-radius:8px;padding:16px;background:#f9fafb;">
+              <tr>
+                <td style="font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em;padding-bottom:8px;border-bottom:1px solid #e5e7eb;">Customer Details</td>
+              </tr>
+              <tr>
+                <td style="font-size:14px;color:#4b5563;padding-top:10px;line-height:1.6;">
+                  <span style="color:#6b7280;">Name:</span> <strong style="color:#111827;">${order.customer.name}</strong><br>
+                  <span style="color:#6b7280;">Phone:</span> <strong style="color:#111827;">${order.customer.phone}</strong><br>
+                  <span style="color:#6b7280;">Email:</span> <strong style="color:#111827;">${order.customer.email}</strong>
                 </td>
               </tr>
             </table>
