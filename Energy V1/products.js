@@ -1,123 +1,33 @@
-// ─── Product Catalogue ─────────────────────────────────────────────────────
-const PRODUCTS = [
-  {
-    id: 'jinko-585w',
-    brand: 'Jinko',
-    name: 'Jinko Bifacial Solar Panel 585W',
-    category: 'Solar Panel',
-    price: 32500,
-    image: 'https://jinkosolarcdn.shwebspace.com/themes/basicen/skin/images/tige2.png',
-    description: 'Tier 1 panel with dual-sided power generation and N-Type TOPCon cell technology for maximum efficiency. Higher energy yield from same sunlight.',
-    specs: {
-      'Wattage': '585 W',
-      'Cell Type': 'N-Type TOPCon',
-      'Technology': 'Bifacial',
-      'Efficiency': '22.5%',
-      'Warranty': '30-year linear performance',
-    },
-  },
-  {
-    id: 'jinko-620w',
-    brand: 'Jinko',
-    name: 'Jinko Bifacial Solar Panel 620W',
-    category: 'Solar Panel',
-    price: 38500,
-    image: 'https://jinkosolarcdn.shwebspace.com/themes/basicen/skin/images/tige2.png',
-    description: 'Premium Tier 1 bifacial panel with dual-sided power generation and N-Type TOPCon cell technology. Built to last a lifetime with a 30-year performance warranty.',
-    specs: {
-      'Wattage': '620 W',
-      'Cell Type': 'N-Type TOPCon',
-      'Technology': 'Bifacial',
-      'Efficiency': '23.1%',
-      'Warranty': '30-year linear performance',
-    },
-  },
-  {
-    id: 'deye-5kw-single',
-    brand: 'Deye',
-    name: 'Deye 5 kW Hybrid Inverter (Single Phase)',
-    category: 'Inverter',
-    price: 95000,
-    image: 'Deye A.jpg',
-    description: 'All-in-one hybrid inverter supporting both on-grid and off-grid modes with built-in MPPT charge controller. Parallel operation for bigger systems.',
-    specs: {
-      'Rated Power': '5 kW',
-      'Type': 'Hybrid (Grid-Tie + Battery)',
-      'Phase': 'Single Phase',
-      'MPPT Channels': '2',
-      'Battery Voltage': '48 V',
-      'Warranty': '5 years',
-    },
-  },
-  {
-    id: 'deye-8kw-single',
-    brand: 'Deye',
-    name: 'Deye 8 kW Hybrid Inverter (Single Phase)',
-    category: 'Inverter',
-    price: 140000,
-    image: 'Deye A.jpg',
-    description: 'Higher-power hybrid inverter for larger homes and small businesses. Supports parallel operation and ensures uninterrupted energy flow.',
-    specs: {
-      'Rated Power': '8 kW',
-      'Type': 'Hybrid (Grid-Tie + Battery)',
-      'Phase': 'Single Phase',
-      'MPPT Channels': '2',
-      'Battery Voltage': '48 V',
-      'Warranty': '5 years',
-    },
-  },
-  {
-    id: 'deye-10kw-three',
-    brand: 'Deye',
-    name: 'Deye 10 kW Hybrid Inverter (Three Phase)',
-    category: 'Inverter',
-    price: 185000,
-    image: 'Deye A.jpg',
-    description: 'Three-phase hybrid inverter for commercial applications and larger installations. Supports both on-grid and off-grid modes with built-in MPPT.',
-    specs: {
-      'Rated Power': '10 kW',
-      'Type': 'Hybrid (Grid-Tie + Battery)',
-      'Phase': 'Three Phase',
-      'MPPT Channels': '2',
-      'Battery Voltage': '48 V',
-      'Warranty': '5 years',
-    },
-  },
-  {
-    id: 'dyness-5kw',
-    brand: 'Dyness',
-    name: 'Dyness LiFePO₂ Battery 5.12 kWh',
-    category: 'Battery',
-    price: 120000,
-    image: 'Dyness A.jpg',
-    description: 'LiFePO₄ chemistry with 6,000+ cycles at 90% DoD, scalable up to 50 units in parallel. Modular wall or floor mounting design.',
-    specs: {
-      'Capacity': '5.12 kWh',
-      'Chemistry': 'LiFePO₄',
-      'Voltage': '48 V / 100 Ah',
-      'Cycle Life': '6,000+ cycles at 90% DoD',
-      'Scalability': 'Up to 50 units in parallel',
-      'Warranty': '5 years',
-    },
-  },
-  {
-    id: 'dyness-10kw',
-    brand: 'Dyness',
-    name: 'Dyness Power Box 10.24 kWh',
-    category: 'Battery',
-    price: 215000,
-    image: 'Dyness.png',
-    description: 'Wall-mounted all-in-one energy storage unit with built-in BMS. Ideal for homes and SMEs. Combines high capacity with sleek, compact design.',
-    specs: {
-      'Capacity': '10.24 kWh',
-      'Chemistry': 'LiFePO₄',
-      'Voltage': '48 V / 200 Ah',
-      'Cycle Life': '6,000+ cycles at 90% DoD',
-      'Installation': 'Wall or floor mounting',
-      'Warranty': '5 years',
-    },
-  },
-];
+// ─── Supabase config (anon / public key — safe for frontend) ──
+const SUPABASE_URL      = 'https://bpdysxhbyprfkmpkkynm.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwZHlzeGhieXByZmttcGtreW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTgzNDQsImV4cCI6MjA5NTQ3NDM0NH0.mBdTYEr3nrtTXjuyBHFl9AGG_rJn7kH7J5l-5E8uEQY';
+
+// ─── Product Catalogue (loaded from Supabase on boot) ──────
+let PRODUCTS = [];
+
+function transformProduct(row) {
+  return {
+    id:          row.sku,
+    brand:       row.brand,
+    name:        row.name,
+    category:    row.category,
+    price:       parseFloat(row.price),
+    image:       row.image_url || '',
+    description: row.description || '',
+    specs:       Array.isArray(row.specs) ? row.specs : [],
+    rangeLabel:  row.range_label || '',
+  };
+}
+
+async function fetchProducts() {
+  const url = `${SUPABASE_URL}/rest/v1/products?select=*&active=eq.true&order=sort_order.asc`;
+  const res = await fetch(url, {
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+  });
+  if (!res.ok) throw new Error('Failed to load products');
+  const rows = await res.json();
+  return rows.map(transformProduct);
+}
 
 const ORDER_CURRENCY = 'KES';
 
@@ -224,7 +134,7 @@ function renderGrid() {
       <div class="product-card-body">
         <p class="product-card-brand">${p.brand} · ${p.category}</p>
         <h3 data-open="${p.id}">${p.name}</h3>
-        <p class="product-card-subtitle">${Object.entries(p.specs).slice(0,2).map(([k,v])=>`${k}: ${v}`).join(' · ')}</p>
+        <p class="product-card-subtitle">${p.specs.slice(0,2).join(' · ')}</p>
         <p class="product-card-desc">${p.description}</p>
         <p class="product-card-price">${formatPrice(p.price)} <span>per unit</span></p>
         <div class="product-card-actions">
@@ -354,10 +264,10 @@ function openModal(id) {
   const p = PRODUCTS.find(p => p.id === id);
   if (!p) return;
 
-  const specsHtml = Object.entries(p.specs).map(([k, v]) => `
-    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--clr-border);font-size:0.88rem;">
-      <span style="color:var(--clr-muted);font-weight:500;">${k}</span>
-      <span style="font-weight:600;">${v}</span>
+  const specsHtml = p.specs.map(s => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--clr-border);font-size:0.88rem;">
+      <i class="fas fa-check-circle" style="color:var(--clr-primary);font-size:0.8rem;flex-shrink:0;"></i>
+      <span>${s}</span>
     </div>`).join('');
 
   modalBodyEl.innerHTML = `
@@ -674,6 +584,28 @@ checkoutBtn.addEventListener('click', async () => {
 searchInput.addEventListener('input',  renderGrid);
 sortSelect.addEventListener('change',  renderGrid);
 
-// ─── Boot ──────────────────────────────────────────────────────────────────
-renderGrid();
-updateCartUI();
+// ─── Boot: load from Supabase then render ──────────────────────────────────
+(async () => {
+  if (grid) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--clr-muted);">
+        <i class="fas fa-spinner fa-spin" style="font-size:1.8rem;opacity:.5;display:block;margin-bottom:12px;"></i>
+        <p>Loading products…</p>
+      </div>`;
+  }
+  try {
+    PRODUCTS = await fetchProducts();
+  } catch (e) {
+    console.error('Could not load products:', e);
+    if (grid) {
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--clr-muted);">
+          <i class="fas fa-exclamation-circle" style="font-size:1.8rem;opacity:.4;display:block;margin-bottom:12px;"></i>
+          <p>Could not load products. Please refresh the page.</p>
+        </div>`;
+    }
+    return;
+  }
+  renderGrid();
+  updateCartUI();
+})();

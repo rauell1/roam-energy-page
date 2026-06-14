@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | Roam Energy</title>
+  <link rel="icon" href="Roam_Logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-screen">
+  <div class="login-card">
+    <img src="Roam_Logo.png" alt="Roam Energy">
+    <h1>Admin Panel</h1>
+    <p>Enter your access key to manage products and projects.</p>
+    <input type="password" id="password-input" placeholder="Access key" autocomplete="current-password">
+    <button class="btn btn-primary btn-full" id="login-btn">Sign In</button>
+    <p id="login-error" class="hidden"></p>
+  </div>
+</div>
+
+<!-- ═══ ADMIN PANEL ═══ -->
+<div id="admin-panel" class="hidden">
+
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="admin-logo">
+      <img src="Roam_Logo.png" alt="Roam Energy">
+      <span>Roam Energy</span>
+      <span class="badge">Admin</span>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </button>
+  </header>
+
+  <!-- Body -->
+  <div class="admin-body">
+
+    <!-- Tabs -->
+    <nav>
+      <button class="admin-tab active" data-tab="products">
+        <i class="fas fa-solar-panel"></i> Products
+      </button>
+      <button class="admin-tab" data-tab="projects">
+        <i class="fas fa-building"></i> Projects
+      </button>
+    </nav>
+
+    <!-- ─── PRODUCTS TAB ─── -->
+    <div id="tab-products" class="tab-content">
+      <div class="admin-toolbar">
+        <h2>Products <span id="products-count"></span></h2>
+        <button class="btn btn-primary" id="add-product-btn">
+          <i class="fas fa-plus"></i> Add Product
+        </button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>SKU</th>
+              <th>Name</th>
+              <th class="hide-mobile">Category</th>
+              <th>Price (KES)</th>
+              <th class="hide-mobile">Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="products-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── PROJECTS TAB ─── -->
+    <div id="tab-projects" class="tab-content hidden">
+      <div class="admin-toolbar">
+        <h2>Projects <span id="projects-count"></span></h2>
+        <button class="btn btn-primary" id="add-project-btn">
+          <i class="fas fa-plus"></i> Add Project
+        </button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Title</th>
+              <th class="hide-mobile">Location</th>
+              <th>Type</th>
+              <th class="hide-mobile">Size</th>
+              <th class="hide-mobile">Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="projects-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ PRODUCT FORM MODAL ═══ -->
+<div id="product-modal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <button class="modal-close" id="product-modal-close"><i class="fas fa-times"></i></button>
+    <h3 id="product-modal-title">Add Product</h3>
+    <form id="product-form" autocomplete="off">
+      <input type="hidden" id="pf-id">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="pf-sku">SKU *</label>
+          <input id="pf-sku" name="sku" placeholder="e.g. jinko-585w" required>
+          <span class="form-hint">Unique slug, used as product ID</span>
+        </div>
+        <div class="form-field">
+          <label for="pf-brand">Brand *</label>
+          <input id="pf-brand" name="brand" placeholder="e.g. Jinko Solar" required>
+        </div>
+        <div class="form-field full">
+          <label for="pf-name">Product Name *</label>
+          <input id="pf-name" name="name" placeholder="e.g. Bifacial Solar Panel 585W" required>
+        </div>
+        <div class="form-field">
+          <label for="pf-category">Category *</label>
+          <select id="pf-category" name="category" required>
+            <option value="">Select category</option>
+            <option value="panel">Solar Panel</option>
+            <option value="inverter">Inverter</option>
+            <option value="battery">Battery</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="pf-price">Price (KES) *</label>
+          <input id="pf-price" name="price" type="number" min="0" step="500" placeholder="32500" required>
+        </div>
+        <div class="form-field">
+          <label for="pf-range">Range Label</label>
+          <input id="pf-range" name="range_label" placeholder="e.g. 585W &amp; 620W">
+        </div>
+        <div class="form-field">
+          <label for="pf-sort">Sort Order</label>
+          <input id="pf-sort" name="sort_order" type="number" placeholder="1">
+        </div>
+        <div class="form-field full">
+          <label for="pf-image">Image URL</label>
+          <input id="pf-image" name="image_url" placeholder="https://... or local filename e.g. Deye A.jpg">
+        </div>
+        <div class="form-field full">
+          <label for="pf-desc">Description</label>
+          <textarea id="pf-desc" name="description" rows="3" placeholder="Short product description…"></textarea>
+        </div>
+        <div class="form-field full">
+          <label for="pf-specs">Features / Specs</label>
+          <textarea id="pf-specs" name="specs" rows="4" placeholder="One feature per line&#10;e.g. 30-year linear performance warranty&#10;Dual-sided power generation"></textarea>
+          <span class="form-hint">One bullet point per line</span>
+        </div>
+        <div class="form-field">
+          <label>
+            <input type="checkbox" id="pf-active" name="active" checked style="width:auto;margin-right:6px;">
+            Active (visible on site)
+          </label>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" id="product-cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="product-save-btn">Save Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ PROJECT FORM MODAL ═══ -->
+<div id="project-modal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <button class="modal-close" id="project-modal-close"><i class="fas fa-times"></i></button>
+    <h3 id="project-modal-title">Add Project</h3>
+    <form id="project-form" autocomplete="off">
+      <input type="hidden" id="proj-id">
+      <div class="form-grid">
+        <div class="form-field full">
+          <label for="proj-title">Title *</label>
+          <input id="proj-title" name="title" placeholder="e.g. Emboo River Camp" required>
+        </div>
+        <div class="form-field">
+          <label for="proj-location">Location *</label>
+          <input id="proj-location" name="location" placeholder="e.g. Maasai Mara, Kenya" required>
+        </div>
+        <div class="form-field">
+          <label for="proj-type">System Type *</label>
+          <select id="proj-type" name="type" required>
+            <option value="">Select type</option>
+            <option value="grid-tied">Grid-Tied</option>
+            <option value="off-grid">Off-Grid</option>
+            <option value="hybrid">Hybrid</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="proj-size">System Size (kWp)</label>
+          <input id="proj-size" name="size_kwp" type="number" min="0" step="0.01" placeholder="64.31">
+        </div>
+        <div class="form-field">
+          <label for="proj-storage">Battery Storage (kWh)</label>
+          <input id="proj-storage" name="storage_kwh" type="number" min="0" step="0.1" placeholder="153.6">
+        </div>
+        <div class="form-field">
+          <label for="proj-date">Completed Date</label>
+          <input id="proj-date" name="completed_at" type="date">
+        </div>
+        <div class="form-field">
+          <label for="proj-sort">Sort Order</label>
+          <input id="proj-sort" name="sort_order" type="number" placeholder="1">
+        </div>
+        <div class="form-field full">
+          <label for="proj-image">Image URL / Filename</label>
+          <input id="proj-image" name="image_url" placeholder="Emboo River.jpg or https://...">
+        </div>
+        <div class="form-field full">
+          <label for="proj-desc">Description</label>
+          <textarea id="proj-desc" name="description" rows="4" placeholder="Project description…"></textarea>
+        </div>
+        <div class="form-field">
+          <label>
+            <input type="checkbox" id="proj-featured" name="featured" style="width:auto;margin-right:6px;">
+            Featured (shown on homepage)
+          </label>
+        </div>
+        <div class="form-field">
+          <label>
+            <input type="checkbox" id="proj-active" name="active" checked style="width:auto;margin-right:6px;">
+            Active (visible on site)
+          </label>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" id="project-cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="project-save-btn">Save Project</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM DELETE MODAL ═══ -->
+<div id="confirm-modal" class="confirm-modal hidden">
+  <div class="confirm-card">
+    <i class="fas fa-exclamation-triangle"></i>
+    <h4>Delete this item?</h4>
+    <p id="confirm-text">This action cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-danger" id="confirm-delete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="admin-toast" class="admin-toast"></div>
+
+<script src="admin.js"></script>
+</body>
+</html>

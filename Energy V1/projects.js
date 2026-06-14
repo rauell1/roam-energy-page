@@ -1,66 +1,43 @@
-// ─── Projects Data ─────────────────────────────────────────────────────────
-const projects = [
-  {
-    id: 'emboo-river',
-    name: 'Emboo River Camp',
-    images: ['Emboo River1.jpg', 'Emboo River.jpg'],
-    location: 'Maasai Mara National Park, Narok County',
-    type: 'Off-Grid',
-    size: '64.31 kWp',
-    storage: '153.6 kWh lithium-ion',
-    completed: 'January 2023',
-    results: 'Provides 100% off-grid power for a remote luxury eco-camp in the Mara.',
-    description: 'Roam Energy implemented a fully off-grid solar PV system with substantial lithium-ion battery storage to supply electricity sustainably deep inside the Maasai Mara National Park. The system eliminated diesel generator dependence entirely, reducing noise pollution and operational costs while ensuring uninterrupted power for guests.'
-  },
-  {
-    id: 'roam-park',
-    name: 'Roam Park',
-    images: ['Roam Park.png'],
-    location: 'Nairobi, Kenya',
-    type: 'Grid-Tied',
-    size: '55.78 kWp',
-    storage: 'N/A',
-    completed: 'August 2021',
-    results: 'Efficient energy generation using Jinko 575W panels and SMA inverters.',
-    description: 'Roam Energy installed a 55.78 kWp grid-tied solar PV system at Roam Park, featuring premium Jinko 575W solar panels and SMA Sunny Tripower Core inverters. The system feeds excess generation back into the grid and significantly reduces the facility\'s electricity costs.'
-  },
-  {
-    id: 'carton-manufacturers',
-    name: 'Carton Manufacturers',
-    images: ['Carton Manufacturers.jpg', 'Carton 3.jpg'],
-    location: 'Nairobi, Kenya',
-    type: 'Commercial',
-    size: '403 kWp / 400 kVA',
-    storage: 'N/A',
-    completed: 'March 2022',
-    results: 'High-capacity rooftop system offsets the majority of facility energy consumption.',
-    description: 'Roam Energy delivered and commissioned a large-scale 403 kWp / 400 kVA rooftop grid-tied solar PV system for Carton Manufacturers Ltd. This flagship commercial installation demonstrates the viability of solar power for heavy manufacturing environments in Nairobi.'
-  },
-  {
-    id: 'sekanani-camp',
-    name: 'Sekanani Camp',
-    images: ['Sekanani Camp1.png', 'Sekanani Camp.png'],
-    location: 'Maasai Mara National Park, Narok County',
-    type: 'Off-Grid',
-    size: '10.34 kWp',
-    storage: '25.6 kWh battery',
-    completed: 'November 2022',
-    results: 'Reliable off-grid energy for camp operations, eliminating generator use.',
-    description: 'Roam Energy installed a compact but complete off-grid solar PV system at Sekanani Camp, a safari camp located in the Maasai Mara. The system provides 24/7 power for accommodation, lighting, water pumping, and communications without any grid connection.'
-  },
-  {
-    id: 'carl-martens',
-    name: 'Carl Martens Residence',
-    images: ['Carl Martens1.png', 'Carl Martens.png'],
-    location: 'Ukunda, Kwale County, Kenya',
-    type: 'Grid-Tied',
-    size: '10.45 kWp',
-    storage: '15.36 kWh battery',
-    completed: 'June 2023',
-    results: 'Enhanced energy independence and significantly reduced grid reliance.',
-    description: 'Roam Energy designed and installed a hybrid grid-tied solar PV system with battery backup for a private residence in Ukunda, on the Kenya coast. The system provides clean energy during the day, stores surplus in batteries for evening use, and maintains grid connectivity as a backup — delivering genuine energy independence.'
+// ─── Supabase config ───────────────────────────────────────────────────────
+const SUPABASE_URL      = 'https://bpdysxhbyprfkmpkkynm.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwZHlzeGhieXByZmttcGtreW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTgzNDQsImV4cCI6MjA5NTQ3NDM0NH0.mBdTYEr3nrtTXjuyBHFl9AGG_rJn7kH7J5l-5E8uEQY';
+
+const MONTH_NAMES = ['January','February','March','April','May','June',
+                     'July','August','September','October','November','December'];
+
+function transformProject(row) {
+  const typeMap = { 'grid-tied': 'Grid-Tied', 'off-grid': 'Off-Grid', 'hybrid': 'Hybrid' };
+  let completed = 'N/A';
+  if (row.completed_at) {
+    const d = new Date(row.completed_at);
+    completed = `${MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
   }
-];
+  return {
+    id:          row.id,
+    name:        row.title,
+    images:      row.image_url ? [row.image_url] : [],
+    location:    row.location,
+    type:        typeMap[row.type] || row.type,
+    size:        row.size_kwp   ? `${row.size_kwp} kWp`   : 'N/A',
+    storage:     row.storage_kwh ? `${row.storage_kwh} kWh` : 'N/A',
+    completed,
+    description: row.description || '',
+    results:     '',
+  };
+}
+
+async function fetchProjects() {
+  const url = `${SUPABASE_URL}/rest/v1/projects?select=*&active=eq.true&order=sort_order.asc`;
+  const res = await fetch(url, {
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+  });
+  if (!res.ok) throw new Error('Failed to load projects');
+  const rows = await res.json();
+  return rows.map(transformProject);
+}
+
+// ─── Projects Data (loaded from Supabase) ──────────────────────────────────
+let projects = [];
 
 // ─── Tag colours ───────────────────────────────────────────────────────────
 const tagClass = {
@@ -84,6 +61,8 @@ let currentProject = null;
 let currentIndex   = 0;
 
 // ─── Render cards ──────────────────────────────────────────────────────────
+function renderCards() {
+  grid.innerHTML = '';
 projects.forEach((p, cardIdx) => {
   const card = document.createElement('div');
   card.className = 'proj-card';
@@ -125,6 +104,7 @@ projects.forEach((p, cardIdx) => {
 
   grid.appendChild(card);
 });
+} // end renderCards
 
 // ─── Card image cycling ────────────────────────────────────────────────────
 const cardIndexes = {};
@@ -249,3 +229,27 @@ nextBtn.addEventListener('click', () => {
 closeModalBtn.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', closeModal);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ─── Boot: load from Supabase then render ──────────────────────────────────
+(async () => {
+  if (grid) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--clr-muted,#6b7280);">
+        <i class="fas fa-spinner fa-spin" style="font-size:1.8rem;opacity:.5;display:block;margin-bottom:12px;"></i>
+        <p>Loading projects…</p>
+      </div>`;
+  }
+  try {
+    projects = await fetchProjects();
+    renderCards();
+  } catch (e) {
+    console.error('Could not load projects:', e);
+    if (grid) {
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--clr-muted,#6b7280);">
+          <i class="fas fa-exclamation-circle" style="font-size:1.8rem;opacity:.4;display:block;margin-bottom:12px;"></i>
+          <p>Could not load projects. Please refresh the page.</p>
+        </div>`;
+    }
+  }
+})();
