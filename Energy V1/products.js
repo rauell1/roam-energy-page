@@ -381,154 +381,230 @@ async function generateInvoice(customerDetails, orderReference) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
-  const LEFT_MARGIN = 20;
-  const RIGHT_END   = 195;
-  const safeName  = customerDetails.name  || 'Walk-in Client';
-  const safeEmail = customerDetails.email || 'N/A';
-  const safePhone = customerDetails.phone || 'N/A';
+  const LEFT_MARGIN  = 20;
+  const RIGHT_END    = 195;
+  const PAGE_WIDTH   = 210;
+  const PAGE_HEIGHT  = 297;
+
+  // Sanitize customer details
+  const safeName  = (customerDetails.name  || 'Walk-in Client').trim();
+  const safeEmail = (customerDetails.email || 'N/A').trim();
+  const safePhone = (customerDetails.phone || 'N/A').trim().replace(/^'+/, '');
 
   const d = new Date();
   const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   const dateStr = `${String(d.getDate()).padStart(2,'0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 
+  // ── 1. LOGO ──────────────────────────────────────────────────────────────
   try {
     const imgData = await loadImageAsDataUrl('logos/wordmarks/ROAM_LOGO_2024-01.png');
-    doc.addImage(imgData, 'PNG', LEFT_MARGIN, 10, 35, 13);
+    doc.addImage(imgData, 'PNG', LEFT_MARGIN, 10, 38, 14);
   } catch (_) {
-    doc.setFontSize(18);
+    doc.setFontSize(20);
     doc.setFont(undefined, 'bold');
-    doc.setTextColor(244, 121, 32); // Exact orange color (244, 121, 32)
-    doc.text('ROAM', LEFT_MARGIN, 25);
+    doc.setTextColor(244, 121, 32);
+    doc.text('ROAM', LEFT_MARGIN, 22);
   }
 
-  // 1. LOGO & TOP TITLE SECTION
-  doc.setFontSize(18);
+  // ── 2. TITLE (top-right) ──────────────────────────────────────────────────
+  doc.setFontSize(16);
   doc.setFont(undefined, 'bold');
   doc.setTextColor(0, 0, 0);
-  doc.text('Pro Forma-Invoice', RIGHT_END, 22, { align: 'right' });
-  doc.setFontSize(9);
+  doc.text('Proforma Invoice', RIGHT_END, 18, { align: 'right' });
+  doc.setFontSize(8.5);
   doc.setFont(undefined, 'normal');
-  doc.text(dateStr, RIGHT_END, 30, { align: 'right' });
-  doc.text(`Page 1 / 1`, RIGHT_END, 35, { align: 'right' });
+  doc.setTextColor(80, 80, 80);
+  doc.text(dateStr,     RIGHT_END, 25, { align: 'right' });
+  doc.text('Page 1 / 1', RIGHT_END, 30, { align: 'right' });
 
-  // 2. ENTITY NAMES & ADDRESS
-  let y = 44;
-  doc.setFontSize(10);
+  // ── 3. TOP HORIZONTAL RULE ────────────────────────────────────────────────
+  doc.setDrawColor(180, 180, 180);
+  doc.setLineWidth(0.4);
+  doc.line(LEFT_MARGIN, 36, RIGHT_END, 36);
+
+  // ── 4. BILL TO (left) & COMPANY (right) ──────────────────────────────────
+  let y = 42;
+  doc.setFontSize(7.5);
+  doc.setTextColor(120, 120, 120);
   doc.setFont(undefined, 'bold');
+  doc.text('BILL TO', LEFT_MARGIN, y);
+  doc.text('ROAM ELECTRIC LIMITED', RIGHT_END, y, { align: 'right' });
+
+  y += 5;
+  doc.setFont(undefined, 'bold');
+  doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
   doc.text(safeName, LEFT_MARGIN, y);
-  doc.text('Roam Electric Limited', RIGHT_END, y, { align: 'right' });
-  doc.setFont(undefined, 'normal');
   doc.setFontSize(9);
-  doc.text(`Phone: ${safePhone}`, LEFT_MARGIN, y + 5);
-  doc.text(`Email: ${safeEmail}`, LEFT_MARGIN, y + 9);
-  ['National Park East Gate Rd.', 'P.O. Box nr 18284', 'Nairobi, 00500', 'Kenya'].forEach((line, i) => {
-    doc.text(line, RIGHT_END, y + 5 + i * 4.5, { align: 'right' });
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(50, 50, 50);
+
+  const companyLines = [
+    'National Park East Gate Rd.',
+    'P.O. Box 18284, Nairobi 00500',
+    'Kenya',
+    'Tel: +254 740 666 555',
+    'info@roam-electric.com',
+  ];
+  companyLines.forEach((line, i) => {
+    doc.text(line, RIGHT_END, y + i * 4.8, { align: 'right' });
   });
 
-  // 4. METADATA SECTIONS
-  y = 75;
+  doc.setFontSize(9);
+  doc.text(`Phone: ${safePhone}`, LEFT_MARGIN, y + 5);
+  doc.text(`Email: ${safeEmail}`, LEFT_MARGIN, y + 10);
+
+  // ── 5. SECOND HORIZONTAL RULE ────────────────────────────────────────────
+  y = 78;
+  doc.setDrawColor(180, 180, 180);
+  doc.line(LEFT_MARGIN, y, RIGHT_END, y);
+
+  // ── 6. METADATA TABLE (two columns) ──────────────────────────────────────
+  y = 84;
   const leftMeta = [
-    ['Document No',          orderReference],
-    ['VAT Registration No.', ''],
+    ['Document No.',         orderReference],
+    ['VAT Registration No.', 'P05170428D'],
     ['Document Date',        dateStr],
     ['Currency',             ORDER_CURRENCY],
     ['Salesperson',          'Roy Otieno'],
   ];
   const rightMeta = [
-    ['Email',                 'info@roam-electric.com'],
-    ['Home Page',             'www.roam-electric.com'],
-    ['Phone No.',             '+254740666555'],
-    ['VAT Registration No.',  'P05170428D'],
-    ['Mpesa Till No.',        '9572270'],
-    ['Bank',                  'Standard Chartered'],
-    ['Account No.',           '0102487879100 (KES)'],
-    ['Account No.',           '8702487879100 (USD)'],
-    ['Branch',                'Industrial Area 053'],
-    ['SWIFT Code',            'SCBLKENXXXX'],
+    ['Email',          'info@roam-electric.com'],
+    ['Home Page',      'www.roam-electric.com'],
+    ['Phone No.',      '+254 740 666 555'],
+    ['Mpesa Till No.', '9572270'],
+    ['Bank',           'Standard Chartered'],
+    ['Account No.',    '0102487879100 (KES)'],
+    ['Account No.',    '8702487879100 (USD)'],
+    ['Branch',         'Industrial Area 053'],
+    ['SWIFT Code',     'SCBLKENXXXX'],
   ];
 
-  doc.setFont(undefined, 'normal');
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   leftMeta.forEach(([label, val], i) => {
-    doc.text(label,        LEFT_MARGIN,      y + i * 5);
-    doc.text(String(val),  LEFT_MARGIN + 45, y + i * 5);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(80, 80, 80);
+    doc.text(label, LEFT_MARGIN, y + i * 5);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(0, 0, 0);
+    doc.text(String(val), LEFT_MARGIN + 42, y + i * 5);
   });
   rightMeta.forEach(([label, val], i) => {
-    doc.text(label, 105,       y + i * 5);
-    doc.text(val,   RIGHT_END, y + i * 5, { align: 'right' });
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(80, 80, 80);
+    doc.text(label, 108, y + i * 5);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(0, 0, 0);
+    doc.text(val, RIGHT_END, y + i * 5, { align: 'right' });
   });
 
-  // 5. ITEM TABLE Columns: Item=60, Qty=15, Price=25, HS=15, VAT%=12, VATAmt=23, Amt=25
-  const COL = { Item: 60, Qty: 15, Price: 25, HS: 15, VATpct: 12, VATAmt: 23, Amt: 25 };
+  // ── 7. ITEM TABLE HEADER (dark background) ───────────────────────────────
+  const COL = { Item: 62, Qty: 14, Price: 26, HS: 15, VATpct: 12, VATAmt: 22, Amt: 24 };
   const colX = {
-    Item:    LEFT_MARGIN,
-    Qty:     LEFT_MARGIN + COL.Item,
-    Price:   LEFT_MARGIN + COL.Item + COL.Qty,
-    HS:      LEFT_MARGIN + COL.Item + COL.Qty + COL.Price,
-    VATpct:  LEFT_MARGIN + COL.Item + COL.Qty + COL.Price + COL.HS,
-    VATAmt:  LEFT_MARGIN + COL.Item + COL.Qty + COL.Price + COL.HS + COL.VATpct,
-    Amt:     RIGHT_END,
+    Item:   LEFT_MARGIN,
+    Qty:    LEFT_MARGIN + COL.Item,
+    Price:  LEFT_MARGIN + COL.Item + COL.Qty,
+    HS:     LEFT_MARGIN + COL.Item + COL.Qty + COL.Price,
+    VATpct: LEFT_MARGIN + COL.Item + COL.Qty + COL.Price + COL.HS,
+    VATAmt: LEFT_MARGIN + COL.Item + COL.Qty + COL.Price + COL.HS + COL.VATpct,
+    Amt:    RIGHT_END,
   };
 
-  y = 135;
-  doc.setFont(undefined, 'bold');
-  doc.setFontSize(9);
-  doc.text('Item',        colX.Item,                     y);
-  doc.text('Quantity',    colX.Qty    + COL.Qty   / 2,   y, { align: 'center' });
-  doc.text('Unit Price',  colX.Price  + COL.Price,        y, { align: 'right' });
-  doc.text('HS Code',     colX.HS     + COL.HS    / 2,   y, { align: 'center' });
-  doc.text('VAT%',        colX.VATpct + COL.VATpct / 2,  y, { align: 'center' });
-  doc.text('VAT Amount',  colX.VATAmt + COL.VATAmt,       y, { align: 'right' });
-  doc.text('Amount',      colX.Amt,                       y, { align: 'right' });
-  doc.setDrawColor(0);
-  doc.line(LEFT_MARGIN, y + 1, RIGHT_END, y + 1);
-  y += 8;
+  y = 133;
+  const ROW_H = 7;
+  // Header background bar
+  doc.setFillColor(20, 110, 245);   // Roam blue
+  doc.rect(LEFT_MARGIN, y - ROW_H + 1, RIGHT_END - LEFT_MARGIN, ROW_H, 'F');
 
-  // 6. ITEM DATA
+  doc.setFont(undefined, 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(255, 255, 255);
+  doc.text('Item',       colX.Item + 1,                    y - 1);
+  doc.text('Qty',        colX.Qty   + COL.Qty   / 2,       y - 1, { align: 'center' });
+  doc.text('Unit Price', colX.Price + COL.Price,            y - 1, { align: 'right' });
+  doc.text('HS Code',    colX.HS    + COL.HS    / 2,       y - 1, { align: 'center' });
+  doc.text('VAT%',       colX.VATpct+ COL.VATpct/ 2,       y - 1, { align: 'center' });
+  doc.text('VAT Amt',    colX.VATAmt+ COL.VATAmt,           y - 1, { align: 'right' });
+  doc.text('Amount',     colX.Amt,                          y - 1, { align: 'right' });
+
+  doc.setTextColor(0, 0, 0);
+  y += 3;
+
+  // ── 8. ITEM ROWS ──────────────────────────────────────────────────────────
   let grandTotal = 0;
+  let rowIndex   = 0;
   Object.entries(cart).forEach(([id, qty]) => {
     const p = PRODUCTS.find(product => product.id === id);
     if (!p) return;
-    const price = ORDER_CURRENCY === 'USD' ? Math.round((p.price / KES_USD_RATE) * 100) / 100 : p.price;
+    const price     = ORDER_CURRENCY === 'USD' ? Math.round((p.price / KES_USD_RATE) * 100) / 100 : p.price;
     const lineTotal = price * qty;
-    grandTotal += lineTotal;
-    const startY = y;
+    grandTotal     += lineTotal;
+
+    // Alternating row shading
+    const nameLines = doc.splitTextToSize(p.name, COL.Item - 3);
+    const rowHeight = Math.max(nameLines.length * 5, 6) + 3;
+    if (rowIndex % 2 === 0) {
+      doc.setFillColor(245, 247, 252);
+      doc.rect(LEFT_MARGIN, y - 3, RIGHT_END - LEFT_MARGIN, rowHeight, 'F');
+    }
+
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(10, 10, 10);
+    doc.text(nameLines, colX.Item + 1, y);
 
     doc.setFont(undefined, 'normal');
-    doc.setFontSize(9);
-    doc.text(String(qty),             colX.Qty    + COL.Qty    / 2,  startY, { align: 'center' });
-    doc.text(formatAmt(price),        colX.Price  + COL.Price,        startY, { align: 'right' });
-    doc.text('',                      colX.HS     + COL.HS     / 2,  startY, { align: 'center' });
-    doc.text('0',                     colX.VATpct + COL.VATpct / 2,  startY, { align: 'center' });
-    doc.text('0.00',                  colX.VATAmt + COL.VATAmt,       startY, { align: 'right' });
-    doc.text(formatAmt(lineTotal),    colX.Amt,                       startY, { align: 'right' });
-    doc.setFont(undefined, 'bold');
-    const nameLines = doc.splitTextToSize(p.name, COL.Item - 2);
-    doc.text(nameLines, LEFT_MARGIN, startY);
-    y = startY + nameLines.length * 5 + 2;
+    doc.setTextColor(30, 30, 30);
+    doc.text(String(qty),           colX.Qty    + COL.Qty   / 2,  y, { align: 'center' });
+    doc.text(formatAmt(price),      colX.Price  + COL.Price,       y, { align: 'right' });
+    doc.text('-',                   colX.HS     + COL.HS    / 2,  y, { align: 'center' });
+    doc.text('0%',                  colX.VATpct + COL.VATpct/ 2,  y, { align: 'center' });
+    doc.text('0.00',                colX.VATAmt + COL.VATAmt,      y, { align: 'right' });
+    doc.text(formatAmt(lineTotal),  colX.Amt,                      y, { align: 'right' });
+
+    y += rowHeight;
+    rowIndex++;
   });
 
-  // 7. TOTALS SECTION
-  y += 5;
-  const L_COL_X = RIGHT_END - 60;
+  // ── 9. TOTALS ─────────────────────────────────────────────────────────────
+  y += 4;
+  doc.setDrawColor(180, 180, 180);
+  doc.line(LEFT_MARGIN, y - 2, RIGHT_END, y - 2);
+
+  const TOT_LABEL_X = RIGHT_END - 68;
   doc.setFontSize(9);
   doc.setTextColor(0, 0, 0);
-  doc.setFont(undefined, 'bold');
-  doc.text('Total Amount',   L_COL_X, y);
-  doc.setFont(undefined, 'normal');
-  doc.text(formatAmt(grandTotal), RIGHT_END, y, { align: 'right' });
-  y += 6;
-  doc.setFont(undefined, 'bold');
-  doc.text('VAT Amount', L_COL_X, y);
-  doc.setFont(undefined, 'normal');
-  doc.text('0.00', RIGHT_END, y, { align: 'right' });
-  doc.line(L_COL_X, y + 1, RIGHT_END, y + 1);
-  y += 8;
-  doc.setFont(undefined, 'bold');
-  doc.text('Total Incl. VAT', L_COL_X, y);
-  doc.setFont(undefined, 'normal');
-  doc.text(formatAmt(grandTotal), RIGHT_END, y, { align: 'right' });
+
+  const drawTotalRow = (label, value, bold) => {
+    doc.setFont(undefined, bold ? 'bold' : 'normal');
+    doc.text(label,  TOT_LABEL_X, y);
+    doc.text(value,  RIGHT_END,   y, { align: 'right' });
+    y += 6;
+  };
+  drawTotalRow('Sub-Total',       formatAmt(grandTotal), false);
+  drawTotalRow('VAT (0%)',        '0.00',                 false);
+  doc.setDrawColor(20, 110, 245);
+  doc.setLineWidth(0.6);
+  doc.line(TOT_LABEL_X, y - 2, RIGHT_END, y - 2);
+  doc.setLineWidth(0.4);
+  doc.setDrawColor(0);
+  drawTotalRow(`Total (${ORDER_CURRENCY})`, formatAmt(grandTotal), true);
+
+  // ── 10. FOOTER NOTE ───────────────────────────────────────────────────────
+  const footerY = PAGE_HEIGHT - 18;
+  doc.setDrawColor(200, 200, 200);
+  doc.line(LEFT_MARGIN, footerY - 3, RIGHT_END, footerY - 3);
+  doc.setFontSize(7.5);
+  doc.setTextColor(140, 140, 140);
+  doc.setFont(undefined, 'italic');
+  doc.text(
+    'This proforma invoice is valid for 30 days. Prices exclude VAT and installation unless stated. Payment terms: 100% upfront.',
+    PAGE_WIDTH / 2, footerY, { align: 'center' }
+  );
+  doc.text(
+    'Roam Electric Limited · VAT Reg: P05170428D · www.roam-electric.com · energy@roam-electric.com',
+    PAGE_WIDTH / 2, footerY + 5, { align: 'center' }
+  );
 
   const filename = `Roam-ProForma-Invoice-${orderReference}.pdf`;
   const blob = doc.output('blob');
