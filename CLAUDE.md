@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-14 14:33 UTC
+> Last updated: 2026-06-14 14:46 UTC
 
 ---
 
@@ -155,6 +155,8 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- c8b0c06 feat: revamp color scheme to Roam orange + pill buttons
+- 2a08f1b chore: update CLAUDE.md
 - 2497eae feat: user accounts + admin access button
 - 832fd0e chore: update CLAUDE.md
 - e9ba104 fix: point all Supabase config to correct project (akbmydsqorsoijxsmwrh)
@@ -163,6 +165,4 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 - e35ae8e chore: update CLAUDE.md
 - f9bd5ca feat: Supabase-backed products/projects + admin panel
 - 7afc49b chore: update CLAUDE.md
-- 6c581bc feat: page transitions, scroll progress, parallax, animated counters, solar calculator
-- 2d3a40d chore: update CLAUDE.md
 
