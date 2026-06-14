@@ -598,7 +598,7 @@ checkoutBtn.addEventListener('click', async () => {
   orderReference  = generateOrderReference();
 
   try {
-    if (window.raeAuth?.isLoggedIn?.()) {
+    if (window.raeAuth?.isLoggedIn?.() && typeof window.raeAuth.updateProfile === 'function') {
       await window.raeAuth.updateProfile(name, phone).catch(err => {
         console.warn('Failed to auto-update profile on checkout:', err);
       });
