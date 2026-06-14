@@ -36,4 +36,7 @@ export const appConfig = {
     apiKey: process.env.RESEND_API_KEY,
     fromAddress: process.env.RESEND_FROM_EMAIL,
   },
+  webhooks: {
+    googleSheetsUrl: process.env.GOOGLE_SHEETS_WEBHOOK_URL || '',
+  },
 };

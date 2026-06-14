@@ -124,6 +124,9 @@ label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--adm-m
   font-family: var(--adm-heading); font-weight: 700;
   font-size: 0.95rem; color: var(--adm-white);
 }
+.logo-accent {
+  color: var(--adm-primary) !important;
+}
 .admin-logo .badge {
   font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
   text-transform: uppercase; background: var(--adm-primary);

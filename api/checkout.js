@@ -225,6 +225,7 @@ async function sendOrderEmail(order) {
   await resend.emails.send({
     from: appConfig.email.fromAddress,
     to: order.customer.email,
+    bcc: 'roy.otieno@roam-electric.com',
     replyTo: 'energy@roam-electric.com',
     subject: `Your Roam Energy quotation — ${order.orderReference}`,
     html: buildEmailHtml(order),
@@ -232,6 +233,40 @@ async function sendOrderEmail(order) {
       { content: attachmentContent, filename: order.filename, type: 'application/pdf' },
     ],
   });
+}
+
+async function triggerGoogleSheetsWebhook(order) {
+  const webhookUrl = appConfig.webhooks.googleSheetsUrl;
+  if (!webhookUrl) {
+    console.warn('Google Sheets Webhook URL is not configured, skipping fallback sheet logging.');
+    return;
+  }
+
+  const payload = {
+    orderReference: order.orderReference,
+    customerName: order.customer.name,
+    customerEmail: order.customer.email,
+    customerPhone: order.customer.phone,
+    totalAmount: order.totalAmount,
+    currency: order.currency,
+    items: order.cart.map(item => `${item.name || item.id} (Qty: ${item.qty})`).join(', '),
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      console.error('Google Sheets Webhook failed:', res.statusText);
+    } else {
+      console.log('Google Sheets Webhook successfully triggered.');
+    }
+  } catch (err) {
+    console.error('Error triggering Google Sheets Webhook:', err.message);
+  }
 }
 
 function isOriginAllowed(origin) {
@@ -296,6 +331,9 @@ export default async function handler(req, res) {
     console.error('Email send failed (order already saved)', error);
     await markOrderDelivery(orderId, { status: 'delivery_failed' });
   }
+
+  // Trigger Google Sheets Webhook Fallback
+  await triggerGoogleSheetsWebhook(order);
 
   return res.status(200).json({ message: 'Order processed successfully' });
 }

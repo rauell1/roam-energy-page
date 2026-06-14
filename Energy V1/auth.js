@@ -66,8 +66,10 @@
     });
   }
 
-  async function fetchProfile() {
-    const r = await supaFetch('/rest/v1/profiles?select=*&limit=1');
+  async function fetchProfile(userId) {
+    const id = userId || getUser()?.id;
+    if (!id) return null;
+    const r = await supaFetch(`/rest/v1/profiles?id=eq.${id}&select=*`);
     if (!r.ok) return null;
     const rows = await r.json();
     return rows[0] || null;
@@ -85,7 +87,8 @@
   <div id="rae-auth-view">
     <button class="rae-modal-close" id="rae-close-btn" aria-label="Close">&times;</button>
     <div class="rae-modal-logo">
-      <img src="roam-logo.png" alt="Roam Energy">
+      <img src="logos/wordmarks/ROAM_LOGO_2024-03.png" alt="Roam">
+      <span class="logo-accent">Energy</span>
     </div>
 
     <div class="rae-tabs" role="tablist">
@@ -257,7 +260,7 @@
         const json = await apiSignIn(email, pw);
         // Fetch profile to get name/phone
         setSession(json.access_token, { email: json.user.email, id: json.user.id });
-        const profile = await fetchProfile();
+        const profile = await fetchProfile(json.user.id);
         setSession(json.access_token, {
           email: json.user.email,
           id: json.user.id,
@@ -353,6 +356,26 @@
   }
 
   /* ── Custom event so products.js can react ────────────────────────────── */
+  async function updateProfile(fullName, phone) {
+    const user = getUser();
+    if (!user) return;
+    await upsertProfile(user.id, user.email, fullName, phone);
+    setSession(getToken(), { ...user, full_name: fullName, phone });
+    // Update inputs if the modal forms exist in the DOM
+    const pfName = document.getElementById('rae-pf-name');
+    const pfPhone = document.getElementById('rae-pf-phone');
+    if (pfName) pfName.value = fullName;
+    if (pfPhone) pfPhone.value = phone;
+    // Update initials & details in modal
+    const profileNameEl = document.getElementById('rae-profile-name');
+    const avatarInitialsEl = document.getElementById('rae-avatar-initials');
+    if (profileNameEl) profileNameEl.textContent = fullName || user.email;
+    if (avatarInitialsEl) avatarInitialsEl.textContent = (fullName || user.email || '?')[0].toUpperCase();
+    updateNavBtn();
+    dispatchAuthEvent('profile-updated');
+  }
+
+  /* ── Custom event so products.js can react ────────────────────────────── */
   function dispatchAuthEvent(type) {
     document.dispatchEvent(new CustomEvent('rae:auth', { detail: { type } }));
   }
@@ -364,6 +387,7 @@
     isLoggedIn: () => !!getToken(),
     openModal,
     closeModal,
+    updateProfile,
   };
 
   /* ── Boot ─────────────────────────────────────────────────────────────── */
@@ -371,5 +395,22 @@
     injectModal();
     wireEvents();
     updateNavBtn();
+
+    // Background profile sync if logged in
+    const token = getToken();
+    const user = getUser();
+    if (token && user?.id) {
+      fetchProfile(user.id).then(profile => {
+        if (profile) {
+          setSession(token, {
+            ...user,
+            full_name: profile.full_name || user.full_name || '',
+            phone: profile.phone || user.phone || '',
+          });
+          updateNavBtn();
+          dispatchAuthEvent('profile-updated');
+        }
+      }).catch(err => console.error('Failed to sync profile on boot:', err));
+    }
   });
 })();

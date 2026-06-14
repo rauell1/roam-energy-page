@@ -644,7 +644,7 @@
   background: var(--clr-white);
   border-radius: var(--radius-lg);
   width: 100%;
-  max-width: 580px;
+  max-width: 620px;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
@@ -658,15 +658,15 @@
 
 .modal-close {
   position: absolute;
-  top: 16px; right: 16px;
-  width: 32px; height: 32px;
+  top: 20px; right: 20px;
+  width: 36px; height: 36px;
   border-radius: var(--radius-sm);
   background: var(--clr-light);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--clr-muted);
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   z-index: 1;
   transition: background var(--transition), color var(--transition);
 }
@@ -687,22 +687,22 @@
   max-height: 180px;
   object-fit: contain;
 }
-.modal-product-body { padding: 28px; }
+.modal-product-body { padding: 36px; }
 .modal-product-brand {
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--clr-primary);
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 .modal-product-title {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
   color: var(--clr-body);
   letter-spacing: -0.02em;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
 }
 .modal-product-sub {
   font-size: 0.88rem;
@@ -711,17 +711,17 @@
 }
 .modal-product-price {
   font-family: var(--font-heading);
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 800;
   color: var(--clr-primary);
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   letter-spacing: -0.03em;
 }
 .modal-product-desc {
-  font-size: 0.93rem;
+  font-size: 0.98rem;
   color: #555;
   line-height: 1.7;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 .modal-features {
   list-style: none;
@@ -738,7 +738,7 @@
   color: var(--clr-body);
 }
 .modal-features li i { color: var(--clr-primary); margin-top: 3px; flex-shrink: 0; }
-.modal-actions { display: flex; gap: 10px; }
+.modal-actions { display: flex; gap: 12px; }
 .modal-actions .btn { flex: 1; justify-content: center; }
 
 /* ── Toast notification ───────────────────────────────────── */

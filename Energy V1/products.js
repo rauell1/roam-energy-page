@@ -292,9 +292,9 @@ function openModal(id) {
   if (!p) return;
 
   const specsHtml = p.specs.map(s => `
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--clr-border);font-size:0.88rem;">
-      <i class="fas fa-check-circle" style="color:var(--clr-primary);font-size:0.8rem;flex-shrink:0;"></i>
-      <span>${s}</span>
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--clr-border);font-size:0.96rem;">
+      <i class="fas fa-check-circle" style="color:var(--clr-primary);font-size:1.05rem;margin-top:2px;flex-shrink:0;"></i>
+      <span style="color:var(--clr-body);line-height:1.4;">${s}</span>
     </div>`).join('');
 
   modalBodyEl.innerHTML = `
@@ -305,11 +305,11 @@ function openModal(id) {
       <p class="modal-product-brand">${p.brand} · ${p.category}</p>
       <h3 class="modal-product-title">${p.name}</h3>
       <p class="modal-product-desc">${p.description}</p>
-      <div style="margin-bottom:20px;">${specsHtml}</div>
+      <div style="margin-bottom:24px;">${specsHtml}</div>
       <p class="modal-product-price">${formatPrice(p.price)}</p>
       <div class="modal-actions">
-        <button class="btn btn-outline-primary" id="modal-details-close">Close</button>
-        <button class="btn btn-primary" data-add="${p.id}">
+        <button class="btn btn-outline-primary btn-md" id="modal-details-close">Close</button>
+        <button class="btn btn-primary btn-md" data-add="${p.id}">
           <i class="fas fa-cart-plus"></i> Add to Cart
         </button>
       </div>
@@ -376,8 +376,8 @@ async function generateInvoice(customerDetails, orderReference) {
   const dateStr = `${String(d.getDate()).padStart(2,'0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 
   try {
-    const imgData = await loadImageAsDataUrl('roam-logo.png');
-    doc.addImage(imgData, 'PNG', LEFT_MARGIN, 10, 35, 14);
+    const imgData = await loadImageAsDataUrl('logos/wordmarks/ROAM_LOGO_2024-01.png');
+    doc.addImage(imgData, 'PNG', LEFT_MARGIN, 10, 35, 13);
   } catch (_) {
     doc.setFontSize(18);
     doc.setFont(undefined, 'bold');
@@ -598,6 +598,12 @@ checkoutBtn.addEventListener('click', async () => {
   orderReference  = generateOrderReference();
 
   try {
+    if (window.raeAuth?.isLoggedIn?.()) {
+      await window.raeAuth.updateProfile(name, phone).catch(err => {
+        console.warn('Failed to auto-update profile on checkout:', err);
+      });
+    }
+
     invoice        = await generateInvoice(customerDetails, orderReference);
     invoice.base64 = await blobToDataUrl(invoice.blob);
     downloadInvoice(invoice.blob, invoice.filename);

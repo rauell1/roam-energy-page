@@ -153,6 +153,19 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   color: var(--clr-white);
   letter-spacing: -0.02em;
 }
+.logo-accent {
+  color: var(--clr-primary) !important;
+}
+.footer-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.footer-logo-wrap img {
+  height: 36px;
+  width: auto;
+}
 
 .nav-links {
   display: flex;
@@ -1275,8 +1288,21 @@ body.page-ready #page-overlay { opacity: 0; }
 }
 .rae-modal-close:hover { background: #1e1e1e; color: #fff; }
 
-.rae-modal-logo { text-align: center; margin-bottom: 20px; }
-.rae-modal-logo img { height: 38px; margin: 0 auto; }
+.rae-modal-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.rae-modal-logo img { height: 38px; width: auto; }
+.rae-modal-logo span {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
 
 /* Tabs */
 .rae-tabs {
