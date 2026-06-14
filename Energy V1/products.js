@@ -47,7 +47,7 @@ const cartDrawerEl    = document.getElementById('cartDrawer');
 const cartItemsEl     = document.getElementById('cartItems');
 const cartTotalEl     = document.getElementById('cartTotal');
 const floatingCount   = document.getElementById('floatingCount');
-const checkoutBtn     = document.getElementById('checkoutBtn');
+let   checkoutBtn     = document.getElementById('checkoutBtn');
 const modalOverlay    = document.getElementById('productModalOverlay');
 const modalWrap       = document.getElementById('productModal');
 const modalBodyEl     = document.getElementById('modalBody');
@@ -237,9 +237,24 @@ function prefillCheckout() {
   const nameEl  = document.getElementById('customerName');
   const emailEl = document.getElementById('customerEmail');
   const phoneEl = document.getElementById('customerPhone');
-  if (nameEl  && !nameEl.value  && user.full_name) nameEl.value  = user.full_name;
-  if (emailEl && !emailEl.value && user.email)     emailEl.value = user.email;
-  if (phoneEl && !phoneEl.value && user.phone)     phoneEl.value = user.phone;
+  if (nameEl)  nameEl.value  = user.full_name || nameEl.value || '';
+  if (emailEl) emailEl.value = user.email     || emailEl.value || '';
+  if (phoneEl) phoneEl.value = user.phone     || phoneEl.value || '';
+}
+
+function updateCartAuthState() {
+  const loggedIn = window.raeAuth?.isLoggedIn?.() || false;
+  const gate = document.getElementById('cart-auth-gate');
+  const form = document.getElementById('cart-checkout-form');
+  if (!gate || !form) return;
+  gate.classList.toggle('hidden', loggedIn);
+  form.classList.toggle('hidden', !loggedIn);
+  if (loggedIn) {
+    prefillCheckout();
+    const user = window.raeAuth?.getUser?.();
+    const label = document.getElementById('cart-user-label');
+    if (label && user) label.textContent = user.full_name || user.email || 'Account';
+  }
 }
 
 function openCart() {
@@ -247,7 +262,7 @@ function openCart() {
   cartDrawerEl.classList.add('drawer-open');
   cartOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
-  prefillCheckout();
+  updateCartAuthState();
 }
 
 function closeCart() {
@@ -321,9 +336,28 @@ closeModalBtn.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', closeModal);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeCart(); } });
 
-// Pre-fill checkout when user signs in
+// Auth gate buttons in cart
+document.getElementById('cart-signin-btn')?.addEventListener('click', () => {
+  window.raeAuth?.openModal('in');
+});
+document.getElementById('cart-signup-btn')?.addEventListener('click', () => {
+  window.raeAuth?.openModal('up');
+});
+document.getElementById('cart-edit-account-btn')?.addEventListener('click', () => {
+  window.raeAuth?.openModal();
+});
+
+// Update cart auth state when user signs in/out/updates profile
 document.addEventListener('rae:auth', e => {
-  if (e.detail.type === 'signed-in' || e.detail.type === 'profile-updated') prefillCheckout();
+  const { type } = e.detail;
+  updateCartAuthState();
+  if (type === 'signed-out') {
+    // Clear prefilled fields on sign out
+    ['customerName','customerEmail','customerPhone'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+  }
 });
 
 // ─── PDF generation ────────────────────────────────────────────────────────
@@ -537,6 +571,11 @@ function persistOrderLocally({ customer, entries, orderReference, total }) {
 let customerDetails, cartEntries, orderReference, invoice;
 
 checkoutBtn.addEventListener('click', async () => {
+  if (!window.raeAuth?.isLoggedIn?.()) {
+    window.raeAuth?.openModal('up');
+    return;
+  }
+
   const name  = document.getElementById('customerName').value.trim();
   const email = document.getElementById('customerEmail').value.trim();
   const phone = document.getElementById('customerPhone').value.trim();

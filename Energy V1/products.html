@@ -124,34 +124,59 @@
     <div id="cartItems" class="cart-items"></div>
 
     <div class="cart-footer">
-      <div class="customer-fields">
-        <h4>Your Details</h4>
-        <div class="field-group">
-          <label for="customerName">Full Name</label>
-          <input id="customerName" type="text" placeholder="Enter your full name">
-          <p class="field-error-msg" id="nameError"></p>
+
+      <!-- Auth gate — shown when user is not signed in -->
+      <div id="cart-auth-gate" class="cart-auth-gate hidden">
+        <div class="cart-auth-icon">
+          <i class="fas fa-user-circle"></i>
         </div>
-        <div class="field-group">
-          <label for="customerEmail">Email Address</label>
-          <input id="customerEmail" type="email" placeholder="you@example.com">
-          <p class="field-error-msg" id="emailError"></p>
+        <h4>Sign in to send your quote</h4>
+        <p>Create a free account to send your quote and download your personalised PDF invoice.</p>
+        <div class="cart-auth-actions">
+          <button class="btn btn-primary btn-full" id="cart-signin-btn">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+          </button>
+          <button class="btn btn-outline-primary btn-full" id="cart-signup-btn">
+            <i class="fas fa-user-plus"></i> Create Account
+          </button>
         </div>
-        <div class="field-group">
-          <label for="customerPhone">Phone Number</label>
-          <input id="customerPhone" type="tel" placeholder="+254 7XX XXX XXX">
-          <p class="field-error-msg" id="phoneError"></p>
-        </div>
+        <p class="cart-auth-note">Your cart is saved and will be ready when you sign in.</p>
       </div>
 
-      <div class="cart-total">
-        <span>Subtotal</span>
-        <span id="cartTotal" class="cart-total-amount">KES 0</span>
+      <!-- Checkout form — shown when user is signed in -->
+      <div id="cart-checkout-form" class="hidden">
+        <div class="customer-fields">
+          <div class="customer-fields-header">
+            <h4>Your Details</h4>
+            <button class="cart-edit-account" id="cart-edit-account-btn">
+              <i class="fas fa-user-circle"></i> <span id="cart-user-label">Account</span>
+            </button>
+          </div>
+          <div class="field-group">
+            <label for="customerName">Full Name</label>
+            <input id="customerName" type="text" placeholder="Enter your full name">
+          </div>
+          <div class="field-group">
+            <label for="customerEmail">Email Address</label>
+            <input id="customerEmail" type="email" placeholder="you@example.com">
+          </div>
+          <div class="field-group">
+            <label for="customerPhone">Phone Number</label>
+            <input id="customerPhone" type="tel" placeholder="+254 7XX XXX XXX">
+          </div>
+        </div>
+
+        <div class="cart-total">
+          <span>Subtotal</span>
+          <span id="cartTotal" class="cart-total-amount">KES 0</span>
+        </div>
+
+        <button id="checkoutBtn" class="btn btn-primary btn-full checkout-btn">
+          <i class="fas fa-paper-plane"></i> Send Quote &amp; Download PDF
+        </button>
+        <p class="checkout-hint">We'll email and WhatsApp your PDF quote, and download a local copy.</p>
       </div>
 
-      <button id="checkoutBtn" class="btn btn-primary btn-full checkout-btn">
-        <i class="fas fa-paper-plane"></i> Send Quote &amp; Download PDF
-      </button>
-      <p class="checkout-hint">We'll email and WhatsApp your PDF quote, and download a local copy.</p>
     </div>
   </aside>
 

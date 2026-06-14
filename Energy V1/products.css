@@ -474,17 +474,88 @@
 .remove-btn:hover { background: #fee2e2; color: #ef4444; }
 
 .cart-footer {
-  padding: 16px 24px 24px;
+  padding: 20px 24px 28px;
   border-top: 1px solid var(--clr-border);
   flex-shrink: 0;
 }
+
+/* ── Auth gate (shown when logged out) ───────────────────── */
+.cart-auth-gate {
+  text-align: center;
+  padding: 8px 0 4px;
+}
+.cart-auth-icon {
+  width: 64px; height: 64px;
+  background: rgba(232,119,34,.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.cart-auth-icon i {
+  font-size: 1.8rem;
+  color: var(--clr-primary);
+}
+.cart-auth-gate h4 {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--clr-body);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+.cart-auth-gate > p {
+  font-size: 0.875rem;
+  color: var(--clr-muted);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.cart-auth-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.cart-auth-note {
+  font-size: 0.78rem;
+  color: var(--clr-muted);
+  text-align: center;
+}
+
+/* ── Customer fields header ──────────────────────────────── */
+.customer-fields-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.cart-edit-account {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--clr-primary);
+  font-family: var(--font-body);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+.cart-edit-account:hover { background: rgba(232,119,34,.08); }
 
 .customer-fields h4 {
   font-family: var(--font-heading);
   font-size: 0.88rem;
   font-weight: 700;
-  margin-bottom: 12px;
   color: var(--clr-body);
+  margin: 0;
 }
 .field-group {
   margin-bottom: 10px;

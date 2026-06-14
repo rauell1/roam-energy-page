@@ -179,7 +179,7 @@
   }
 
   /* ── Open / close modal ───────────────────────────────────────────────── */
-  function openModal() {
+  function openModal(tab) {
     const modal    = document.getElementById('rae-auth-modal');
     const backdrop = document.getElementById('rae-auth-backdrop');
     const user = getUser();
@@ -194,6 +194,8 @@
       document.getElementById('rae-avatar-initials').textContent = (user.full_name || user.email || '?')[0].toUpperCase();
       document.getElementById('rae-pf-name').value  = user.full_name || '';
       document.getElementById('rae-pf-phone').value = user.phone     || '';
+    } else if (tab) {
+      switchTab(tab);
     }
 
     modal.classList.remove('hidden');
