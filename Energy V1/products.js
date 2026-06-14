@@ -34,7 +34,7 @@ const KES_USD_RATE = 130.0;
 
 // ─── State ─────────────────────────────────────────────────────────────────
 const cart = {};
-let activeBrand = 'All';
+let activeCategory = 'All';
 
 // ─── DOM refs ──────────────────────────────────────────────────────────────
 const grid            = document.getElementById('productsGrid');
@@ -97,9 +97,9 @@ function filteredProducts() {
   const sort = sortSelect.value;
 
   let list = PRODUCTS.filter(p => {
-    const matchBrand = activeBrand === 'All' || p.brand === activeBrand;
+    const matchCategory = activeCategory === 'All' || p.category === activeCategory;
     const matchQ     = !q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
-    return matchBrand && matchQ;
+    return matchCategory && matchQ;
   });
 
   if (sort === 'low')  list = [...list].sort((a, b) => a.price - b.price);
@@ -281,10 +281,10 @@ openCartBtn.addEventListener('click', openCart);
 closeCartBtn.addEventListener('click', closeCart);
 cartOverlay.addEventListener('click', closeCart);
 
-// ─── Brand chips ───────────────────────────────────────────────────────────
+// ─── Filter chips ──────────────────────────────────────────────────────────
 document.querySelectorAll('.chip').forEach(chip => {
   chip.addEventListener('click', () => {
-    activeBrand = chip.dataset.brand;
+    activeCategory = chip.dataset.category;
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('chip-active'));
     chip.classList.add('chip-active');
     renderGrid();
