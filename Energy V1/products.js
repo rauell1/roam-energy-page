@@ -1,6 +1,6 @@
 // ─── Supabase config (anon / public key — safe for frontend) ──
-const SUPABASE_URL      = 'https://bpdysxhbyprfkmpkkynm.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwZHlzeGhieXByZmttcGtreW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTgzNDQsImV4cCI6MjA5NTQ3NDM0NH0.mBdTYEr3nrtTXjuyBHFl9AGG_rJn7kH7J5l-5E8uEQY';
+const SUPABASE_URL      = 'https://akbmydsqorsoijxsmwrh.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFrYm15ZHNxb3Jzb2lqeHNtd3JoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMzgyNDMsImV4cCI6MjA5NDYxNDI0M30.7zqrrNdn4golHcw9IFhFZemxfu0NGzdhqHPdflxSbSU';
 
 // ─── Product Catalogue (loaded from Supabase on boot) ──────
 let PRODUCTS = [];
