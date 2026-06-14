@@ -1220,3 +1220,133 @@ body.page-ready #page-overlay { opacity: 0; }
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   NAV AUTH BUTTON
+══════════════════════════════════════════════════════════════ */
+.nav-auth-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: transparent; border: 1.5px solid rgba(255,255,255,.2);
+  color: var(--clr-white); font-size: 1.15rem;
+  cursor: pointer; transition: border-color .18s, background .18s;
+  flex-shrink: 0;
+}
+.nav-auth-btn:hover { border-color: var(--clr-primary); background: rgba(20,110,245,.12); }
+.nav-auth-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--clr-primary); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 700; font-family: var(--font-heading);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AUTH MODAL
+══════════════════════════════════════════════════════════════ */
+.rae-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.65); backdrop-filter: blur(4px);
+  z-index: 1200; opacity: 0; transition: opacity .22s ease;
+}
+.rae-backdrop--open { opacity: 1; }
+
+.rae-modal {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -46%); opacity: 0;
+  z-index: 1201; width: 92%; max-width: 420px;
+  background: #111; border: 1px solid #2a2a2a;
+  border-radius: 16px; padding: 36px 32px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.6);
+  transition: transform .22s ease, opacity .22s ease;
+  max-height: 90vh; overflow-y: auto;
+}
+.rae-modal--open { transform: translate(-50%, -50%); opacity: 1; }
+
+.rae-modal-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 30px; height: 30px; border-radius: 50%;
+  font-size: 1.2rem; color: #6b7280;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background .15s, color .15s;
+  background: none; border: none;
+}
+.rae-modal-close:hover { background: #1e1e1e; color: #fff; }
+
+.rae-modal-logo { text-align: center; margin-bottom: 20px; }
+.rae-modal-logo img { height: 38px; margin: 0 auto; }
+
+/* Tabs */
+.rae-tabs {
+  display: flex; gap: 0; margin-bottom: 24px;
+  border-bottom: 1.5px solid #2a2a2a;
+}
+.rae-tab {
+  flex: 1; padding: 10px; font-size: .88rem; font-weight: 600;
+  color: #6b7280; background: none; border: none;
+  border-bottom: 2px solid transparent; margin-bottom: -1.5px;
+  cursor: pointer; transition: color .15s, border-color .15s;
+}
+.rae-tab:hover { color: #e5e7eb; }
+.rae-tab--active { color: var(--clr-primary); border-bottom-color: var(--clr-primary); }
+
+/* Form fields */
+.rae-form { display: flex; flex-direction: column; gap: 14px; }
+.rae-field { display: flex; flex-direction: column; gap: 5px; }
+.rae-field label {
+  font-size: .78rem; font-weight: 600; color: #6b7280;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.rae-field input {
+  background: #0a0a0a; border: 1.5px solid #2a2a2a;
+  border-radius: 8px; padding: 10px 13px;
+  color: #e5e7eb; font-family: inherit; font-size: .9rem; outline: none;
+  transition: border-color .18s;
+}
+.rae-field input:focus { border-color: var(--clr-primary); box-shadow: 0 0 0 3px rgba(20,110,245,.12); }
+
+.rae-btn-primary {
+  width: 100%; padding: 12px; border: none; border-radius: 8px;
+  background: var(--clr-primary); color: #fff;
+  font-family: var(--font-heading); font-size: .9rem; font-weight: 700;
+  cursor: pointer; margin-top: 4px; transition: background .15s, transform .12s;
+}
+.rae-btn-primary:hover:not(:disabled) { background: #0e58cc; }
+.rae-btn-primary:active { transform: scale(.98); }
+.rae-btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+
+.rae-btn-ghost {
+  width: 100%; padding: 10px; border: 1.5px solid #2a2a2a; border-radius: 8px;
+  background: transparent; color: #6b7280;
+  font-family: var(--font-heading); font-size: .88rem; font-weight: 600;
+  cursor: pointer; transition: border-color .15s, color .15s; margin-top: 4px;
+}
+.rae-btn-ghost:hover { border-color: #e5e7eb; color: #e5e7eb; }
+
+.rae-error   { font-size: .83rem; color: #f87171; margin: 0; }
+.rae-success { font-size: .83rem; color: #6ee7b7; margin: 0; }
+.rae-divider { border: none; border-top: 1px solid #2a2a2a; margin: 20px 0; }
+
+/* Profile view */
+.rae-profile-header {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 24px;
+}
+.rae-avatar {
+  width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+  background: var(--clr-primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; font-weight: 700; font-family: var(--font-heading);
+}
+.rae-profile-name  { font-weight: 700; color: #fff; font-size: 1rem; margin: 0; }
+.rae-profile-email { font-size: .82rem; color: #6b7280; margin: 2px 0 0; }
+
+/* Footer admin link */
+.footer-admin-link {
+  color: #3a3a3a; font-size: .75rem; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 4px;
+  transition: color .15s; margin-left: 12px;
+}
+.footer-admin-link:hover { color: #6b7280; }
+
+@media (max-width: 640px) {
+  .rae-modal { padding: 28px 20px; }
+}

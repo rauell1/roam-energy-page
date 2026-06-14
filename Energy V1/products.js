@@ -231,11 +231,23 @@ function updateCartUI() {
   });
 }
 
+function prefillCheckout() {
+  const user = window.raeAuth?.getUser?.();
+  if (!user) return;
+  const nameEl  = document.getElementById('customerName');
+  const emailEl = document.getElementById('customerEmail');
+  const phoneEl = document.getElementById('customerPhone');
+  if (nameEl  && !nameEl.value  && user.full_name) nameEl.value  = user.full_name;
+  if (emailEl && !emailEl.value && user.email)     emailEl.value = user.email;
+  if (phoneEl && !phoneEl.value && user.phone)     phoneEl.value = user.phone;
+}
+
 function openCart() {
   cartDrawerEl.classList.remove('drawer-closed');
   cartDrawerEl.classList.add('drawer-open');
   cartOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+  prefillCheckout();
 }
 
 function closeCart() {
@@ -308,6 +320,11 @@ function closeModal() {
 closeModalBtn.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', closeModal);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeCart(); } });
+
+// Pre-fill checkout when user signs in
+document.addEventListener('rae:auth', e => {
+  if (e.detail.type === 'signed-in' || e.detail.type === 'profile-updated') prefillCheckout();
+});
 
 // ─── PDF generation ────────────────────────────────────────────────────────
 async function generateInvoice(customerDetails, orderReference) {
