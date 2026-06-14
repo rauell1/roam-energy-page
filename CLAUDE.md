@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-14 15:30 UTC
+> Last updated: 2026-06-14 15:35 UTC
 
 ---
 
@@ -155,6 +155,8 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- fb0585f feat: add new logo and update all references sitewide
+- d4bb9e8 chore: update CLAUDE.md
 - c042584 feat: gate quote checkout behind account sign-in
 - 935acf7 chore: update CLAUDE.md
 - 379777d feat: forgot/reset password flow for admin login
@@ -163,6 +165,4 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 - 86ce205 chore: update CLAUDE.md
 - c8b0c06 feat: revamp color scheme to Roam orange + pill buttons
 - 2a08f1b chore: update CLAUDE.md
-- 2497eae feat: user accounts + admin access button
-- 832fd0e chore: update CLAUDE.md
 
