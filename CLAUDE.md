@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-14 15:35 UTC
+> Last updated: 2026-06-15 03:19 UTC
 
 ---
 
@@ -156,14 +156,14 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
-- fb0585f feat: add new logo and update all references sitewide
-- d4bb9e8 chore: update CLAUDE.md
-- c042584 feat: gate quote checkout behind account sign-in
-- 935acf7 chore: update CLAUDE.md
-- 379777d feat: forgot/reset password flow for admin login
-- abb3e70 chore: update CLAUDE.md
-- 5b49651 fix: restore click interactivity + remove all em/en dashes sitewide
-- 86ce205 chore: update CLAUDE.md
-- c8b0c06 feat: revamp color scheme to Roam orange + pill buttons
-- 2a08f1b chore: update CLAUDE.md
+- 7c0d9b9 feat: add upright Deye inverter image and Dyness Stack 100 product
+- 19bb157 feat: organize images into products/ and projects/ subdirectories, remove white backgrounds from Deye/Dyness images, and update references
+- 3670272 fix: update project image URLs in Supabase, parse comma-separated image paths for project carousels, and replace external Jinko panel image with local file
+- 09feb16 Upgrade proforma PDF invoice, fix phone number in Google Sheets, update Dyness product images
+- 161bb3d feat: include both Deye and Solis inverters in catalog, restore user images for Dyness and Deye, and use category-based filter chips
+- 1f623fa feat: add professional background-free product catalog images and update email body to explicitly include customer details follow-up table
+- baa1fb1 feat: clean up api response and complete production deployment
+- 54f68d6 docs: update CLAUDE.md catalog to reflect Solis inverters and pricing
+- eeb80b8 debug: expose storage upload error in api response
+- a70d2c7 feat: implement KES/USD quotation currency toggle, proforma invoice structure replica, fix google sheet phone number parsing, and link PDF to google sheet and email
 
