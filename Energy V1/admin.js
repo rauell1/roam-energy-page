@@ -553,6 +553,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeProductModal();
     closeProjectModal();
+    if (typeof closeSubscriberModal === 'function') closeSubscriberModal();
+    if (typeof closeNewsletterModal === 'function') closeNewsletterModal();
     pendingDelete = null;
     document.getElementById('confirm-modal').classList.add('hidden');
   }
@@ -628,3 +630,126 @@ function exportSubscribersCSV() {
 }
 
 document.getElementById('export-subscribers-btn').addEventListener('click', exportSubscribersCSV);
+
+/* ── Add Subscriber & Newsletter Broadcast Modals ─────────── */
+const subscriberModal = document.getElementById('subscriber-modal');
+const subscriberForm  = document.getElementById('subscriber-form');
+const newsletterModal = document.getElementById('newsletter-modal');
+const newsletterForm  = document.getElementById('newsletter-form');
+
+function openSubscriberModal() {
+  subscriberModal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+window.closeSubscriberModal = function() {
+  subscriberModal.classList.add('hidden');
+  subscriberForm.reset();
+  document.body.style.overflow = '';
+};
+
+function openNewsletterModal() {
+  newsletterModal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+window.closeNewsletterModal = function() {
+  newsletterModal.classList.add('hidden');
+  newsletterForm.reset();
+  document.getElementById('newsletter-status-box').classList.add('hidden');
+  document.body.style.overflow = '';
+};
+
+// Wire open buttons
+document.getElementById('add-subscriber-btn').addEventListener('click', openSubscriberModal);
+document.getElementById('compose-newsletter-btn').addEventListener('click', openNewsletterModal);
+
+// Wire close buttons
+document.getElementById('subscriber-modal-close').addEventListener('click', closeSubscriberModal);
+document.getElementById('subscriber-cancel-btn').addEventListener('click', closeSubscriberModal);
+document.getElementById('newsletter-modal-close').addEventListener('click', closeNewsletterModal);
+document.getElementById('newsletter-cancel-btn').addEventListener('click', closeNewsletterModal);
+
+// Click outside close
+subscriberModal.addEventListener('click', e => { if (e.target === subscriberModal) closeSubscriberModal(); });
+newsletterModal.addEventListener('click', e => { if (e.target === newsletterModal) closeNewsletterModal(); });
+
+// Submit subscriber
+subscriberForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const emailInput = document.getElementById('sub-email');
+  const email = emailInput ? emailInput.value.trim() : '';
+  if (!email) return;
+
+  const btn = document.getElementById('subscriber-save-btn');
+  btn.disabled = true; btn.textContent = 'Adding…';
+
+  try {
+    await apiPost({
+      table: 'subscribers',
+      action: 'insert',
+      data: { email }
+    });
+    toast('Subscriber added successfully!', 'success');
+    closeSubscriberModal();
+    await loadSubscribers();
+  } catch (err) {
+    let msg = err.message || 'Failed to add subscriber';
+    if (msg.includes('duplicate') || msg.includes('unique')) {
+      msg = 'This email is already subscribed!';
+    }
+    toast(msg, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Add Subscriber';
+  }
+});
+
+// Submit newsletter broadcast
+newsletterForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const subject = document.getElementById('news-subject').value.trim();
+  const title   = document.getElementById('news-title').value.trim();
+  const content = document.getElementById('news-content').value.trim();
+
+  if (!subject || !content) {
+    toast('Subject and Content are required.', 'error');
+    return;
+  }
+
+  const btn       = document.getElementById('newsletter-send-btn');
+  const cancelBtn = document.getElementById('newsletter-cancel-btn');
+  const statusBox = document.getElementById('newsletter-status-box');
+  const statusText = document.getElementById('newsletter-status-text');
+
+  // Disable UI
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Sending…';
+  cancelBtn.disabled = true;
+  statusBox.classList.remove('hidden');
+  statusText.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Querying subscribers and sending emails...';
+
+  try {
+    const res = await fetch('/api/newsletter', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ACCESS_TOKEN}`
+      },
+      body: JSON.stringify({ subject, title, content })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to dispatch newsletter');
+    }
+
+    toast(data.message || 'Broadcast completed successfully!', 'success');
+    closeNewsletterModal();
+    await loadSubscribers(); // Reload to count any updates
+  } catch (err) {
+    toast(err.message, 'error');
+    statusBox.classList.add('hidden');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Broadcast';
+    cancelBtn.disabled = false;
+  }
+});

@@ -143,9 +143,17 @@
     <div id="tab-subscribers" class="tab-content hidden">
       <div class="admin-toolbar">
         <h2>Newsletter Subscribers <span id="subscribers-count"></span></h2>
-        <button class="btn btn-secondary" id="export-subscribers-btn" style="background:#22c55e; border-color:#22c55e; color:#fff;">
-          <i class="fas fa-file-export"></i> Export CSV
-        </button>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn" id="compose-newsletter-btn" style="background:#f47920; border-color:#f47920; color:#fff; font-weight:600;">
+            <i class="fas fa-paper-plane"></i> Compose Newsletter
+          </button>
+          <button class="btn btn-primary" id="add-subscriber-btn" style="font-weight:600;">
+            <i class="fas fa-plus"></i> Add Subscriber
+          </button>
+          <button class="btn btn-secondary" id="export-subscribers-btn" style="background:#22c55e; border-color:#22c55e; color:#fff; font-weight:600;">
+            <i class="fas fa-file-export"></i> Export CSV
+          </button>
+        </div>
       </div>
       <div class="admin-table-wrap">
         <table class="admin-table">
@@ -299,6 +307,64 @@
       <div class="form-actions">
         <button type="button" class="btn btn-ghost" id="project-cancel-btn">Cancel</button>
         <button type="submit" class="btn btn-primary" id="project-save-btn">Save Project</button>
+      </div>
+    </form>
+  </div>
+<!-- ═══ ADD SUBSCRIBER MODAL ═══ -->
+<div id="subscriber-modal" class="modal-overlay hidden">
+  <div class="modal-card" style="max-width: 450px;">
+    <button class="modal-close" id="subscriber-modal-close"><i class="fas fa-times"></i></button>
+    <h3 id="subscriber-modal-title" style="margin-bottom: 20px; font-family: var(--adm-heading); color: var(--adm-white);">Add Subscriber</h3>
+    <form id="subscriber-form">
+      <div class="form-grid" style="grid-template-columns: 1fr;">
+        <div class="form-field full">
+          <label for="sub-email">Email Address</label>
+          <input type="email" id="sub-email" required placeholder="name@example.com" style="width: 100%; box-sizing: border-box;">
+        </div>
+      </div>
+      <div class="form-actions" style="margin-top: 24px;">
+        <button type="button" class="btn btn-ghost" id="subscriber-cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="subscriber-save-btn">Add Subscriber</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ COMPOSE NEWSLETTER MODAL ═══ -->
+<div id="newsletter-modal" class="modal-overlay hidden">
+  <div class="modal-card" style="max-width: 700px;">
+    <button class="modal-close" id="newsletter-modal-close"><i class="fas fa-times"></i></button>
+    <h3 style="margin-bottom: 20px; font-family: var(--adm-heading); color: var(--adm-white); display: flex; align-items: center; gap: 8px;">
+      <i class="fas fa-paper-plane" style="color: var(--adm-primary);"></i>Compose Newsletter Broadcast
+    </h3>
+    <form id="newsletter-form">
+      <div class="form-grid" style="grid-template-columns: 1fr;">
+        <div class="form-field full">
+          <label for="news-subject">Email Subject Line</label>
+          <input type="text" id="news-subject" required placeholder="e.g. Roam Energy Updates: Solis Inverters are Here!" style="width: 100%; box-sizing: border-box;">
+        </div>
+        <div class="form-field full">
+          <label for="news-title">Newsletter Header Title (Optional)</label>
+          <input type="text" id="news-title" placeholder="Defaults to 'Roam Energy News'" style="width: 100%; box-sizing: border-box;">
+        </div>
+        <div class="form-field full">
+          <label for="news-content">Newsletter Body Content</label>
+          <textarea id="news-content" required rows="10" placeholder="Type your newsletter body here...&#10;&#10;Double-newline creates a new paragraph.&#10;&#10;Supports **bold** formatting.&#10;&#10;Supports [links](https://example.com) formatting." style="width: 100%; box-sizing: border-box; background: var(--adm-bg); color: var(--adm-white); border: 1px solid var(--adm-border); border-radius: 6px; padding: 12px; font-family: inherit; font-size: 0.95rem;"></textarea>
+        </div>
+      </div>
+      
+      <!-- Send progress container -->
+      <div id="newsletter-status-box" class="hidden" style="margin-top: 16px; padding: 12px; background: rgba(244, 121, 32, 0.1); border: 1px solid rgba(244, 121, 32, 0.3); border-radius: 6px;">
+        <p id="newsletter-status-text" style="margin: 0; font-size: 0.9rem; color: var(--adm-white); display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-circle-notch fa-spin"></i> Preparing broadcast...
+        </p>
+      </div>
+
+      <div class="form-actions" style="margin-top: 24px;">
+        <button type="button" class="btn btn-ghost" id="newsletter-cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="newsletter-send-btn" style="background:#f47920; border-color:#f47920; color:#fff; font-weight:600;">
+          <i class="fas fa-paper-plane"></i> Send Broadcast
+        </button>
       </div>
     </form>
   </div>
