@@ -252,16 +252,15 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       btn.disabled = true;
       btn.textContent = '\u2026';
       try {
-        // 1. Save to Supabase subscribers table
-        await fetch(`${SUPABASE_URL}/rest/v1/subscribers`, {
+        // 1. Save to Supabase subscribers table via RPC
+        await fetch(`${SUPABASE_URL}/rest/v1/rpc/subscribe_email`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'apikey': SUPABASE_ANON,
-            'Authorization': `Bearer ${SUPABASE_ANON}`,
-            'Prefer': 'resolution=merge-duplicates'
+            'Authorization': `Bearer ${SUPABASE_ANON}`
           },
-          body: JSON.stringify({ email })
+          body: JSON.stringify({ email_addr: email })
         });
       } catch (err) {
         console.warn('Supabase subscription failed:', err);
