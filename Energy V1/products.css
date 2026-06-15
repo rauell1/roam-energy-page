@@ -13,6 +13,7 @@
   background-size: cover;
   background-position: center 60%;
   margin-top: var(--nav-h);
+  overflow: hidden;
 }
 .page-hero-overlay {
   position: absolute;
@@ -798,6 +799,8 @@
   .search-wrap input { width: 100%; }
   .filter-chips  { width: 100%; }
   .products-grid { grid-template-columns: 1fr; }
+  .page-hero-content h1 { font-size: clamp(1.8rem, 8vw, 2.4rem); }
+  .page-hero-content p { font-size: 0.9rem; }
 }
 
 /* ── System Recommender Wizard ───────────────────────────── */

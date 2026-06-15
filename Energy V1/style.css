@@ -241,8 +241,8 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   background-image: url('https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=2070&q=80');
   background-size: cover;
   background-position: center 40%;
-  background-attachment: fixed;
   padding-top: var(--nav-h);
+  overflow: hidden;
 }
 
 .hero-overlay {
@@ -260,8 +260,9 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   position: relative;
   z-index: 1;
   max-width: 700px;
+  width: 100%;
   padding: 80px 24px;
-  margin-left: max(24px, calc((100vw - 1200px) / 2));
+  margin-left: clamp(0px, calc((100vw - 1200px) / 2), 50vw);
 }
 
 .hero-eyebrow {
@@ -407,7 +408,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 /* ── Pillars Grid (About) ─────────────────────────────────── */
 .pillars-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 24px;
 }
 
@@ -542,7 +543,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 /* ── Projects Grid ────────────────────────────────────────── */
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 24px;
 }
 
@@ -625,7 +626,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 /* ── Testimonials ─────────────────────────────────────────── */
 .testimonials-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 20px;
 }
 
@@ -988,6 +989,7 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
   .hero-content {
     margin-left: 0;
     padding: 60px 24px;
+    max-width: 100%;
   }
 
   .stats-inner { flex-direction: column; gap: 0; }
@@ -1015,13 +1017,24 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
     border-radius: var(--radius-sm);
     border-bottom: none;
   }
-  .newsletter-form .btn { border-radius: var(--radius-sm); }
+  .newsletter-form .btn { border-radius: var(--radius-sm); width: 100%; justify-content: center; }
+
+  /* Ensure no element overflows the viewport */
+  .section { overflow-x: hidden; }
+  .container { padding: 0 16px; }
+  .footer-col ul { gap: 8px; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .footer-legal { flex-wrap: wrap; gap: 16px; }
 }
 
 @media (max-width: 480px) {
-  .section { padding: 72px 0; }
-  .product-showcase-body { padding: 28px 24px; }
-  .contact-form-wrapper { padding: 24px; }
+  .section { padding: 60px 0; }
+  .product-showcase-body { padding: 28px 20px; }
+  .contact-form-wrapper { padding: 20px; }
+  .stat-item { padding: 20px 24px; }
+  .hero h1 { font-size: clamp(2rem, 10vw, 2.8rem); }
+  .testimonial-card { padding: 24px 20px; }
+  .pillar-card { padding: 32px 24px; }
 }
 
 /* ── AOS override ─────────────────────────────────────────── */
