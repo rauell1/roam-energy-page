@@ -17,6 +17,10 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
 html { font-size: 15px; }
 body {
   font-family: var(--adm-font);
