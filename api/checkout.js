@@ -76,6 +76,9 @@ function validateOrderPayload(payload) {
 
   if (errors.length) return { errors, order: null };
 
+  const source = normalizeString(payload.source || 'web') || 'web';
+  const queuedAt = payload.queuedAt ? new Date(payload.queuedAt).toISOString() : null;
+
   return {
     errors: [],
     order: {
@@ -90,6 +93,8 @@ function validateOrderPayload(payload) {
       filename,
       pdfBase64,
       totalAmount,
+      source,
+      queuedAt,
     },
   };
 }
@@ -98,15 +103,17 @@ async function storeOrder(order, pdfUrl) {
   const db = getSupabase();
   const { data, error } = await db.from(appConfig.supabase.ordersTable).insert({
     order_reference: order.orderReference,
-    customer_name: order.customer.name,
-    customer_email: order.customer.email,
-    customer_phone: order.customer.phone,
-    cart: order.cart,
-    currency: order.currency,
-    total_amount: order.totalAmount,
-    filename: order.filename,
-    status: 'pending',
-    pdf_url: pdfUrl,
+    customer_name:   order.customer.name,
+    customer_email:  order.customer.email,
+    customer_phone:  order.customer.phone,
+    cart:            order.cart,
+    currency:        order.currency,
+    total_amount:    order.totalAmount,
+    filename:        order.filename,
+    status:          'pending',
+    pdf_url:         pdfUrl,
+    source:          order.source || 'web',
+    queued_at:       order.queuedAt || null,
   }).select('id').single();
   if (error) throw new Error(`Supabase insert failed: ${error.message}`);
   return data.id;
@@ -263,19 +270,185 @@ function buildEmailHtml(order, pdfUrl) {
 </html>`;
 }
 
+function buildAdminEmailHtml(order, pdfUrl) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Nairobi' });
+  const isOfflineSync = order.source === 'web-offline-sync';
+
+  const lineItems = order.cart.map((item) => `
+    <tr>
+      <td style="padding:10px 16px;border-bottom:1px solid #334155;font-size:13px;color:#e2e8f0;">${item.name || item.id}</td>
+      <td style="padding:10px 16px;border-bottom:1px solid #334155;font-size:13px;color:#94a3b8;text-align:center;">${item.qty}</td>
+      <td style="padding:10px 16px;border-bottom:1px solid #334155;font-size:13px;color:#94a3b8;text-align:right;">${order.currency} ${(item.price || 0).toLocaleString()}</td>
+      <td style="padding:10px 16px;border-bottom:1px solid #334155;font-size:13px;font-weight:700;color:#f8fafc;text-align:right;">${order.currency} ${((item.price || 0) * item.qty).toLocaleString()}</td>
+    </tr>`).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0f172a;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f172a;padding:32px 0;">
+    <tr><td align="center">
+      <table width="620" cellpadding="0" cellspacing="0" style="background:#1e293b;border-radius:12px;overflow:hidden;max-width:620px;width:100%;border:1px solid #334155;">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:#0f172a;padding:24px 32px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <span style="background:#ef4444;color:#fff;font-size:10px;font-weight:800;letter-spacing:0.12em;padding:4px 10px;border-radius:4px;text-transform:uppercase;">NEW ORDER</span>
+                  ${isOfflineSync ? '<span style="background:#f59e0b;color:#000;font-size:10px;font-weight:800;letter-spacing:0.10em;padding:4px 10px;border-radius:4px;text-transform:uppercase;margin-left:8px;">OFFLINE SYNC</span>' : ''}
+                  <span style="display:block;font-size:20px;font-weight:800;color:#f8fafc;margin-top:10px;letter-spacing:-0.02em;">Roam <span style="color:#146EF5;">Energy</span> · Admin Notification</span>
+                </td>
+                <td align="right" style="white-space:nowrap;">
+                  <span style="font-size:12px;color:#64748b;">${dateStr}</span><br>
+                  <span style="font-size:12px;color:#64748b;">${timeStr} EAT</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Summary bar -->
+        <tr>
+          <td style="background:#162032;border-top:1px solid #334155;border-bottom:1px solid #334155;padding:0;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding:16px 32px;border-right:1px solid #334155;">
+                  <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;">Reference</span>
+                  <span style="display:block;font-size:15px;font-weight:800;color:#f8fafc;margin-top:4px;font-family:monospace;">${order.orderReference}</span>
+                </td>
+                <td style="padding:16px 32px;border-right:1px solid #334155;">
+                  <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;">Total</span>
+                  <span style="display:block;font-size:15px;font-weight:800;color:#22c55e;margin-top:4px;">${order.currency} ${order.totalAmount.toLocaleString()}</span>
+                </td>
+                <td style="padding:16px 32px;">
+                  <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;">Source</span>
+                  <span style="display:block;font-size:15px;font-weight:800;color:#f8fafc;margin-top:4px;">${order.source || 'web'}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Customer info -->
+        <tr>
+          <td style="padding:28px 32px 0;">
+            <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;">Customer Details</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f172a;border-radius:8px;border:1px solid #334155;">
+              <tr>
+                <td style="padding:20px 24px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding:6px 0;font-size:13px;color:#94a3b8;width:80px;">Name</td>
+                      <td style="padding:6px 0;font-size:14px;font-weight:700;color:#f8fafc;">${order.customer.name}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:6px 0;font-size:13px;color:#94a3b8;">Phone</td>
+                      <td style="padding:6px 0;font-size:14px;font-weight:700;color:#f8fafc;">
+                        <a href="tel:${order.customer.phone}" style="color:#22c55e;text-decoration:none;">${order.customer.phone}</a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:6px 0;font-size:13px;color:#94a3b8;">Email</td>
+                      <td style="padding:6px 0;font-size:14px;font-weight:700;color:#f8fafc;">
+                        <a href="mailto:${order.customer.email}" style="color:#146EF5;text-decoration:none;">${order.customer.email}</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Line items -->
+        <tr>
+          <td style="padding:24px 32px 0;">
+            <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;">Order Items</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #334155;border-radius:8px;overflow:hidden;">
+              <thead>
+                <tr style="background:#0f172a;">
+                  <th style="padding:10px 16px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;text-align:left;">Product</th>
+                  <th style="padding:10px 16px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;text-align:center;">Qty</th>
+                  <th style="padding:10px 16px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;text-align:right;">Unit Price</th>
+                  <th style="padding:10px 16px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;text-align:right;">Line Total</th>
+                </tr>
+              </thead>
+              <tbody>${lineItems}</tbody>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Total -->
+        <tr>
+          <td style="padding:20px 32px 0;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f172a;border-radius:8px;border:1px solid #334155;padding:0;">
+              <tr>
+                <td style="padding:16px 24px;" align="right">
+                  <span style="font-size:12px;color:#64748b;">Grand Total (excl. VAT &amp; installation)</span><br>
+                  <span style="font-size:28px;font-weight:800;color:#22c55e;letter-spacing:-0.02em;">${order.currency} ${order.totalAmount.toLocaleString()}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Actions -->
+        <tr>
+          <td style="padding:24px 32px;">
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                ${pdfUrl ? `
+                <td style="padding-right:12px;">
+                  <a href="${pdfUrl}" style="display:inline-block;background:#146EF5;color:#fff;font-size:13px;font-weight:700;padding:12px 22px;border-radius:6px;text-decoration:none;">View PDF Quotation</a>
+                </td>` : ''}
+                <td>
+                  <a href="mailto:${order.customer.email}?subject=Re: Quotation ${order.orderReference}" style="display:inline-block;border:1px solid #334155;color:#94a3b8;font-size:13px;font-weight:700;padding:12px 22px;border-radius:6px;text-decoration:none;">Reply to Customer</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#0f172a;border-top:1px solid #334155;padding:16px 32px;">
+            <p style="margin:0;font-size:11px;color:#475569;">Roam Energy admin notification · This email is sent only to authorised recipients · <a href="https://roam-energy.vercel.app/" style="color:#475569;">roam-energy.vercel.app</a></p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 async function sendOrderEmail(order, pdfUrl) {
   const attachmentContent = order.pdfBase64.replace('data:application/pdf;base64,', '');
+  const attachment = { content: attachmentContent, filename: order.filename, type: 'application/pdf' };
 
+  // 1. Customer-facing email (friendly quote receipt)
   await resend.emails.send({
-    from: appConfig.email.fromAddress,
-    to: order.customer.email,
-    bcc: 'roy.otieno@roam-electric.com',
+    from:    appConfig.email.fromAddress,
+    to:      order.customer.email,
     replyTo: 'energy@roam-electric.com',
     subject: `Your Roam Energy quotation — ${order.orderReference}`,
-    html: buildEmailHtml(order, pdfUrl),
-    attachments: [
-      { content: attachmentContent, filename: order.filename, type: 'application/pdf' },
-    ],
+    html:    buildEmailHtml(order, pdfUrl),
+    attachments: [attachment],
+  });
+
+  // 2. Admin notification (dedicated, not BCC) — explicit tracking for Roy
+  await resend.emails.send({
+    from:    appConfig.email.fromAddress,
+    to:      'roy.otieno@roam-electric.com',
+    replyTo: order.customer.email,
+    subject: `[NEW ORDER] ${order.orderReference} — ${order.customer.name} — ${order.currency} ${Number(order.totalAmount).toLocaleString()}`,
+    html:    buildAdminEmailHtml(order, pdfUrl),
+    attachments: [attachment],
   });
 }
 
@@ -399,9 +572,9 @@ export default async function handler(req, res) {
 
   try {
     await sendOrderEmail(order, pdfUrl);
-    await markOrderDelivery(orderId, { email_sent: true, status: 'confirmed' });
+    await markOrderDelivery(orderId, { email_sent: true, admin_notified: true, status: 'confirmed' });
   } catch (error) {
-    console.error('Email send failed (order already saved)', error);
+    console.error('Email send failed (order already saved in Supabase)', error);
     await markOrderDelivery(orderId, { status: 'delivery_failed' });
   }
 

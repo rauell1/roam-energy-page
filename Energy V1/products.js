@@ -658,14 +658,70 @@ function generateOrderReference() {
   return `RE-${ts}-${rand}`;
 }
 
-function persistOrderLocally({ customer, entries, orderReference, total }) {
+// ─── Offline Quote Log & Retry Queue ───────────────────────────────────────
+// QUOTE_LOG: persistent audit log of every quote generated (survives page close)
+// PENDING_Q : orders waiting to be POSTed to the server (e.g. submitted offline)
+const QUOTE_LOG_KEY  = 'roam_quote_log';
+const PENDING_Q_KEY  = 'roam_pending_queue';
+
+function logQuote(ref, status, extra = {}) {
   try {
-    sessionStorage.setItem('roamLastOrder', JSON.stringify({
-      customer, entries, orderReference, currency: ORDER_CURRENCY, total,
-      savedAt: new Date().toISOString(),
-    }));
+    const log = JSON.parse(localStorage.getItem(QUOTE_LOG_KEY) || '[]');
+    const idx = log.findIndex(e => e.ref === ref);
+    const entry = { ref, status, ...extra, updatedAt: new Date().toISOString() };
+    if (idx >= 0) log[idx] = { ...log[idx], ...entry };
+    else log.unshift(entry);
+    localStorage.setItem(QUOTE_LOG_KEY, JSON.stringify(log.slice(0, 200)));
   } catch (_) {}
 }
+
+function enqueueOrder(payload) {
+  try {
+    const q = JSON.parse(localStorage.getItem(PENDING_Q_KEY) || '[]');
+    if (!q.find(e => e.orderReference === payload.orderReference)) {
+      q.push({ ...payload, queuedAt: new Date().toISOString() });
+      localStorage.setItem(PENDING_Q_KEY, JSON.stringify(q));
+    }
+  } catch (_) {}
+}
+
+function dequeueOrder(ref) {
+  try {
+    const q = JSON.parse(localStorage.getItem(PENDING_Q_KEY) || '[]');
+    localStorage.setItem(PENDING_Q_KEY, JSON.stringify(q.filter(e => e.orderReference !== ref)));
+  } catch (_) {}
+}
+
+async function drainQueue() {
+  if (!navigator.onLine) return;
+  let q;
+  try { q = JSON.parse(localStorage.getItem(PENDING_Q_KEY) || '[]'); } catch (_) { return; }
+  if (!q.length) return;
+
+  let synced = 0;
+  for (const item of [...q]) {
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (API_ACCESS_TOKEN) headers['x-api-key'] = API_ACCESS_TOKEN;
+      const res = await fetch(API_ENDPOINT, {
+        method: 'POST', headers,
+        body: JSON.stringify({ ...item, source: 'web-offline-sync' }),
+      });
+      if (res.ok) {
+        dequeueOrder(item.orderReference);
+        logQuote(item.orderReference, 'synced');
+        synced++;
+      }
+    } catch (_) {}
+  }
+  if (synced) showToast(`${synced} offline quote${synced > 1 ? 's' : ''} synced and emailed.`, 'success');
+}
+
+// Auto-drain when network is restored
+window.addEventListener('online', () => {
+  showToast('Back online — syncing queued quotes…', '');
+  setTimeout(drainQueue, 1500); // brief delay to let connection stabilise
+});
 
 // ─── Checkout ──────────────────────────────────────────────────────────────
 let customerDetails, cartEntries, orderReference, invoice;
@@ -686,43 +742,62 @@ checkoutBtn.addEventListener('click', async () => {
     return;
   }
 
-  const origHTML   = checkoutBtn.innerHTML;
-  checkoutBtn.innerHTML  = '<i class="fas fa-spinner fa-spin"></i> Sending…';
-  checkoutBtn.disabled   = true;
+  const origHTML = checkoutBtn.innerHTML;
+  checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
+  checkoutBtn.disabled  = true;
 
   customerDetails = { name, email, phone };
-  cartEntries     = Object.entries(cart).map(([id, qty]) => ({
-    id, qty, price: PRODUCTS.find(p => p.id === id)?.price,
-    name: PRODUCTS.find(p => p.id === id)?.name,
+  cartEntries = Object.entries(cart).map(([id, qty]) => ({
+    id, qty,
+    price: PRODUCTS.find(p => p.id === id)?.price,
+    name:  PRODUCTS.find(p => p.id === id)?.name,
   }));
-  orderReference  = generateOrderReference();
+  orderReference = generateOrderReference();
 
   try {
-    if (window.raeAuth?.isLoggedIn?.() && typeof window.raeAuth.updateProfile === 'function') {
-      await window.raeAuth.updateProfile(name, phone).catch(err => {
-        console.warn('Failed to auto-update profile on checkout:', err);
-      });
+    if (typeof window.raeAuth?.updateProfile === 'function') {
+      await window.raeAuth.updateProfile(name, phone).catch(() => {});
     }
 
     invoice        = await generateInvoice(customerDetails, orderReference);
     invoice.base64 = await blobToDataUrl(invoice.blob);
     downloadInvoice(invoice.blob, invoice.filename);
 
+    const payload = {
+      user:        customerDetails,
+      cart:        cartEntries,
+      orderReference,
+      filename:    invoice.filename,
+      pdfBase64:   invoice.base64,
+      currency:    ORDER_CURRENCY,
+      totalAmount: invoice.total,
+      source:      'web',
+    };
+
+    // Always log locally first — survives offline, browser close, API failures
+    logQuote(orderReference, 'local', {
+      customer: customerDetails,
+      cart:     cartEntries,
+      currency: ORDER_CURRENCY,
+      total:    invoice.total,
+    });
+
+    if (!navigator.onLine) {
+      enqueueOrder(payload);
+      logQuote(orderReference, 'queued');
+      showToast('You\'re offline. Quote saved locally and will sync + email when you reconnect.', '');
+      return;
+    }
+
+    // Pre-queue so a hard failure (power cut etc.) still retries on next visit
+    enqueueOrder(payload);
+
     const headers = { 'Content-Type': 'application/json' };
     if (API_ACCESS_TOKEN) headers['x-api-key'] = API_ACCESS_TOKEN;
 
     const response = await fetch(API_ENDPOINT, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        user: customerDetails,
-        cart: cartEntries,
-        orderReference,
-        filename:    invoice.filename,
-        pdfBase64:   invoice.base64,
-        currency:    ORDER_CURRENCY,
-        totalAmount: invoice.total,
-      }),
+      method: 'POST', headers,
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -730,12 +805,16 @@ checkoutBtn.addEventListener('click', async () => {
       throw new Error(data.detail || data.message || 'API error');
     }
 
-    persistOrderLocally({ customer: customerDetails, entries: cartEntries, orderReference, total: invoice.total });
-    showToast('Quote sent! Check your email for the invoice.', 'success');
+    // Success — remove from retry queue and update log
+    dequeueOrder(orderReference);
+    logQuote(orderReference, 'synced');
+    showToast('Quote sent! Check your inbox for the invoice.', 'success');
 
   } catch (e) {
     console.error('Checkout error:', e);
-    showToast('Something went wrong. Please try again or contact us directly.', 'error');
+    // Order stays in queue — drainQueue() will retry when online
+    logQuote(orderReference, 'queued');
+    showToast('Quote saved locally. It will sync and email automatically when reconnected.', '');
   } finally {
     checkoutBtn.innerHTML = origHTML;
     checkoutBtn.disabled  = false;
@@ -885,6 +964,8 @@ sortSelect.addEventListener('change',  renderGrid);
   }
   try {
     PRODUCTS = await fetchProducts();
+    // Drain any orders that were queued while offline
+    if (navigator.onLine) drainQueue();
   } catch (e) {
     console.error('Could not load products:', e);
     if (grid) {
