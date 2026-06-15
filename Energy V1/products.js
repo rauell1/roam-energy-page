@@ -410,7 +410,7 @@ async function generateInvoice(customerDetails, orderReference) {
   doc.setFontSize(16);
   doc.setFont(undefined, 'bold');
   doc.setTextColor(0, 0, 0);
-  doc.text('Proforma Invoice', RIGHT_END, 18, { align: 'right' });
+  doc.text('Pro Forma-Invoice', RIGHT_END, 18, { align: 'right' });
   doc.setFontSize(8.5);
   doc.setFont(undefined, 'normal');
   doc.setTextColor(80, 80, 80);
@@ -422,37 +422,32 @@ async function generateInvoice(customerDetails, orderReference) {
   doc.setLineWidth(0.4);
   doc.line(LEFT_MARGIN, 36, RIGHT_END, 36);
 
-  // ── 4. BILL TO (left) & COMPANY (right) ──────────────────────────────────
+  // ── 4. CUSTOMER (left) & COMPANY (right) ─────────────────────────────────
   let y = 42;
-  doc.setFontSize(7.5);
-  doc.setTextColor(120, 120, 120);
-  doc.setFont(undefined, 'bold');
-  doc.text('BILL TO', LEFT_MARGIN, y);
-  doc.text('ROAM ELECTRIC LIMITED', RIGHT_END, y, { align: 'right' });
-
-  y += 5;
   doc.setFont(undefined, 'bold');
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
   doc.text(safeName, LEFT_MARGIN, y);
+  doc.text('Roam Electric Limited', RIGHT_END, y, { align: 'right' });
+
+  y += 5;
   doc.setFontSize(9);
   doc.setFont(undefined, 'normal');
   doc.setTextColor(50, 50, 50);
 
   const companyLines = [
     'National Park East Gate Rd.',
-    'P.O. Box 18284, Nairobi 00500',
+    'P.O. Box nr 18284',
+    'Nairobi, 00500',
     'Kenya',
-    'Tel: +254 740 666 555',
-    'info@roam-electric.com',
   ];
   companyLines.forEach((line, i) => {
     doc.text(line, RIGHT_END, y + i * 4.8, { align: 'right' });
   });
 
   doc.setFontSize(9);
-  doc.text(`Phone: ${safePhone}`, LEFT_MARGIN, y + 5);
-  doc.text(`Email: ${safeEmail}`, LEFT_MARGIN, y + 10);
+  doc.text(`Phone: ${safePhone}`, LEFT_MARGIN, y);
+  doc.text(`Email: ${safeEmail}`, LEFT_MARGIN, y + 5);
 
   // ── 5. SECOND HORIZONTAL RULE ────────────────────────────────────────────
   y = 78;
@@ -462,22 +457,23 @@ async function generateInvoice(customerDetails, orderReference) {
   // ── 6. METADATA TABLE (two columns) ──────────────────────────────────────
   y = 84;
   const leftMeta = [
-    ['Document No.',         orderReference],
-    ['VAT Registration No.', 'P05170428D'],
+    ['Document No',          orderReference],
+    ['VAT Registration No.', ''],
     ['Document Date',        dateStr],
     ['Currency',             ORDER_CURRENCY],
     ['Salesperson',          'Roy Otieno'],
   ];
   const rightMeta = [
-    ['Email',          'info@roam-electric.com'],
-    ['Home Page',      'www.roam-electric.com'],
-    ['Phone No.',      '+254 740 666 555'],
-    ['Mpesa Till No.', '9572270'],
-    ['Bank',           'Standard Chartered'],
-    ['Account No.',    '0102487879100 (KES)'],
-    ['Account No.',    '8702487879100 (USD)'],
-    ['Branch',         'Industrial Area 053'],
-    ['SWIFT Code',     'SCBLKENXXXX'],
+    ['Email',                'info@roam-electric.com'],
+    ['Home Page',            'www.roam-electric.com'],
+    ['Phone No.',            '+254740666555'],
+    ['VAT Registration No.', 'P05170428D'],
+    ['Mpesa Till No.',       '9572270'],
+    ['Bank',                 'Standard Chartered'],
+    ['Account No.',          '0102487879100 (KES)'],
+    ['Account No.',          '8702487879100 (USD)'],
+    ['Branch',               'Industrial Area 053'],
+    ['SWIFT Code',           'SCBLKENXXXX'],
   ];
 
   doc.setFontSize(8.5);
@@ -581,14 +577,17 @@ async function generateInvoice(customerDetails, orderReference) {
     doc.text(value,  RIGHT_END,   y, { align: 'right' });
     y += 6;
   };
-  drawTotalRow('Sub-Total',       formatAmt(grandTotal), false);
-  drawTotalRow('VAT (0%)',        '0.00',                 false);
-  doc.setDrawColor(20, 110, 245);
-  doc.setLineWidth(0.6);
-  doc.line(TOT_LABEL_X, y - 2, RIGHT_END, y - 2);
+  drawTotalRow('Total Amount', formatAmt(grandTotal), false);
+  // VAT Amount row with bottom border (matches Pro Forma-Invoice template)
+  doc.setFont(undefined, 'normal');
+  doc.text('VAT Amount', TOT_LABEL_X, y);
+  doc.text('0.00', RIGHT_END, y, { align: 'right' });
+  doc.setDrawColor(180, 180, 180);
   doc.setLineWidth(0.4);
+  doc.line(TOT_LABEL_X, y + 2, RIGHT_END, y + 2);
   doc.setDrawColor(0);
-  drawTotalRow(`Total (${ORDER_CURRENCY})`, formatAmt(grandTotal), true);
+  y += 6;
+  drawTotalRow('Total Incl. VAT', formatAmt(grandTotal), true);
 
   // ── 10. FOOTER NOTE ───────────────────────────────────────────────────────
   const footerY = PAGE_HEIGHT - 18;
