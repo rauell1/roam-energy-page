@@ -225,7 +225,8 @@ const TYPE_BADGE     = { 'grid-tied': 'adm-badge-gridtied', 'off-grid': 'adm-bad
 
 function imgThumb(url) {
   if (!url) return '<div class="adm-img-thumb" style="background:#222;"></div>';
-  return `<img class="adm-img-thumb" src="${url}" alt="" loading="lazy" onerror="this.style.display='none'">`;
+  const firstUrl = url.split(',')[0].trim();
+  return `<img class="adm-img-thumb" src="${firstUrl}" alt="" loading="lazy" onerror="this.style.display='none'">`;
 }
 
 function skeletonRows(cols, n = 3) {

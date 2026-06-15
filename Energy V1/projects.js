@@ -15,7 +15,7 @@ function transformProject(row) {
   return {
     id:          row.id,
     name:        row.title,
-    images:      row.image_url ? [row.image_url] : [],
+    images:      row.image_url ? row.image_url.split(',').map(s => s.trim()) : [],
     location:    row.location,
     type:        typeMap[row.type] || row.type,
     size:        row.size_kwp   ? `${row.size_kwp} kWp`   : 'N/A',
