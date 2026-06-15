@@ -238,21 +238,44 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 /* ── Newsletter form AJAX ────────────────────────────────── */
 (function () {
+  const SUPABASE_URL  = 'https://akbmydsqorsoijxsmwrh.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFrYm15ZHNxb3Jzb2lqeHNtd3JoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMzgyNDMsImV4cCI6MjA5NDYxNDI0M30.7zqrrNdn4golHcw9IFhFZemxfu0NGzdhqHPdflxSbSU';
+
   document.querySelectorAll('.newsletter-form').forEach(form => {
     form.addEventListener('submit', async e => {
       e.preventDefault();
       const btn   = form.querySelector('button[type="submit"]');
-      const email = form.querySelector('input[type="email"]').value;
-      const orig  = btn.textContent;
+      const emailInput = form.querySelector('input[type="email"]');
+      const email = emailInput ? emailInput.value.trim() : '';
+      if (!email) return;
+
       btn.disabled = true;
       btn.textContent = '\u2026';
       try {
+        // 1. Save to Supabase subscribers table
+        await fetch(`${SUPABASE_URL}/rest/v1/subscribers`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${SUPABASE_ANON}`,
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({ email })
+        });
+      } catch (err) {
+        console.warn('Supabase subscription failed:', err);
+      }
+
+      try {
+        // 2. Submit to FormSubmit.co for notification
         await fetch('https://formsubmit.co/ajax/roy.otieno@roam-electric.com', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({ email, _subject: 'Newsletter Signup: Roam Energy' })
         });
       } catch (_) { /* silent */ }
+
       form.innerHTML = '<p class="newsletter-success">Subscribed! \u2705 Thanks for joining.</p>';
     });
   });

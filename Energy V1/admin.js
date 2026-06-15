@@ -216,6 +216,7 @@ function showPanel() {
   adminPanel.classList.remove('hidden');
   loadProducts();
   loadProjects();
+  loadSubscribers();
 }
 
 // On page load: verify the stored token is still valid AND belongs to the admin
@@ -534,7 +535,8 @@ document.getElementById('confirm-delete').addEventListener('click', async () => 
     await apiPost({ table: pendingDelete.table, action: 'delete', id: pendingDelete.id });
     toast('Deleted!', 'success');
     if (pendingDelete.table === 'products') await loadProducts();
-    else await loadProjects();
+    else if (pendingDelete.table === 'projects') await loadProjects();
+    else if (pendingDelete.table === 'subscribers') await loadSubscribers();
   } catch (e) {
     toast(e.message, 'error');
   } finally {
@@ -555,3 +557,74 @@ document.addEventListener('keydown', e => {
     document.getElementById('confirm-modal').classList.add('hidden');
   }
 });
+
+/* ═══ SUBSCRIBERS ════════════════════════════════════════════ */
+let allSubscribers = [];
+
+async function loadSubscribers() {
+  const tbody = document.getElementById('subscribers-tbody');
+  const countEl = document.getElementById('subscribers-count');
+  if (tbody) tbody.innerHTML = skeletonRows(3);
+  try {
+    allSubscribers = await apiGet('subscribers');
+    if (countEl) countEl.textContent = `(${allSubscribers.length})`;
+    renderSubscribersTable();
+  } catch (e) {
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>${e.message}</p></div></td></tr>`;
+    }
+  }
+}
+
+function renderSubscribersTable() {
+  const tbody = document.getElementById('subscribers-tbody');
+  if (!tbody) return;
+  if (allSubscribers.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state"><i class="fas fa-envelope"></i><p>No newsletter subscribers found.</p></div></td></tr>`;
+    return;
+  }
+  
+  tbody.innerHTML = allSubscribers.map(s => {
+    const dateStr = s.created_at ? new Date(s.created_at).toLocaleDateString('en-GB', {
+      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    }) : 'N/A';
+    
+    return `
+      <tr>
+        <td style="font-weight: 600;">${s.email}</td>
+        <td>${dateStr}</td>
+        <td>
+          <button class="btn btn-sm btn-outline" onclick="confirmDelete('subscribers', '${s.id}', '${s.email}')" style="color:#ef4444; border-color:#fca5a5; background:transparent;">
+            <i class="fas fa-trash-alt"></i> Unsubscribe
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function exportSubscribersCSV() {
+  if (allSubscribers.length === 0) {
+    toast('No subscribers to export', 'error');
+    return;
+  }
+  
+  let csv = 'Email,Signup Date\n';
+  allSubscribers.forEach(s => {
+    const dateStr = s.created_at ? new Date(s.created_at).toISOString() : '';
+    csv += `"${s.email.replace(/"/g, '""')}",${dateStr}\n`;
+  });
+  
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', `Roam_Energy_Subscribers_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast('CSV exported!', 'success');
+}
+
+document.getElementById('export-subscribers-btn').addEventListener('click', exportSubscribersCSV);

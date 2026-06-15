@@ -82,6 +82,9 @@
       <button class="admin-tab" data-tab="projects">
         <i class="fas fa-building"></i> Projects
       </button>
+      <button class="admin-tab" data-tab="subscribers">
+        <i class="fas fa-envelope"></i> Subscribers
+      </button>
     </nav>
 
     <!-- ─── PRODUCTS TAB ─── -->
@@ -132,6 +135,28 @@
             </tr>
           </thead>
           <tbody id="projects-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── SUBSCRIBERS TAB ─── -->
+    <div id="tab-subscribers" class="tab-content hidden">
+      <div class="admin-toolbar">
+        <h2>Newsletter Subscribers <span id="subscribers-count"></span></h2>
+        <button class="btn btn-secondary" id="export-subscribers-btn" style="background:#22c55e; border-color:#22c55e; color:#fff;">
+          <i class="fas fa-file-export"></i> Export CSV
+        </button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Email Address</th>
+              <th>Signup Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="subscribers-tbody"></tbody>
         </table>
       </div>
     </div>

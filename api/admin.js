@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-const ALLOWED_TABLES = ['products', 'projects'];
+const ALLOWED_TABLES = ['products', 'projects', 'subscribers'];
 
 const ALLOWED_ADMIN_EMAIL = 'roy.otieno@roam-electric.com';
 
@@ -43,10 +43,12 @@ export default async function handler(req, res) {
     if (!ALLOWED_TABLES.includes(table)) {
       return res.status(400).json({ error: 'Invalid table' });
     }
+    const orderCol = table === 'subscribers' ? 'created_at' : 'sort_order';
+    const ascending = table !== 'subscribers';
     const { data, error } = await db
       .from(table)
       .select('*')
-      .order('sort_order', { ascending: true });
+      .order(orderCol, { ascending });
     if (error) return res.status(500).json({ error: error.message });
     return res.status(200).json({ data });
   }
