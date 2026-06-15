@@ -743,6 +743,134 @@ checkoutBtn.addEventListener('click', async () => {
   }
 });
 
+// ─── System Recommender ───────────────────────────────────────────────────
+let currentRecommendation = null;
+
+function updateRecommendation() {
+  const billSlider = document.getElementById('monthlyPowerBill');
+  if (!billSlider) return;
+  const bill = parseInt(billSlider.value, 10);
+  const needBackup = document.querySelector('input[name="needBackup"]:checked').value === 'yes';
+  
+  const billValEl = document.getElementById('billVal');
+  if (billValEl) {
+    billValEl.textContent = 'KES ' + bill.toLocaleString('en-KE');
+  }
+
+  let panels = { id: 'jinko-585w', qty: 0 };
+  let inverter = { id: '', qty: 1 };
+  let battery = { id: '', qty: 0 };
+  let sizeLabel = '';
+
+  if (bill <= 8000) {
+    panels = { id: 'jinko-585w', qty: 4 }; // 2.34 kWp
+    inverter = { id: 'deye-5kw-single', qty: 1 };
+    if (needBackup) battery = { id: 'dyness-5kwh', qty: 1 };
+    sizeLabel = '2.3 kWp Eco System';
+  } else if (bill <= 20000) {
+    panels = { id: 'jinko-585w', qty: 8 }; // 4.68 kWp
+    inverter = { id: 'solis-6kw', qty: 1 };
+    if (needBackup) battery = { id: 'dyness-5kwh', qty: 2 };
+    sizeLabel = '4.7 kWp Smart System';
+  } else if (bill <= 50000) {
+    panels = { id: 'jinko-620w', qty: 16 }; // 9.92 kWp
+    inverter = { id: 'solis-12kw', qty: 1 };
+    if (needBackup) battery = { id: 'dyness-10kwh', qty: 2 };
+    sizeLabel = '9.9 kWp Executive System';
+  } else if (bill <= 100000) {
+    panels = { id: 'jinko-620w', qty: 32 }; // 19.8 kWp
+    inverter = { id: 'solis-18kw', qty: 1 };
+    if (needBackup) battery = { id: 'dyness-stack100', qty: 1 };
+    sizeLabel = '19.8 kWp Commercial System';
+  } else {
+    panels = { id: 'jinko-620w', qty: 64 }; // 39.6 kWp
+    inverter = { id: 'solis-50kw', qty: 1 };
+    if (needBackup) battery = { id: 'dyness-stack100', qty: 2 };
+    sizeLabel = '39.6 kWp Industrial System';
+  }
+
+  const panelProd = PRODUCTS.find(p => p.id === panels.id);
+  const invProd = PRODUCTS.find(p => p.id === inverter.id);
+  const batProd = battery.id ? PRODUCTS.find(p => p.id === battery.id) : null;
+
+  let items = [];
+  if (panelProd) items.push({ product: panelProd, qty: panels.qty });
+  if (invProd) items.push({ product: invProd, qty: inverter.qty });
+  if (batProd) items.push({ product: batProd, qty: battery.qty });
+
+  currentRecommendation = items;
+
+  let totalCost = items.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
+
+  const resultEl = document.getElementById('recommenderResult');
+  if (!resultEl) return;
+  resultEl.parentElement.classList.add('calculated');
+
+  let itemsHtml = items.map(item => `
+    <div class="recommender-rec-item">
+      <div class="rec-item-left">
+        <div class="rec-item-img">
+          <img src="${item.product.image}" alt="${item.product.name}">
+        </div>
+        <span class="rec-item-qty">x${item.qty}</span>
+        <span class="rec-item-name">${item.product.name}</span>
+      </div>
+      <span class="rec-item-price">${formatPrice(item.product.price * item.qty)}</span>
+    </div>
+  `).join('');
+
+  resultEl.innerHTML = `
+    <p class="recommender-rec-title">Recommended Package</p>
+    <h4 class="recommender-rec-name">${sizeLabel}</h4>
+    <div class="recommender-rec-items">
+      ${itemsHtml}
+    </div>
+    <div class="recommender-rec-total">
+      <span>Est. Package Total</span>
+      <strong>${formatPrice(totalCost)}</strong>
+    </div>
+    <button id="addRecToCartBtn" class="btn btn-primary recommender-rec-btn">
+      <i class="fas fa-cart-plus"></i> Add Package to Cart
+    </button>
+  `;
+
+  document.getElementById('addRecToCartBtn').addEventListener('click', () => {
+    currentRecommendation.forEach(item => {
+      cart[item.product.id] = (cart[item.product.id] || 0) + item.qty;
+    });
+    updateCartUI();
+    showToast('Recommended system added to cart!', 'success');
+    openCart();
+  });
+}
+
+function initRecommender() {
+  const recCard = document.getElementById('recommenderCard');
+  const header = document.getElementById('recommenderHeader');
+  const body = document.getElementById('recommenderBody');
+  const billSlider = document.getElementById('monthlyPowerBill');
+  const radioButtons = document.getElementsByName('needBackup');
+
+  if (!recCard || !header || !body || !billSlider) return;
+
+  header.addEventListener('click', () => {
+    const isHidden = body.classList.toggle('hidden');
+    recCard.classList.toggle('active', !isHidden);
+    
+    const toggleSpan = document.querySelector('#toggleRecommenderBtn span');
+    if (toggleSpan) {
+      toggleSpan.textContent = isHidden ? 'Open Recommender' : 'Close Recommender';
+    }
+  });
+
+  billSlider.addEventListener('input', updateRecommendation);
+  radioButtons.forEach(radio => {
+    radio.addEventListener('change', updateRecommendation);
+  });
+
+  updateRecommendation();
+}
+
 // ─── Filters ───────────────────────────────────────────────────────────────
 searchInput.addEventListener('input',  renderGrid);
 sortSelect.addEventListener('change',  renderGrid);
@@ -771,4 +899,5 @@ sortSelect.addEventListener('change',  renderGrid);
   }
   renderGrid();
   updateCartUI();
+  initRecommender();
 })();

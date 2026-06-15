@@ -106,6 +106,66 @@
   <!-- ═══ PRODUCTS GRID ═══ -->
   <main class="products-page">
     <div class="container">
+
+      <!-- System Recommendation Wizard -->
+      <div class="recommender-card" id="recommenderCard">
+        <div class="recommender-header" id="recommenderHeader">
+          <div class="recommender-title-wrap">
+            <span class="recommender-badge"><i class="fas fa-magic"></i> Recommender</span>
+            <h3>Not sure what you need? Calculate your system</h3>
+            <p>Enter your electricity usage to get an instant customized solar package recommendation.</p>
+          </div>
+          <button id="toggleRecommenderBtn" class="recommender-toggle-btn" aria-label="Toggle calculator">
+            <span>Open Recommender</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+        </div>
+
+        <div class="recommender-body hidden" id="recommenderBody">
+          <div class="recommender-grid">
+            <div class="recommender-inputs">
+              <div class="field-group">
+                <label for="monthlyPowerBill">Average Monthly Electricity Bill</label>
+                <div class="bill-slider-container">
+                  <input type="range" id="monthlyPowerBill" min="3000" max="150000" step="1000" value="15000">
+                  <div class="bill-slider-labels">
+                    <span>KES 3,000</span>
+                    <span id="billVal" class="bill-val-highlight">KES 15,000</span>
+                    <span>KES 150,000+</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field-group" style="margin-top: 24px;">
+                <label>Do you need battery backup for blackouts?</label>
+                <div class="backup-options">
+                  <label class="backup-option">
+                    <input type="radio" name="needBackup" value="yes" checked>
+                    <span class="backup-radio-custom"></span>
+                    <div class="backup-option-text">
+                      <strong>Yes, Hybrid System (Savings + Backup)</strong>
+                      <span>Powers essential appliances during blackouts and stores power for night use.</span>
+                    </div>
+                  </label>
+                  <label class="backup-option">
+                    <input type="radio" name="needBackup" value="no">
+                    <span class="backup-radio-custom"></span>
+                    <div class="backup-option-text">
+                      <strong>No, Grid-Tied System (Savings Only)</strong>
+                      <span>Lowers daytime electricity bills; system shuts down during blackouts for safety.</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="recommender-result" id="recommenderResult">
+              <!-- Result content will be injected by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="productsGrid" class="products-grid"></div>
     </div>
   </main>
