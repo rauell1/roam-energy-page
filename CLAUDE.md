@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-15 17:13 UTC
+> Last updated: 2026-06-15 17:31 UTC
 
 ---
 
@@ -156,6 +156,8 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- 57304da feat: admin email notifications, offline quote queue, and full Supabase logging
+- ddd66f9 chore: update CLAUDE.md
 - 26886c7 fix: update PDF invoice to match Pro Forma-Invoice template
 - a5b44fc fix: remove black rocks from Deye inverter, remove white halos, and crop empty padding from all product images
 - a358e45 feat: rotate Deye inverter to portrait, integrate new background-free Solis/Dyness/Jinko product assets, and expand image display dimensions to fill card spaces
@@ -164,6 +166,4 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 - 7c0d9b9 feat: add upright Deye inverter image and Dyness Stack 100 product
 - 19bb157 feat: organize images into products/ and projects/ subdirectories, remove white backgrounds from Deye/Dyness images, and update references
 - 3670272 fix: update project image URLs in Supabase, parse comma-separated image paths for project carousels, and replace external Jinko panel image with local file
-- 09feb16 Upgrade proforma PDF invoice, fix phone number in Google Sheets, update Dyness product images
-- 161bb3d feat: include both Deye and Solis inverters in catalog, restore user images for Dyness and Deye, and use category-based filter chips
 
