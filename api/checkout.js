@@ -471,14 +471,29 @@ async function triggerGoogleSheetsWebhook(order, pdfUrl) {
     timestamp: new Date().toISOString()
   };
 
+  const body = JSON.stringify(payload);
+  const headers = { 'Content-Type': 'application/json' };
+
   try {
-    const res = await fetch(webhookUrl, {
+    // Google Apps Script /exec endpoints return a 302 redirect on POST requests.
+    // Node fetch follows the redirect but converts POST→GET, so doPost() never fires.
+    // Fix: catch the redirect manually and re-issue the POST to the final URL.
+    let res = await fetch(webhookUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      headers,
+      body,
+      redirect: 'manual',
     });
+
+    if (res.status >= 300 && res.status < 400) {
+      const location = res.headers.get('location');
+      if (location) {
+        res = await fetch(location, { method: 'POST', headers, body });
+      }
+    }
+
     if (!res.ok) {
-      console.error('Google Sheets Webhook failed:', res.statusText);
+      console.error('Google Sheets Webhook failed:', res.status, res.statusText);
     } else {
       console.log('Google Sheets Webhook successfully triggered.');
     }
