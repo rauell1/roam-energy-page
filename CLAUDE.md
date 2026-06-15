@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-15 17:35 UTC
+> Last updated: 2026-06-15 18:31 UTC
 
 ---
 
@@ -156,6 +156,8 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- ec565de fix: handle Google Apps Script redirect to keep POST body in webhook
+- a7d99cf chore: update CLAUDE.md
 - c85c883 security: lock admin panel exclusively to roy.otieno@roam-electric.com
 - 6c49309 chore: update CLAUDE.md
 - 57304da feat: admin email notifications, offline quote queue, and full Supabase logging
@@ -164,6 +166,4 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 - a5b44fc fix: remove black rocks from Deye inverter, remove white halos, and crop empty padding from all product images
 - a358e45 feat: rotate Deye inverter to portrait, integrate new background-free Solis/Dyness/Jinko product assets, and expand image display dimensions to fill card spaces
 - af9be8e feat: add simple interactive system recommendation wizard to products page
-- 7041367 chore: update CLAUDE.md
-- 7c0d9b9 feat: add upright Deye inverter image and Dyness Stack 100 product
 
