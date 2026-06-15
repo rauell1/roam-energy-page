@@ -243,7 +243,7 @@ function buildEmailHtml(order, pdfUrl) {
             <table cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
               <tr>
                 <td style="background:#146EF5;border-radius:6px;padding:14px 28px;">
-                  <a href="https://roam-energy.vercel.app/" style="display:inline-block;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;">Visit Roam Energy</a>
+                  <a href="https://roam-energy.rauell.systems/" style="display:inline-block;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;">Visit Roam Energy</a>
                 </td>
                 ${pdfUrl ? `
                 <td style="padding-left:16px;">
@@ -416,7 +416,7 @@ function buildAdminEmailHtml(order, pdfUrl) {
         <!-- Footer -->
         <tr>
           <td style="background:#0f172a;border-top:1px solid #334155;padding:16px 32px;">
-            <p style="margin:0;font-size:11px;color:#475569;">Roam Energy admin notification · This email is sent only to authorised recipients · <a href="https://roam-energy.vercel.app/" style="color:#475569;">roam-energy.vercel.app</a></p>
+            <p style="margin:0;font-size:11px;color:#475569;">Roam Energy admin notification · This email is sent only to authorised recipients · <a href="https://roam-energy.rauell.systems/" style="color:#475569;">roam-energy.rauell.systems</a></p>
           </td>
         </tr>
 

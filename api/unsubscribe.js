@@ -143,13 +143,13 @@ function renderResponse(success, title, message) {
 </head>
 <body>
   <div class="card">
-    <a href="https://roam-energy.vercel.app/" class="logo">ROAM<span>ENERGY</span></a>
+    <a href="https://roam-energy.rauell.systems/" class="logo">ROAM<span>ENERGY</span></a>
     <div>
       <div class="icon-circle">${icon}</div>
     </div>
     <h1>${title}</h1>
     <p>${message}</p>
-    <a href="https://roam-energy.vercel.app/" class="btn">Return to Website</a>
+    <a href="https://roam-energy.rauell.systems/" class="btn">Return to Website</a>
   </div>
 </body>
 </html>

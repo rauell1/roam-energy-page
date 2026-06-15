@@ -120,7 +120,7 @@ export default async function handler(req, res) {
     // 5. Send individually to support unique unsubscribe links
     const sendPromises = subscribers.map(async (subscriber) => {
       const email = subscriber.email.trim();
-      const unsubUrl = `https://roam-energy.vercel.app/api/unsubscribe?email=${encodeURIComponent(email)}`;
+      const unsubUrl = `https://roam-energy.rauell.systems/api/unsubscribe?email=${encodeURIComponent(email)}`;
       
       const emailHtml = `
 <!DOCTYPE html>
