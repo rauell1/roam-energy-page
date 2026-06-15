@@ -51,6 +51,11 @@ async function attemptLogin(email, password) {
   loginError.classList.add('hidden');
 
   try {
+    // Reject immediately — no Supabase round-trip needed for wrong email
+    if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+      throw new Error('Access denied. This account is not authorised for admin access.');
+    }
+
     const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
       method: 'POST',
       headers: {
@@ -66,8 +71,9 @@ async function attemptLogin(email, password) {
       throw new Error(json.error_description || json.msg || 'Invalid credentials.');
     }
 
-    if (json.user?.email !== ADMIN_EMAIL) {
-      throw new Error('Access denied. Unauthorised account.');
+    // Double-check the token's claimed email (defence-in-depth)
+    if (json.user?.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+      throw new Error('Access denied. This account is not authorised for admin access.');
     }
 
     ACCESS_TOKEN = json.access_token;
@@ -115,6 +121,13 @@ document.getElementById('forgot-btn').addEventListener('click', async () => {
   msgEl.className = 'hidden';
 
   if (!email) { msgEl.textContent = 'Please enter your email.'; msgEl.className = 'forgot-error'; return; }
+
+  // Only the authorised admin email may request a reset link
+  if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    msgEl.textContent = 'Password reset is only available for the authorised admin account.';
+    msgEl.className = 'forgot-error';
+    return;
+  }
 
   btn.disabled = true; btn.textContent = 'Sending…';
   try {
@@ -205,7 +218,27 @@ function showPanel() {
   loadProjects();
 }
 
-if (ACCESS_TOKEN) showPanel();
+// On page load: verify the stored token is still valid AND belongs to the admin
+// before ever showing the panel — prevents stale or foreign tokens from bypassing
+// the login screen.
+if (ACCESS_TOKEN) {
+  (async () => {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+        headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${ACCESS_TOKEN}` },
+      });
+      const json = await res.json();
+      if (!res.ok || json.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        throw new Error('Unauthorised');
+      }
+      showPanel();
+    } catch {
+      ACCESS_TOKEN = '';
+      sessionStorage.removeItem('roam_admin_token');
+      loginScreen.classList.remove('hidden');
+    }
+  })();
+}
 
 /* ── Tabs ─────────────────────────────────────────────────── */
 document.querySelectorAll('.admin-tab').forEach(tab => {
