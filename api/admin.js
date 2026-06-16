@@ -28,23 +28,42 @@ async function getAuthorizedUser(req) {
 // Push a status/salesperson change back to the Google Sheet row
 async function syncOrderUpdateToSheet(order) {
   const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
-  if (!webhookUrl) return;
+  if (!webhookUrl) {
+    console.error('[SheetSync] GOOGLE_SHEETS_WEBHOOK_URL not set');
+    return;
+  }
 
-  const body = JSON.stringify({
+  const payload = {
     action: 'update',
     orderReference: order.order_reference,
     status: order.status,
     salesperson: order.salesperson || '',
-  });
+  };
+  console.log('[SheetSync] Sending:', JSON.stringify(payload));
+
+  const body = JSON.stringify(payload);
   const headers = { 'Content-Type': 'application/json' };
 
   try {
     let res = await fetch(webhookUrl, { method: 'POST', headers, body, redirect: 'manual' });
+    console.log('[SheetSync] Initial response:', res.status);
+
     if (res.status >= 300 && res.status < 400) {
       const location = res.headers.get('location');
-      if (location) await fetch(location, { method: 'POST', headers, body });
+      console.log('[SheetSync] Redirect to:', location);
+      if (location) {
+        res = await fetch(location, { method: 'POST', headers, body });
+        console.log('[SheetSync] Redirect response:', res.status);
+        const text = await res.text();
+        console.log('[SheetSync] Redirect body:', text);
+      }
+    } else {
+      const text = await res.text();
+      console.log('[SheetSync] Response body:', text);
     }
-  } catch (_) {}
+  } catch (err) {
+    console.error('[SheetSync] Error:', err.message);
+  }
 }
 
 export default async function handler(req, res) {
