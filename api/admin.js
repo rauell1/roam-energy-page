@@ -45,20 +45,30 @@ async function syncOrderUpdateToSheet(order) {
   const body = JSON.stringify(payload);
   const headers = { 'Content-Type': 'application/json' };
 
+  const log = { ref: payload.orderReference, step: '', status1: 0, location: '', status2: 0, body: '' };
   try {
+    log.step = 'fetch1';
     let res = await fetch(webhookUrl, { method: 'POST', headers, body, redirect: 'manual' });
-    console.log('[SheetSync] Initial response:', res.status);
+    log.status1 = res.status;
 
     if (res.status >= 300 && res.status < 400) {
       const location = res.headers.get('location');
-      console.log('[SheetSync] Redirect to:', location);
-      if (!location) return { ok: false, status: 'no_redirect_location', detail: '' };
+      log.location = location || '';
+      if (!location) {
+        log.step = 'no_location';
+        console.log('[SheetSync]', JSON.stringify(log));
+        return { ok: false, status: 'no_redirect_location', detail: '' };
+      }
+      log.step = 'fetch2';
       res = await fetch(location, { method: 'POST', headers, body });
-      console.log('[SheetSync] Redirect response:', res.status);
+      log.status2 = res.status;
+    } else {
+      log.step = 'direct';
     }
 
     const text = await res.text();
-    console.log('[SheetSync] Final body:', text);
+    log.body = text.slice(0, 300);
+    console.log('[SheetSync]', JSON.stringify(log));
 
     let parsed;
     try { parsed = JSON.parse(text); } catch (_) { parsed = { status: 'unparseable', raw: text }; }
@@ -67,7 +77,9 @@ async function syncOrderUpdateToSheet(order) {
     return { ok, status: parsed?.status ?? 'unknown', detail: text };
 
   } catch (err) {
-    console.error('[SheetSync] Error:', err.message);
+    log.step = 'error';
+    log.body = err.message;
+    console.log('[SheetSync]', JSON.stringify(log));
     return { ok: false, status: 'fetch_error', detail: err.message };
   }
 }
