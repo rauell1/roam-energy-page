@@ -29,3 +29,40 @@ export async function getHeaders(sheets, spreadsheetId) {
   });
   return (res.data.values?.[0] || []).map(h => h.toLowerCase().trim());
 }
+
+// Map a Supabase order row to a sheet row array (aligned to headers)
+export function buildSheetRow(headers, order) {
+  const cart = Array.isArray(order.cart) ? order.cart : [];
+  const itemsStr = cart.map(i => `${i.name || i.id} (Qty: ${i.qty})`).join(', ');
+  const status = order.status
+    ? order.status.charAt(0).toUpperCase() + order.status.slice(1)
+    : 'Draft';
+
+  const fieldMap = {
+    'order reference': order.order_reference,
+    'order ref':       order.order_reference,
+    'customer name':   order.customer_name,
+    'name':            order.customer_name,
+    'email':           order.customer_email,
+    'phone':           order.customer_phone,
+    'total':           order.total_amount,
+    'amount':          order.total_amount,
+    'currency':        order.currency,
+    'items':           itemsStr,
+    'pdf':             order.pdf_url || '',
+    'link':            order.pdf_url || '',
+    'date':            order.created_at || '',
+    'timestamp':       order.created_at || '',
+    'status':          status,
+    'salesperson':     order.salesperson || '',
+    'expiry':          order.expiry_date || '',
+    'source':          order.source || '',
+  };
+
+  return headers.map(h => {
+    for (const [key, val] of Object.entries(fieldMap)) {
+      if (h.includes(key)) return val ?? '';
+    }
+    return '';
+  });
+}

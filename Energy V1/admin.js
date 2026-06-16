@@ -447,6 +447,27 @@ document.getElementById('orders-status-filter')?.addEventListener('change', appl
 document.getElementById('orders-search')?.addEventListener('input', applyOrderFilters);
 document.getElementById('refresh-orders-btn')?.addEventListener('click', loadOrders);
 
+document.getElementById('sync-sheet-btn')?.addEventListener('click', async () => {
+  const btn = document.getElementById('sync-sheet-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing…';
+  try {
+    const res = await fetch(`${API_BASE}`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'sync_sheet' }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Sync failed');
+    toast(`Sheet synced — ${json.appended} added, ${json.updated} updated (${json.total} total)`, 'success');
+  } catch (err) {
+    toast(`Sync failed: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-table"></i> Sync All to Sheet';
+  }
+});
+
 document.getElementById('export-orders-btn')?.addEventListener('click', () => {
   if (!filteredOrders.length) { toast('No orders to export', 'error'); return; }
   const cols = ['order_reference','customer_name','customer_email','customer_phone','total_amount','currency','status','salesperson','expiry_date','pdf_url','created_at'];
