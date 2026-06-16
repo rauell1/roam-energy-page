@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-16 12:31 UTC
+> Last updated: 2026-06-16 12:37 UTC
 
 ---
 
@@ -156,6 +156,8 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- c8a6a98 feat: write PDF URLs as clickable HYPERLINK formulas in Google Sheet
+- 91f5135 chore: update CLAUDE.md
 - fe890b1 feat: full sheet sync — upsert on admin update, sync-all button pushes every order
 - 04ca669 chore: update CLAUDE.md
 - 09c101d feat: use Sheets API in checkout (append) and admin (update), share auth via sheets.js
@@ -164,6 +166,4 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 - 889bbad chore: update CLAUDE.md
 - 7eade5d feat: replace AppScript webhook with Google Sheets API direct integration
 - 26953d7 chore: update CLAUDE.md
-- 61883ef debug: remove first SheetSync log so diagnostic JSON is first visible entry
-- 748600e chore: update CLAUDE.md
 
