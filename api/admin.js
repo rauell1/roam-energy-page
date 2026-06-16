@@ -26,11 +26,12 @@ async function getAuthorizedUser(req) {
 }
 
 // Push a status/salesperson change back to the Google Sheet row
+// Returns an object: { ok: boolean, status: string, detail: string }
 async function syncOrderUpdateToSheet(order) {
   const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
   if (!webhookUrl) {
     console.error('[SheetSync] GOOGLE_SHEETS_WEBHOOK_URL not set');
-    return;
+    return { ok: false, status: 'no_url', detail: 'GOOGLE_SHEETS_WEBHOOK_URL not configured' };
   }
 
   const payload = {
@@ -51,18 +52,23 @@ async function syncOrderUpdateToSheet(order) {
     if (res.status >= 300 && res.status < 400) {
       const location = res.headers.get('location');
       console.log('[SheetSync] Redirect to:', location);
-      if (location) {
-        res = await fetch(location, { method: 'POST', headers, body });
-        console.log('[SheetSync] Redirect response:', res.status);
-        const text = await res.text();
-        console.log('[SheetSync] Redirect body:', text);
-      }
-    } else {
-      const text = await res.text();
-      console.log('[SheetSync] Response body:', text);
+      if (!location) return { ok: false, status: 'no_redirect_location', detail: '' };
+      res = await fetch(location, { method: 'POST', headers, body });
+      console.log('[SheetSync] Redirect response:', res.status);
     }
+
+    const text = await res.text();
+    console.log('[SheetSync] Final body:', text);
+
+    let parsed;
+    try { parsed = JSON.parse(text); } catch (_) { parsed = { status: 'unparseable', raw: text }; }
+
+    const ok = parsed?.status === 'updated';
+    return { ok, status: parsed?.status ?? 'unknown', detail: text };
+
   } catch (err) {
     console.error('[SheetSync] Error:', err.message);
+    return { ok: false, status: 'fetch_error', detail: err.message };
   }
 }
 
@@ -116,7 +122,9 @@ export default async function handler(req, res) {
       result = await db.from(table).update(data).eq('id', id).select().single();
       // Mirror the change to Google Sheets
       if (table === 'orders' && !result.error && result.data) {
-        await syncOrderUpdateToSheet(result.data);
+        const sheetSync = await syncOrderUpdateToSheet(result.data);
+        if (result.error) return res.status(500).json({ error: result.error.message });
+        return res.status(200).json({ data: result.data ?? null, sheetSync });
       }
     } else if (action === 'delete') {
       if (!id) return res.status(400).json({ error: 'id required' });

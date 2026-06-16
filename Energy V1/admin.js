@@ -514,13 +514,21 @@ document.getElementById('order-save-btn')?.addEventListener('click', async () =>
   };
 
   try {
-    await apiPost({ table: 'orders', action: 'update', id, data });
+    const result = await apiPost({ table: 'orders', action: 'update', id, data });
     // Update local cache immediately
     const idx = allOrders.findIndex(o => o.id === id);
     if (idx !== -1) allOrders[idx] = { ...allOrders[idx], ...data };
     applyOrderFilters();
     closeOrderModal();
-    toast('Order updated and synced to sheet!', 'success');
+
+    const sync = result?.sheetSync;
+    if (!sync) {
+      toast('Order saved.', 'success');
+    } else if (sync.ok) {
+      toast('Order saved and sheet updated!', 'success');
+    } else {
+      toast(`Order saved — sheet sync: ${sync.status} | ${sync.detail}`, 'error');
+    }
   } catch (err) {
     toast(err.message, 'error');
   } finally {
