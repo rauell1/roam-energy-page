@@ -40,7 +40,6 @@ async function syncOrderUpdateToSheet(order) {
     status: order.status,
     salesperson: order.salesperson || '',
   };
-  console.log('[SheetSync] Sending:', JSON.stringify(payload));
 
   const body = JSON.stringify(payload);
   const headers = { 'Content-Type': 'application/json' };
