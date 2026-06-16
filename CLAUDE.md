@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-16 11:23 UTC
+> Last updated: 2026-06-16 11:33 UTC
 
 ---
 
@@ -156,6 +156,8 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- 57732a3 chore: redeploy after env var fix
+- cfde87f chore: update CLAUDE.md
 - e438a77 chore: redeploy with corrected GOOGLE_SHEETS_WEBHOOK_URL
 - 58676b4 chore: update CLAUDE.md
 - 6c39341 chore: fix GOOGLE_SHEETS_WEBHOOK_URL newline in env var
@@ -164,6 +166,4 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 - 29d4f67 chore: update CLAUDE.md
 - 27b1be0 chore: redeploy to pick up updated GOOGLE_SHEETS_WEBHOOK_URL
 - 95e8c75 chore: update CLAUDE.md
-- 9752fa8 fix: lowercase status in orders-sync so sheet->Supabase stays consistent
-- 3aab651 chore: update CLAUDE.md
 
