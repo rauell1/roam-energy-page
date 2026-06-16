@@ -76,7 +76,10 @@
 
     <!-- Tabs -->
     <nav class="admin-tabs">
-      <button class="admin-tab active" data-tab="products">
+      <button class="admin-tab active" data-tab="orders">
+        <i class="fas fa-file-invoice"></i> Orders
+      </button>
+      <button class="admin-tab" data-tab="products">
         <i class="fas fa-solar-panel"></i> Products
       </button>
       <button class="admin-tab" data-tab="projects">
@@ -87,8 +90,55 @@
       </button>
     </nav>
 
+    <!-- ─── ORDERS TAB ─── -->
+    <div id="tab-orders" class="tab-content">
+      <div class="admin-toolbar">
+        <h2>Orders <span id="orders-count"></span></h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" id="refresh-orders-btn">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+          <button class="btn btn-sm" id="export-orders-btn" style="background:#22c55e;border-color:#22c55e;color:#fff;font-weight:600;">
+            <i class="fas fa-file-export"></i> Export CSV
+          </button>
+        </div>
+      </div>
+      <!-- Stats bar -->
+      <div id="orders-stats" class="orders-stats"></div>
+      <!-- Filters -->
+      <div class="orders-filters">
+        <select id="orders-status-filter">
+          <option value="">All Statuses</option>
+          <option value="draft">Draft</option>
+          <option value="contacted">Contacted</option>
+          <option value="quoted">Quoted</option>
+          <option value="won">Won</option>
+          <option value="lost">Lost</option>
+          <option value="expired">Expired</option>
+        </select>
+        <input type="text" id="orders-search" placeholder="Search name, email, ref…" style="max-width:220px;">
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>Customer</th>
+              <th class="hide-mobile">Amount</th>
+              <th>Status</th>
+              <th class="hide-mobile">Salesperson</th>
+              <th class="hide-mobile">Expiry</th>
+              <th>PDF</th>
+              <th>Edit</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ─── PRODUCTS TAB ─── -->
-    <div id="tab-products" class="tab-content">
+    <div id="tab-products" class="tab-content hidden">
       <div class="admin-toolbar">
         <h2>Products <span id="products-count"></span></h2>
         <button class="btn btn-primary" id="add-product-btn">
@@ -169,6 +219,43 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ═══ ORDER EDIT MODAL ═══ -->
+<div id="order-modal" class="modal-overlay hidden">
+  <div class="modal-card" style="max-width:520px;">
+    <button class="modal-close" id="order-modal-close"><i class="fas fa-times"></i></button>
+    <h3><i class="fas fa-file-invoice" style="color:var(--adm-primary);margin-right:8px;"></i>Update Order</h3>
+    <input type="hidden" id="oe-id">
+
+    <!-- Read-only order summary -->
+    <div id="oe-info" class="order-info-block"></div>
+
+    <div class="form-grid" style="grid-template-columns:1fr 1fr;margin-top:20px;">
+      <div class="form-field">
+        <label for="oe-status">Pipeline Status</label>
+        <select id="oe-status">
+          <option value="draft">Draft — new inquiry</option>
+          <option value="contacted">Contacted</option>
+          <option value="quoted">Quoted</option>
+          <option value="won">Won</option>
+          <option value="lost">Lost</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="oe-salesperson">Assigned To</label>
+        <input id="oe-salesperson" placeholder="Salesperson name…">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-ghost" id="order-cancel-btn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="order-save-btn">
+        <i class="fas fa-save"></i> Save &amp; Sync to Sheet
+      </button>
+    </div>
   </div>
 </div>
 

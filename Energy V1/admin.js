@@ -214,6 +214,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
 function showPanel() {
   loginScreen.classList.add('hidden');
   adminPanel.classList.remove('hidden');
+  loadOrders();
   loadProducts();
   loadProjects();
   loadSubscribers();
@@ -240,6 +241,212 @@ if (ACCESS_TOKEN) {
     }
   })();
 }
+
+/* ═══ ORDERS ════════════════════════════════════════════════ */
+let allOrders = [];
+let filteredOrders = [];
+
+const ORDER_STATUS_LABEL = {
+  draft:          'Draft',
+  contacted:      'Contacted',
+  quoted:         'Quoted',
+  won:            'Won',
+  lost:           'Lost',
+  expired:        'Expired',
+  pending:        'Pending',
+  confirmed:      'Confirmed',
+  delivery_failed:'Email Failed',
+};
+const ORDER_STATUS_CLASS = {
+  draft:          'adm-badge-order-draft',
+  contacted:      'adm-badge-order-contacted',
+  quoted:         'adm-badge-order-quoted',
+  won:            'adm-badge-order-won',
+  lost:           'adm-badge-order-lost',
+  expired:        'adm-badge-order-expired',
+  pending:        'adm-badge-order-draft',
+  confirmed:      'adm-badge-order-contacted',
+  delivery_failed:'adm-badge-order-lost',
+};
+
+async function loadOrders() {
+  const tbody = document.getElementById('orders-tbody');
+  tbody.innerHTML = skeletonRows(8);
+  try {
+    allOrders = await apiGet('orders');
+    applyOrderFilters();
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>${e.message}</p></div></td></tr>`;
+  }
+}
+
+function applyOrderFilters() {
+  const statusVal = (document.getElementById('orders-status-filter')?.value || '').toLowerCase();
+  const searchVal = (document.getElementById('orders-search')?.value || '').toLowerCase();
+  filteredOrders = allOrders.filter(o => {
+    if (statusVal && (o.status || '').toLowerCase() !== statusVal) return false;
+    if (searchVal) {
+      const hay = `${o.order_reference} ${o.customer_name} ${o.customer_email} ${o.customer_phone}`.toLowerCase();
+      if (!hay.includes(searchVal)) return false;
+    }
+    return true;
+  });
+  renderOrdersTable();
+  renderOrderStats();
+}
+
+function renderOrderStats() {
+  const el = document.getElementById('orders-stats');
+  if (!el) return;
+  const total  = allOrders.length;
+  const won    = allOrders.filter(o => o.status === 'won').length;
+  const draft  = allOrders.filter(o => o.status === 'draft' || o.status === 'pending').length;
+  const active = allOrders.filter(o => ['draft','contacted','quoted','pending'].includes(o.status)).length;
+  el.innerHTML = `
+    <div class="orders-stat"><span class="orders-stat-val">${total}</span><span>Total</span></div>
+    <div class="orders-stat"><span class="orders-stat-val" style="color:#22c55e">${won}</span><span>Won</span></div>
+    <div class="orders-stat"><span class="orders-stat-val" style="color:#f59e0b">${active}</span><span>Active</span></div>
+    <div class="orders-stat"><span class="orders-stat-val" style="color:#6b7280">${draft}</span><span>New/Draft</span></div>
+  `;
+}
+
+function renderOrdersTable() {
+  const tbody = document.getElementById('orders-tbody');
+  const countEl = document.getElementById('orders-count');
+  if (countEl) countEl.textContent = `(${filteredOrders.length}/${allOrders.length})`;
+
+  if (!filteredOrders.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-file-invoice"></i><p>No orders match your filters.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filteredOrders.map(o => {
+    const status = (o.status || 'draft').toLowerCase();
+    const badge  = `<span class="adm-badge ${ORDER_STATUS_CLASS[status] || 'adm-badge-order-draft'}">${ORDER_STATUS_LABEL[status] || o.status}</span>`;
+    const expiry = o.expiry_date ? formatExpiry(o.expiry_date) : '—';
+    const pdfBtn = o.pdf_url
+      ? `<a href="${o.pdf_url}" target="_blank" class="btn btn-ghost btn-sm" title="Open PDF"><i class="fas fa-file-pdf"></i></a>`
+      : `<span style="color:var(--adm-muted);font-size:0.8rem;">—</span>`;
+    const phone = o.customer_phone || '';
+    return `
+      <tr>
+        <td style="font-family:monospace;font-size:0.78rem;color:var(--adm-muted);white-space:nowrap;">${o.order_reference}</td>
+        <td>
+          <div style="font-weight:600;font-size:0.88rem;">${escHtml(o.customer_name)}</div>
+          <div style="font-size:0.76rem;color:var(--adm-muted);">${escHtml(o.customer_email)}</div>
+          ${phone ? `<div style="font-size:0.76rem;color:var(--adm-muted);">${escHtml(phone)}</div>` : ''}
+        </td>
+        <td class="hide-mobile" style="white-space:nowrap;font-weight:600;">${o.currency || 'KES'} ${Number(o.total_amount).toLocaleString()}</td>
+        <td>${badge}</td>
+        <td class="hide-mobile" style="font-size:0.85rem;color:${o.salesperson ? 'var(--adm-text)' : 'var(--adm-muted)'};">${escHtml(o.salesperson || '—')}</td>
+        <td class="hide-mobile">${expiry}</td>
+        <td>${pdfBtn}</td>
+        <td>
+          <button class="btn btn-ghost btn-sm" onclick="editOrder('${o.id}')" title="Edit order">
+            <i class="fas fa-pen"></i>
+          </button>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function formatExpiry(dateStr) {
+  const d    = new Date(dateStr);
+  const now  = new Date();
+  const diff = Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+  const label = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  if (diff < 0)  return `<span style="color:#ef4444;font-size:0.82rem;">${label} <small>(expired)</small></span>`;
+  if (diff <= 3) return `<span style="color:#f59e0b;font-size:0.82rem;">${label} <small>(${diff}d left)</small></span>`;
+  return `<span style="font-size:0.82rem;">${label}</span>`;
+}
+
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.getElementById('orders-status-filter')?.addEventListener('change', applyOrderFilters);
+document.getElementById('orders-search')?.addEventListener('input', applyOrderFilters);
+document.getElementById('refresh-orders-btn')?.addEventListener('click', loadOrders);
+
+document.getElementById('export-orders-btn')?.addEventListener('click', () => {
+  if (!filteredOrders.length) { toast('No orders to export', 'error'); return; }
+  const cols = ['order_reference','customer_name','customer_email','customer_phone','total_amount','currency','status','salesperson','expiry_date','pdf_url','created_at'];
+  let csv = cols.join(',') + '\n';
+  filteredOrders.forEach(o => {
+    csv += cols.map(k => `"${String(o[k] ?? '').replace(/"/g,'""')}"`).join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `Roam_Energy_Orders_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('CSV exported!', 'success');
+});
+
+/* ── Order edit modal ──────────────────────────────────────── */
+const orderModal = document.getElementById('order-modal');
+
+function openOrderModal()  { orderModal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+function closeOrderModal() { orderModal.classList.add('hidden'); document.body.style.overflow = ''; }
+
+document.getElementById('order-modal-close')?.addEventListener('click', closeOrderModal);
+document.getElementById('order-cancel-btn')?.addEventListener('click', closeOrderModal);
+orderModal?.addEventListener('click', e => { if (e.target === orderModal) closeOrderModal(); });
+
+window.editOrder = function(id) {
+  const o = allOrders.find(x => x.id === id);
+  if (!o) return;
+  document.getElementById('oe-id').value = o.id;
+  document.getElementById('oe-status').value      = (o.status || 'draft');
+  document.getElementById('oe-salesperson').value = o.salesperson || '';
+
+  const created = new Date(o.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const cartItems = Array.isArray(o.cart)
+    ? o.cart.map(i => `${i.name || i.id} × ${i.qty}`).join(', ')
+    : '—';
+
+  document.getElementById('oe-info').innerHTML = `
+    <div class="order-info-grid">
+      <div class="oig-row"><span>Reference</span><strong style="font-family:monospace;">${escHtml(o.order_reference)}</strong></div>
+      <div class="oig-row"><span>Customer</span><strong>${escHtml(o.customer_name)}</strong></div>
+      <div class="oig-row"><span>Phone</span><strong>${escHtml(o.customer_phone || '—')}</strong></div>
+      <div class="oig-row"><span>Email</span><strong>${escHtml(o.customer_email)}</strong></div>
+      <div class="oig-row"><span>Total</span><strong style="color:#22c55e;">${o.currency || 'KES'} ${Number(o.total_amount).toLocaleString()}</strong></div>
+      <div class="oig-row"><span>Date</span><strong>${created}</strong></div>
+      <div class="oig-row" style="grid-column:1/-1;"><span>Items</span><strong>${escHtml(cartItems)}</strong></div>
+    </div>`;
+
+  openOrderModal();
+};
+
+document.getElementById('order-save-btn')?.addEventListener('click', async () => {
+  const btn = document.getElementById('order-save-btn');
+  const id  = document.getElementById('oe-id').value;
+  if (!id) return;
+
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Saving…';
+
+  const data = {
+    status:      document.getElementById('oe-status').value,
+    salesperson: document.getElementById('oe-salesperson').value.trim(),
+  };
+
+  try {
+    await apiPost({ table: 'orders', action: 'update', id, data });
+    // Update local cache immediately
+    const idx = allOrders.findIndex(o => o.id === id);
+    if (idx !== -1) allOrders[idx] = { ...allOrders[idx], ...data };
+    applyOrderFilters();
+    closeOrderModal();
+    toast('Order updated and synced to sheet!', 'success');
+  } catch (err) {
+    toast(err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-save"></i> Save &amp; Sync to Sheet';
+  }
+});
 
 /* ── Tabs ─────────────────────────────────────────────────── */
 document.querySelectorAll('.admin-tab').forEach(tab => {

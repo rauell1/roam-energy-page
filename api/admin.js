@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-const ALLOWED_TABLES = ['products', 'projects', 'subscribers'];
-
+const ALLOWED_TABLES = ['products', 'projects', 'subscribers', 'orders'];
 const ALLOWED_ADMIN_EMAIL = 'roy.otieno@roam-electric.com';
 
 function cors(res) {
@@ -26,6 +25,28 @@ async function getAuthorizedUser(req) {
   return user;
 }
 
+// Push a status/salesperson change back to the Google Sheet row
+async function syncOrderUpdateToSheet(order) {
+  const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  const body = JSON.stringify({
+    action: 'update',
+    orderReference: order.order_reference,
+    status: order.status,
+    salesperson: order.salesperson || '',
+  });
+  const headers = { 'Content-Type': 'application/json' };
+
+  try {
+    let res = await fetch(webhookUrl, { method: 'POST', headers, body, redirect: 'manual' });
+    if (res.status >= 300 && res.status < 400) {
+      const location = res.headers.get('location');
+      if (location) await fetch(location, { method: 'POST', headers, body });
+    }
+  } catch (_) {}
+}
+
 export default async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -37,14 +58,17 @@ export default async function handler(req, res) {
 
   const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-  /* ── GET: list all rows (including inactive) ── */
+  /* ── GET: list all rows ── */
   if (req.method === 'GET') {
     const { table } = req.query;
     if (!ALLOWED_TABLES.includes(table)) {
       return res.status(400).json({ error: 'Invalid table' });
     }
-    const orderCol = table === 'subscribers' ? 'created_at' : 'sort_order';
-    const ascending = table !== 'subscribers';
+    const isOrders      = table === 'orders';
+    const isSubscribers = table === 'subscribers';
+    const orderCol  = (isOrders || isSubscribers) ? 'created_at' : 'sort_order';
+    const ascending = !isOrders && !isSubscribers;
+
     const { data, error } = await db
       .from(table)
       .select('*')
@@ -59,6 +83,10 @@ export default async function handler(req, res) {
     if (!ALLOWED_TABLES.includes(table)) {
       return res.status(400).json({ error: 'Invalid table' });
     }
+    // Orders can only be updated from the admin panel (checkout creates them)
+    if (table === 'orders' && action !== 'update') {
+      return res.status(400).json({ error: 'Orders can only be updated from admin' });
+    }
 
     let result;
     if (action === 'insert') {
@@ -66,6 +94,10 @@ export default async function handler(req, res) {
     } else if (action === 'update') {
       if (!id) return res.status(400).json({ error: 'id required' });
       result = await db.from(table).update(data).eq('id', id).select().single();
+      // Mirror the change to Google Sheets
+      if (table === 'orders' && !result.error && result.data) {
+        await syncOrderUpdateToSheet(result.data);
+      }
     } else if (action === 'delete') {
       if (!id) return res.status(400).json({ error: 'id required' });
       result = await db.from(table).delete().eq('id', id);

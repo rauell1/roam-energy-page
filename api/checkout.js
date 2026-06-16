@@ -101,6 +101,7 @@ function validateOrderPayload(payload) {
 
 async function storeOrder(order, pdfUrl) {
   const db = getSupabase();
+  const expiryDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const { data, error } = await db.from(appConfig.supabase.ordersTable).insert({
     order_reference: order.orderReference,
     customer_name:   order.customer.name,
@@ -110,10 +111,12 @@ async function storeOrder(order, pdfUrl) {
     currency:        order.currency,
     total_amount:    order.totalAmount,
     filename:        order.filename,
-    status:          'pending',
+    status:          'draft',
     pdf_url:         pdfUrl,
     source:          order.source || 'web',
     queued_at:       order.queuedAt || null,
+    salesperson:     '',
+    expiry_date:     expiryDate,
   }).select('id').single();
   if (error) throw new Error(`Supabase insert failed: ${error.message}`);
   return data.id;
@@ -461,14 +464,16 @@ async function triggerGoogleSheetsWebhook(order, pdfUrl) {
 
   const payload = {
     orderReference: order.orderReference,
-    customerName: order.customer.name,
-    customerEmail: order.customer.email,
-    customerPhone: order.customer.phone,
-    totalAmount: order.totalAmount,
-    currency: order.currency,
-    items: order.cart.map(item => `${item.name || item.id} (Qty: ${item.qty})`).join(', '),
-    pdfUrl: pdfUrl || '',
-    timestamp: new Date().toISOString()
+    customerName:   order.customer.name,
+    customerEmail:  order.customer.email,
+    customerPhone:  order.customer.phone,
+    totalAmount:    order.totalAmount,
+    currency:       order.currency,
+    items:          order.cart.map(item => `${item.name || item.id} (Qty: ${item.qty})`).join(', '),
+    pdfUrl:         pdfUrl || '',
+    timestamp:      new Date().toISOString(),
+    status:         'Draft',
+    salesperson:    '',
   };
 
   const body = JSON.stringify(payload);

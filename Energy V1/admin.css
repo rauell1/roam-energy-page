@@ -305,6 +305,56 @@ label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--adm-m
 .skeleton-row td { padding: 16px; }
 .skeleton-row td div { display: flex; gap: 8px; }
 
+/* ── Order status badges ─────────────────────────────────────── */
+.adm-badge-order-draft     { background:rgba(107,114,128,.18); color:#9ca3af; }
+.adm-badge-order-contacted { background:rgba(59,130,246,.18);  color:#93c5fd; }
+.adm-badge-order-quoted    { background:rgba(245,158,11,.18);  color:#fcd34d; }
+.adm-badge-order-won       { background:rgba(34,197,94,.18);   color:#86efac; }
+.adm-badge-order-lost      { background:rgba(239,68,68,.18);   color:#fca5a5; }
+.adm-badge-order-expired   { background:rgba(156,163,175,.12); color:#6b7280; text-decoration:line-through; }
+
+/* ── Orders stats bar ────────────────────────────────────────── */
+.orders-stats {
+  display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.orders-stat {
+  background: var(--adm-surface);
+  border: 1px solid var(--adm-border);
+  border-radius: var(--adm-radius);
+  padding: 12px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-width: 80px;
+  font-size: 0.78rem; color: var(--adm-muted); text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.orders-stat-val {
+  font-family: var(--adm-heading);
+  font-size: 1.4rem; font-weight: 800;
+  color: var(--adm-white); line-height: 1;
+}
+
+/* ── Orders filters ──────────────────────────────────────────── */
+.orders-filters {
+  display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.orders-filters select,
+.orders-filters input {
+  width: auto; flex: 1; min-width: 140px; max-width: 240px;
+}
+
+/* ── Order info block in edit modal ──────────────────────────── */
+.order-info-block {
+  background: var(--adm-bg);
+  border: 1px solid var(--adm-border);
+  border-radius: var(--adm-radius);
+  padding: 16px 20px;
+  margin-top: 4px;
+}
+.order-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+.oig-row { display: flex; flex-direction: column; gap: 2px; }
+.oig-row span { font-size: 0.72rem; color: var(--adm-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+.oig-row strong { font-size: 0.88rem; color: var(--adm-text); }
+
 @media (max-width: 640px) {
   .admin-header { padding: 0 16px; }
   .admin-body { padding: 16px 12px; }
