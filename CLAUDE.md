@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-16 09:01 UTC
+> Last updated: 2026-06-16 09:47 UTC
 
 ---
 
@@ -156,6 +156,8 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- 2ad1730 debug: surface sheet sync result in admin UI toast
+- 16f1e55 chore: update CLAUDE.md
 - 9115368 debug: add logging to syncOrderUpdateToSheet to surface sheet sync failures
 - 70dbc56 chore: update CLAUDE.md
 - 2d52441 fix: expand orders status constraint, add salesperson dropdown with team management
@@ -164,6 +166,4 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 - d8e330e chore: update CLAUDE.md
 - e3a5a30 feat: Orders dashboard tab with live Google Sheets bidirectional sync
 - 99a9c10 fix: resolve mobile horizontal scrolling across all pages
-- c2b7151 fix: prevent horizontal scrolling on mobile by adding overflow-x hidden on root elements
-- ac74a01 fix: restore project-modal closing tags to fix nested subscriber and newsletter modals
 
