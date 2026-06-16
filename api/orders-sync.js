@@ -21,7 +21,8 @@ export default async function handler(req, res) {
   if (!orderReference) return res.status(400).json({ error: 'orderReference required' });
 
   const updateData = {};
-  if (status    !== undefined) updateData.status      = status;
+  // Lowercase status so Supabase always stores lowercase (admin panel uses lowercase)
+  if (status      !== undefined) updateData.status      = status.toLowerCase();
   if (salesperson !== undefined) updateData.salesperson = salesperson;
 
   if (!Object.keys(updateData).length) {
