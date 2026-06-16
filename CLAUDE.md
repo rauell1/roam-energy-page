@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-16 09:47 UTC
+> Last updated: 2026-06-16 09:56 UTC
 
 ---
 
@@ -156,6 +156,8 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- 9752fa8 fix: lowercase status in orders-sync so sheet->Supabase stays consistent
+- 3aab651 chore: update CLAUDE.md
 - 2ad1730 debug: surface sheet sync result in admin UI toast
 - 16f1e55 chore: update CLAUDE.md
 - 9115368 debug: add logging to syncOrderUpdateToSheet to surface sheet sync failures
@@ -164,6 +166,4 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 - 6fe4ed8 chore: update CLAUDE.md
 - b1da710 fix: update all URLs from roam-energy.vercel.app to roam-energy.rauell.systems
 - d8e330e chore: update CLAUDE.md
-- e3a5a30 feat: Orders dashboard tab with live Google Sheets bidirectional sync
-- 99a9c10 fix: resolve mobile horizontal scrolling across all pages
 
