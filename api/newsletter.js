@@ -177,7 +177,7 @@ export default async function handler(req, res) {
                 Roam Energy Solar Solutions
               </p>
               <p style="margin: 0 0 20px 0; font-size: 12px; color: #9a9a9a; line-height: 1.4;">
-                This newsletter was sent to you because you subscribed at <a href="https://roam-energy.vercel.app" style="color: #f47920; text-decoration: none;">roam-energy.vercel.app</a>.
+                This newsletter was sent to you because you subscribed at <a href="https://roam-energy.rauell.systems" style="color: #f47920; text-decoration: none;">roam-energy.rauell.systems</a>.
               </p>
               <table align="center" border="0" cellspacing="0" cellpadding="0">
                 <tr>

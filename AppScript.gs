@@ -8,7 +8,7 @@
 // onSheetEdit is an installable trigger (set up via Triggers menu → onEdit event)
 // that pushes Status/Salesperson cell changes back to Supabase via /api/orders-sync.
 // Script Properties required:
-//   ORDERS_SYNC_URL    = https://roam-energy.vercel.app/api/orders-sync
+//   ORDERS_SYNC_URL    = https://roam-energy.rauell.systems/api/orders-sync
 //   ORDERS_SYNC_SECRET = <same value as ORDERS_SYNC_SECRET Vercel env var>
 
 var SPREADSHEET_ID = "15NxEfUChcHFKuVmiLxYC9aPrj8bRSLW2pttRbvsREuU";
