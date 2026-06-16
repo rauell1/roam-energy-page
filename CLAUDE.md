@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-16 10:47 UTC
+> Last updated: 2026-06-16 11:04 UTC
 
 ---
 
@@ -156,6 +156,8 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- 1012e3b chore: restore production from correct GitHub source
+- 29d4f67 chore: update CLAUDE.md
 - 27b1be0 chore: redeploy to pick up updated GOOGLE_SHEETS_WEBHOOK_URL
 - 95e8c75 chore: update CLAUDE.md
 - 9752fa8 fix: lowercase status in orders-sync so sheet->Supabase stays consistent
@@ -164,6 +166,4 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 - 16f1e55 chore: update CLAUDE.md
 - 9115368 debug: add logging to syncOrderUpdateToSheet to surface sheet sync failures
 - 70dbc56 chore: update CLAUDE.md
-- 2d52441 fix: expand orders status constraint, add salesperson dropdown with team management
-- 6fe4ed8 chore: update CLAUDE.md
 
