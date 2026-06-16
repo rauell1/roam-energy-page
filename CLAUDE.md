@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-15 18:31 UTC
+> Last updated: 2026-06-16 08:05 UTC
 
 ---
 
@@ -156,14 +156,14 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
-- ec565de fix: handle Google Apps Script redirect to keep POST body in webhook
-- a7d99cf chore: update CLAUDE.md
-- c85c883 security: lock admin panel exclusively to roy.otieno@roam-electric.com
-- 6c49309 chore: update CLAUDE.md
-- 57304da feat: admin email notifications, offline quote queue, and full Supabase logging
-- ddd66f9 chore: update CLAUDE.md
-- 26886c7 fix: update PDF invoice to match Pro Forma-Invoice template
-- a5b44fc fix: remove black rocks from Deye inverter, remove white halos, and crop empty padding from all product images
-- a358e45 feat: rotate Deye inverter to portrait, integrate new background-free Solis/Dyness/Jinko product assets, and expand image display dimensions to fill card spaces
-- af9be8e feat: add simple interactive system recommendation wizard to products page
+- e3a5a30 feat: Orders dashboard tab with live Google Sheets bidirectional sync
+- 99a9c10 fix: resolve mobile horizontal scrolling across all pages
+- c2b7151 fix: prevent horizontal scrolling on mobile by adding overflow-x hidden on root elements
+- ac74a01 fix: restore project-modal closing tags to fix nested subscriber and newsletter modals
+- 3a82f3f fix: force reload of admin.js using query param cache-buster
+- 1adc6a2 fix: update email link domains to roam-energy.rauell.systems
+- 772e50b feat: add newsletter broadcast engine, manual subscriber creation, and public unsubscribe pipeline
+- 1c79942 fix: apply admin-tabs class to nav container in admin.html
+- 2555147 fix: call RPC subscribe_email to prevent RLS violation on anonymous signups
+- 125ab99 feat: save newsletter subscribers to Supabase and view/export them in Admin Page
 
