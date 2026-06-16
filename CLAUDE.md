@@ -1,7 +1,7 @@
 # Roam Energy — CLAUDE.md
 
 > **Auto-updated on every commit via `.git/hooks/post-commit`**
-> Last updated: 2026-06-16 08:30 UTC
+> Last updated: 2026-06-16 08:38 UTC
 
 ---
 
@@ -156,6 +156,8 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 
 <!-- RECENT_COMMITS -->
 
+- 2d52441 fix: expand orders status constraint, add salesperson dropdown with team management
+- 6fe4ed8 chore: update CLAUDE.md
 - b1da710 fix: update all URLs from roam-energy.vercel.app to roam-energy.rauell.systems
 - d8e330e chore: update CLAUDE.md
 - e3a5a30 feat: Orders dashboard tab with live Google Sheets bidirectional sync
@@ -164,6 +166,4 @@ Matches [roam-electric.com](https://www.roam-electric.com/) visual identity:
 - ac74a01 fix: restore project-modal closing tags to fix nested subscriber and newsletter modals
 - 3a82f3f fix: force reload of admin.js using query param cache-buster
 - 1adc6a2 fix: update email link domains to roam-energy.rauell.systems
-- 772e50b feat: add newsletter broadcast engine, manual subscriber creation, and public unsubscribe pipeline
-- 1c79942 fix: apply admin-tabs class to nav container in admin.html
 
