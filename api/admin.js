@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-const ALLOWED_TABLES = ['products', 'projects', 'subscribers', 'orders'];
+const ALLOWED_TABLES = ['products', 'projects', 'subscribers', 'orders', 'salespersons'];
 const ALLOWED_ADMIN_EMAIL = 'roy.otieno@roam-electric.com';
 
 function cors(res) {
@@ -64,9 +64,10 @@ export default async function handler(req, res) {
     if (!ALLOWED_TABLES.includes(table)) {
       return res.status(400).json({ error: 'Invalid table' });
     }
-    const isOrders      = table === 'orders';
-    const isSubscribers = table === 'subscribers';
-    const orderCol  = (isOrders || isSubscribers) ? 'created_at' : 'sort_order';
+    const isOrders       = table === 'orders';
+    const isSubscribers  = table === 'subscribers';
+    const isSalespersons = table === 'salespersons';
+    const orderCol  = (isOrders || isSubscribers) ? 'created_at' : isSalespersons ? 'name' : 'sort_order';
     const ascending = !isOrders && !isSubscribers;
 
     const { data, error } = await db

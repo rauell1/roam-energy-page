@@ -222,6 +222,23 @@
   </div>
 </div>
 
+<!-- ═══ MANAGE TEAM MODAL ═══ -->
+<div id="team-modal" class="modal-overlay hidden">
+  <div class="modal-card" style="max-width:440px;">
+    <button class="modal-close" id="team-modal-close"><i class="fas fa-times"></i></button>
+    <h3><i class="fas fa-users" style="color:var(--adm-primary);margin-right:8px;"></i>Sales Team</h3>
+    <p style="font-size:0.85rem;color:var(--adm-muted);margin-bottom:20px;">Add or remove people who can be assigned to orders.</p>
+    <div id="team-list" style="margin-bottom:20px;"></div>
+    <div style="display:flex;gap:8px;">
+      <input id="new-salesperson-name" placeholder="Full name…" style="flex:1;">
+      <input id="new-salesperson-email" placeholder="Email (optional)" style="flex:1;">
+      <button class="btn btn-primary btn-sm" id="add-salesperson-btn" style="white-space:nowrap;">
+        <i class="fas fa-plus"></i> Add
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ ORDER EDIT MODAL ═══ -->
 <div id="order-modal" class="modal-overlay hidden">
   <div class="modal-card" style="max-width:520px;">
@@ -246,7 +263,14 @@
       </div>
       <div class="form-field">
         <label for="oe-salesperson">Assigned To</label>
-        <input id="oe-salesperson" placeholder="Salesperson name…">
+        <select id="oe-salesperson">
+          <option value="">— Unassigned —</option>
+        </select>
+        <span class="form-hint" style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+          <button type="button" class="btn-link" id="manage-salespeople-btn" style="font-size:0.78rem;">
+            <i class="fas fa-users-cog"></i> Manage team
+          </button>
+        </span>
       </div>
     </div>
 

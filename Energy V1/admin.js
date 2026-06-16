@@ -214,11 +214,90 @@ document.getElementById('logout-btn').addEventListener('click', () => {
 function showPanel() {
   loginScreen.classList.add('hidden');
   adminPanel.classList.remove('hidden');
+  loadSalespersons();
   loadOrders();
   loadProducts();
   loadProjects();
   loadSubscribers();
 }
+
+/* ═══ SALESPERSONS ══════════════════════════════════════════ */
+let allSalespersons = [];
+
+async function loadSalespersons() {
+  try {
+    allSalespersons = (await apiGet('salespersons')).filter(s => s.active);
+    populateSalespersonSelect();
+    renderTeamList();
+  } catch (_) {}
+}
+
+function populateSalespersonSelect() {
+  const sel = document.getElementById('oe-salesperson');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Unassigned —</option>' +
+    allSalespersons.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+  if (current) sel.value = current;
+}
+
+function renderTeamList() {
+  const el = document.getElementById('team-list');
+  if (!el) return;
+  if (!allSalespersons.length) {
+    el.innerHTML = `<p style="color:var(--adm-muted);font-size:0.85rem;">No team members yet.</p>`;
+    return;
+  }
+  el.innerHTML = allSalespersons.map(s => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--adm-border);">
+      <div>
+        <div style="font-weight:600;font-size:0.9rem;">${escHtml(s.name)}</div>
+        ${s.email ? `<div style="font-size:0.78rem;color:var(--adm-muted);">${escHtml(s.email)}</div>` : ''}
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeSalesperson('${s.id}','${escHtml(s.name)}')">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>`).join('');
+}
+
+window.removeSalesperson = async function(id, name) {
+  if (!confirm(`Remove "${name}" from the team?`)) return;
+  try {
+    await apiPost({ table: 'salespersons', action: 'delete', id });
+    toast(`${name} removed`, 'success');
+    await loadSalespersons();
+  } catch (e) { toast(e.message, 'error'); }
+};
+
+/* ── Manage Team modal ─────────────────────────────────────── */
+const teamModal = document.getElementById('team-modal');
+function openTeamModal()  { teamModal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+function closeTeamModal() { teamModal.classList.add('hidden'); document.body.style.overflow = ''; }
+
+document.getElementById('team-modal-close')?.addEventListener('click', closeTeamModal);
+teamModal?.addEventListener('click', e => { if (e.target === teamModal) closeTeamModal(); });
+document.getElementById('manage-salespeople-btn')?.addEventListener('click', openTeamModal);
+
+document.getElementById('add-salesperson-btn')?.addEventListener('click', async () => {
+  const nameEl  = document.getElementById('new-salesperson-name');
+  const emailEl = document.getElementById('new-salesperson-email');
+  const name  = nameEl.value.trim();
+  const email = emailEl.value.trim();
+  if (!name) { toast('Name is required', 'error'); return; }
+
+  const btn = document.getElementById('add-salesperson-btn');
+  btn.disabled = true; btn.textContent = 'Adding…';
+  try {
+    await apiPost({ table: 'salespersons', action: 'insert', data: { name, email: email || null } });
+    nameEl.value = ''; emailEl.value = '';
+    toast(`${name} added to team!`, 'success');
+    await loadSalespersons();
+  } catch (e) {
+    toast(e.message.includes('unique') ? `"${name}" is already on the team` : e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Add';
+  }
+});
 
 // On page load: verify the stored token is still valid AND belongs to the admin
 // before ever showing the panel — prevents stale or foreign tokens from bypassing
@@ -398,7 +477,9 @@ window.editOrder = function(id) {
   const o = allOrders.find(x => x.id === id);
   if (!o) return;
   document.getElementById('oe-id').value = o.id;
-  document.getElementById('oe-status').value      = (o.status || 'draft');
+  document.getElementById('oe-status').value = (o.status || 'draft');
+  // Ensure dropdown is populated before setting value
+  populateSalespersonSelect();
   document.getElementById('oe-salesperson').value = o.salesperson || '';
 
   const created = new Date(o.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
