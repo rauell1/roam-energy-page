@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { google } from 'googleapis';
+import { getSheetsClient, getHeaders, colToLetter } from './sheets.js';
 
 const ALLOWED_TABLES = ['products', 'projects', 'subscribers', 'orders', 'salespersons'];
 const ALLOWED_ADMIN_EMAIL = 'roy.otieno@roam-electric.com';
@@ -26,47 +26,17 @@ async function getAuthorizedUser(req) {
   return user;
 }
 
-function colToLetter(index) {
-  let letter = '';
-  let n = index + 1;
-  while (n > 0) {
-    const mod = (n - 1) % 26;
-    letter = String.fromCharCode(65 + mod) + letter;
-    n = Math.floor((n - 1) / 26);
-  }
-  return letter;
-}
-
 async function syncOrderUpdateToSheet(order) {
-  const serviceAccountJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
-
-  if (!serviceAccountJson || !spreadsheetId) {
-    console.error('[SheetSync] Missing GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_SPREADSHEET_ID');
-    return { ok: false, status: 'no_config', detail: 'Missing Sheets env vars' };
-  }
-
-  let credentials;
-  try {
-    credentials = JSON.parse(serviceAccountJson);
-  } catch (e) {
-    console.error('[SheetSync] Failed to parse service account JSON:', e.message);
-    return { ok: false, status: 'invalid_credentials', detail: e.message };
+  if (!spreadsheetId) {
+    console.error('[SheetSync] Missing GOOGLE_SPREADSHEET_ID');
+    return { ok: false, status: 'no_config', detail: 'Missing GOOGLE_SPREADSHEET_ID' };
   }
 
   try {
-    const auth = new google.auth.GoogleAuth({
-      credentials,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-    const sheets = google.sheets({ version: 'v4', auth });
+    const sheets = await getSheetsClient();
 
-    // Read header row to locate columns dynamically
-    const headerRes = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: 'Sheet1!1:1',
-    });
-    const headers = (headerRes.data.values?.[0] || []).map(h => h.toLowerCase().trim());
+    const headers = await getHeaders(sheets, spreadsheetId);
 
     const orderRefCol = headers.findIndex(h => h.includes('order ref'));
     const statusCol   = headers.findIndex(h => h === 'status');

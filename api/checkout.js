@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { appConfig, validateEnvironment } from './config.js';
+import { getSheetsClient, getHeaders, colToLetter } from './sheets.js';
 
 let supabase;
 const resend = new Resend(appConfig.email.apiKey);
@@ -456,54 +457,52 @@ async function sendOrderEmail(order, pdfUrl) {
 }
 
 async function triggerGoogleSheetsWebhook(order, pdfUrl) {
-  const webhookUrl = appConfig.webhooks.googleSheetsUrl;
-  if (!webhookUrl) {
-    console.warn('Google Sheets Webhook URL is not configured, skipping fallback sheet logging.');
+  const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
+  if (!spreadsheetId) {
+    console.warn('[SheetAppend] GOOGLE_SPREADSHEET_ID not set, skipping sheet logging.');
     return;
   }
 
-  const payload = {
-    orderReference: order.orderReference,
-    customerName:   order.customer.name,
-    customerEmail:  order.customer.email,
-    customerPhone:  order.customer.phone,
-    totalAmount:    order.totalAmount,
-    currency:       order.currency,
-    items:          order.cart.map(item => `${item.name || item.id} (Qty: ${item.qty})`).join(', '),
-    pdfUrl:         pdfUrl || '',
-    timestamp:      new Date().toISOString(),
-    status:         'Draft',
-    salesperson:    '',
+  const data = {
+    'order reference': order.orderReference,
+    'order ref':       order.orderReference,
+    'customer name':   order.customer.name,
+    'name':            order.customer.name,
+    'email':           order.customer.email,
+    'phone':           order.customer.phone,
+    'total':           order.totalAmount,
+    'amount':          order.totalAmount,
+    'currency':        order.currency,
+    'items':           order.cart.map(i => `${i.name || i.id} (Qty: ${i.qty})`).join(', '),
+    'pdf':             pdfUrl || '',
+    'date':            new Date().toISOString(),
+    'timestamp':       new Date().toISOString(),
+    'status':          'Draft',
+    'salesperson':     '',
   };
 
-  const body = JSON.stringify(payload);
-  const headers = { 'Content-Type': 'application/json' };
-
   try {
-    // Google Apps Script /exec endpoints return a 302 redirect on POST requests.
-    // Node fetch follows the redirect but converts POST→GET, so doPost() never fires.
-    // Fix: catch the redirect manually and re-issue the POST to the final URL.
-    let res = await fetch(webhookUrl, {
-      method: 'POST',
-      headers,
-      body,
-      redirect: 'manual',
+    const sheets = await getSheetsClient();
+    const headers = await getHeaders(sheets, spreadsheetId);
+
+    const row = headers.map(h => {
+      for (const [key, val] of Object.entries(data)) {
+        if (h.includes(key)) return val ?? '';
+      }
+      return '';
     });
 
-    if (res.status >= 300 && res.status < 400) {
-      const location = res.headers.get('location');
-      if (location) {
-        res = await fetch(location, { method: 'POST', headers, body });
-      }
-    }
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: 'Sheet1!A:A',
+      valueInputOption: 'USER_ENTERED',
+      insertDataOption: 'INSERT_ROWS',
+      requestBody: { values: [row] },
+    });
 
-    if (!res.ok) {
-      console.error('Google Sheets Webhook failed:', res.status, res.statusText);
-    } else {
-      console.log('Google Sheets Webhook successfully triggered.');
-    }
+    console.log(`[SheetAppend] Appended row for ${order.orderReference}`);
   } catch (err) {
-    console.error('Error triggering Google Sheets Webhook:', err.message);
+    console.error('[SheetAppend] Error:', err.message);
   }
 }
 
