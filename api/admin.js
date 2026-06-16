@@ -68,24 +68,17 @@ async function syncOrderUpdateToSheet(order) {
       return { ok: true, status: 'appended', detail: 'Row added to sheet' };
     }
 
+    // Update the full row so every field (including PDF) stays in sync
     const rowNum  = rowIndex + 1;
-    const updates = [];
-    if (statusCol !== -1) {
-      const cap = order.status.charAt(0).toUpperCase() + order.status.slice(1);
-      updates.push({ range: `Sheet1!${colToLetter(statusCol)}${rowNum}`, values: [[cap]] });
-    }
-    if (salesCol !== -1) {
-      updates.push({ range: `Sheet1!${colToLetter(salesCol)}${rowNum}`, values: [[order.salesperson || '']] });
-    }
+    const fullRow = buildSheetRow(headers, order);
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `Sheet1!A${rowNum}:${colToLetter(headers.length - 1)}${rowNum}`,
+      valueInputOption: 'USER_ENTERED',
+      requestBody: { values: [fullRow] },
+    });
 
-    if (updates.length) {
-      await sheets.spreadsheets.values.batchUpdate({
-        spreadsheetId,
-        requestBody: { valueInputOption: 'USER_ENTERED', data: updates },
-      });
-    }
-
-    console.log(`[SheetSync] Updated row ${rowNum} for ${order.order_reference}`);
+    console.log(`[SheetSync] Updated full row ${rowNum} for ${order.order_reference}`);
     return { ok: true, status: 'updated', detail: `Row ${rowNum} updated` };
 
   } catch (err) {
@@ -128,19 +121,16 @@ async function syncAllOrdersToSheet(db) {
   const toAppend  = [];
   const toUpdate  = []; // { range, values }[]
 
+  const lastCol = colToLetter(headers.length - 1);
+
   for (const order of orders) {
     const ref = order.order_reference;
+    const row = buildSheetRow(headers, order);
     if (!sheetMap[ref]) {
-      toAppend.push(buildSheetRow(headers, order));
+      toAppend.push(row);
     } else {
       const rowNum = sheetMap[ref];
-      const cap    = order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Draft';
-      if (statusCol !== -1) {
-        toUpdate.push({ range: `Sheet1!${colToLetter(statusCol)}${rowNum}`, values: [[cap]] });
-      }
-      if (salesCol !== -1) {
-        toUpdate.push({ range: `Sheet1!${colToLetter(salesCol)}${rowNum}`, values: [[order.salesperson || '']] });
-      }
+      toUpdate.push({ range: `Sheet1!A${rowNum}:${lastCol}${rowNum}`, values: [row] });
     }
   }
 
@@ -164,7 +154,7 @@ async function syncAllOrdersToSheet(db) {
     });
   }
 
-  console.log(`[SyncAll] appended=${toAppend.length} updated=${toUpdate.length / 2 || toUpdate.length} total=${orders.length}`);
+  console.log(`[SyncAll] appended=${toAppend.length} updated=${toUpdate.length} total=${orders.length}`);
   return { appended: toAppend.length, updated: Math.ceil(toUpdate.length / 2), total: orders.length };
 }
 
